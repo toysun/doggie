@@ -3,6 +3,7 @@
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta charset="UTF-8">
+  <meta name="8thwall:package" content="@8thwall.xrextras" />
   <title>sky demo2</title>
 
   <script type="module" src="./app.js" defer></script>
@@ -13,7 +14,7 @@
   <script src="./../xr_st/aframe-extras-6.1.1.min.js"></script>
 
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
-
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <link rel="stylesheet" href="./index.css">
 
 </head>
@@ -51,7 +52,7 @@
       id="skyBalloon"
       gltf-model="#balloon"
       animate-balloon
-      position="0 -7 -13"
+      position="0 -7 -15"
       scale=".02 .02 .02"
       shadow>
     </a-entity>
@@ -115,3 +116,4 @@
 </a-scene>
 </body>
 </html>
+
