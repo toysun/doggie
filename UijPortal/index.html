@@ -45,13 +45,13 @@
     <!-- models -->
     <a-asset-item id="portal-rim-model" src="./assets/models/ring.glb"></a-asset-item>
     <a-asset-item id="moon-model" src="./assets/models/dirt_ground.glb"></a-asset-item>
-    <a-asset-item id="platform-model" src="./assets/models/6-s-ground-kiw.glb"></a-asset-item>
+    <a-asset-item id="platform-model" src="./assets/models/6-s-ground-d.glb"></a-asset-item>
     <a-asset-item id="flag-model" src="./assets/models/haetaeb-modi.glb"></a-asset-item>
     <a-asset-item id="rocks-model" src="./assets/models/rock.glb"></a-asset-item>
     <!-- textures -->
     <img id="skybox-img" src="./assets/textures/6jo-street-panorama.jpg">
     <img id="blob-shadow-img" src="./assets/textures/blob-shadow.png">
-    <img id="satellite-img" src="./assets/textures/satellite.png">
+    <img id="satellite-img" src="./assets/textures/crain-fly.png">
     <video id="portal-video" muted autoplay playsinline crossorigin="anonymous" loop="true" src="./assets/textures/portal-video.mp4"></video>
   </a-assets>
 
@@ -112,7 +112,7 @@
       gltf-model="#platform-model"
       rotation="0 0 0"
       reflections="type: static"
-      position="-0.4 -15 -65"
+      position="-0.4 -15 -70"
       scale="9 9 9"
       shadow="receive: false">
     </a-entity>
@@ -127,9 +127,9 @@
     
      <a-entity
       gltf-model="#flag-model"
-      rotation="0 0 0"
+      rotation="0 -90 0"
       reflections="type: static"
-      position="-14 -15 -43"
+      position="-24 -15 -73"
       scale="5 5 5"
       shadow="receive: false">
      </a-entity>
@@ -153,7 +153,7 @@
     reflections="type: realtime"
     position="0 7.5 0"
     rotation="90 -90 -90"
-    scale="0.001 0.001 0.001"
+    scale="0.0005 0.0005 0.0005"
     shadow="receive: false">
   </a-entity>
 
@@ -179,6 +179,7 @@
 
 </body>
 </html>
+
 
 
 
