@@ -48,6 +48,7 @@
     <a-asset-item id="platform-model" src="./assets/models/6-s-ground-d.glb"></a-asset-item>
     <a-asset-item id="flag-model" src="./assets/models/haetaeb-modi.glb"></a-asset-item>
     <a-asset-item id="rocks-model" src="./assets/models/danghagwangunbok.glb"></a-asset-item>
+    <a-asset-item id="birds-model" src="./assets/models/birds.glb"></a-asset-item>
     <!-- textures -->
     <img id="skybox-img" src="./assets/textures/6jo-street-panorama.jpg">
     <img id="blob-shadow-img" src="./assets/textures/blob-shadow.png">
@@ -150,7 +151,15 @@
       scale="10.75 10.75 10.75"
       shadow="receive: false">
      </a-entity>
-      
+    
+    <a-entity
+      gltf-model="#birds-model"
+      reflections="type: static"
+      position="200 150 -250"
+      scale="10.75 10.75 10.75"
+      shadow="receive: false">
+      animation-mixer
+     </a-entity>
      <a-sky src="#skybox-img" rotation="0 -90 0"></a-sky>
   </a-entity>
 
@@ -188,6 +197,7 @@
 
 </body>
 </html>
+
 
 
 
