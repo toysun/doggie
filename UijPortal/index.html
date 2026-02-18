@@ -160,17 +160,18 @@
       shadow="receive: false"
       animation-mixer>
      </a-entity>
-     <a-sky src="#skybox-img" rotation="0 -90 0"></a-sky>
-  </a-entity>
 
-    <a-entity
+        <a-entity
     id="palanquinVideo"
     auto-play-video="video: #palanquin-video"
     material="shader: chromakey; src: #palanquin-video; color: 0 0 0; blending: additive; side: front"
     geometry="primitive: plane; height: 1.2; width: 1;"
     position="0 7.5 -3.1"
-    scale="10 10 10">
+    scale="10 10 10"
+    shadow="receive: false">
   </a-entity>
+    
+     <a-sky src="#skybox-img" rotation="0 -90 0"></a-sky>
 
   <!-- Portal -->
    <a-entity
@@ -206,6 +207,7 @@
 
 </body>
 </html>
+
 
 
 
