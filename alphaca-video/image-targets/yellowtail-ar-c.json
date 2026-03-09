@@ -1,0 +1,26 @@
+{
+  "imagePath": "image-targets/yellowtail-black.jpg",
+  "name": "yellowtail-ar",
+  "type": "CYLINDER",
+  "properties": {
+    "top": 66,
+    "left": 0,
+    "width": 797,
+    "height": 794,
+    "isRotated": true,
+    "originalWidth": 797,
+    "originalHeight": 794,
+    "cylinderCircumferenceTop": 100,
+    "cylinderCircumferenceBottom": 100,
+    "targetCircumferenceTop": 50,
+    "cylinderSideLength": 33.54,
+    "inputMode": "BASIC",
+    "coniness": 0,
+    "arcAngle": 180,
+    "unit": "mm"
+  },
+  "userMetadataIsJson": true,
+  "loadAutomatically": true,
+  "created": 1770738997479,
+  "updated": 1770739008358
+}
