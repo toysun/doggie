@@ -14,7 +14,7 @@
   <script src="//cdn.8thwall.com/web/xrextras/xrextras.js"></script>
 
   <script src='//cdn.8thwall.com/web/landing-page/landing-page.js'></script>
-
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
 
   <script src="./target-aigirl.js">
@@ -40,6 +40,8 @@
         loop="true"
         src="./ai-girl.mp4">
       </video>
+    <!-- Load Hot Air Balloon Model -->
+    <a-asset-item id="snow" src="./falling_snow_loop.glb"></a-asset-item>
     </a-assets>
 
     <a-camera
@@ -58,6 +60,16 @@
       material="shader: chromakey; src: #alpha-video; color: 0.1 0.9 0.2"
       geometry="primitive: plane; height: 1; width: 1;"
       rotation="0 90 0">
+    </a-entity>
+    <a-entity
+      id="snow"
+      gltf-model="#balloon"
+      animate-snow
+      position="0 -7 -20"
+      scale="200 200 200"
+      rotate="0 0 0"
+      shadow
+      animation-mixer>
     </a-entity>
     <!--a-entity
       target-video="name: aigirl-ar; video: #alpha-video;"
