@@ -53,6 +53,7 @@
         id="alpha-video"
         muted
         autoplay
+        webkit-playsinline
         playsinline
         crossorigin="anonymous"
         loop="true"
@@ -97,6 +98,8 @@
 
     // 소리 켜기 버튼 클릭 → 진짜 사용자 제스처이므로 오디오 잠금 해제됨
     soundBtn.addEventListener('click', () => {
+      video.pause();
+      video.removeAttribute('muted');
       video.muted = false;
       video.volume = 1.0;
       video.play().then(() => {
@@ -116,6 +119,7 @@
 
     scene.addEventListener('xrimagelost', () => {
       soundBtn.style.display = 'none';   // 타겟 사라지면 버튼도 숨김
+      video.setAttribute('muted', '');
       video.muted = true;                // 다음 인식을 위해 다시 muted 상태로
     });
   </script>
