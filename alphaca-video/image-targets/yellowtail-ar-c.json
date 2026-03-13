@@ -1,6 +1,6 @@
 {
   "imagePath": "image-targets/yellowtail-black.jpg",
-  "name": "yellowtail-ar",
+  "name": "yellowtail-ar-c",
   "type": "CYLINDER",
   "properties": {
     "top": 66,
@@ -16,7 +16,7 @@
     "cylinderSideLength": 35.54,
     "inputMode": "BASIC",
     "coniness": 0,
-    "arcAngle": 140,
+    "arcAngle": 90,
     "unit": "mm"
   },
   "userMetadataIsJson": true,
