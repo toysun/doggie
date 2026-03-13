@@ -13,10 +13,10 @@
     "cylinderCircumferenceTop": 361,
     "cylinderCircumferenceBottom": 361,
     "targetCircumferenceTop": 100,
-    "cylinderSideLength": 30,
+    "cylinderSideLength": 80,
     "inputMode": "BASIC",
     "coniness": 0,
-    "arcAngle": 120,
+    "arcAngle": 220,
     "unit": "mm"
   },
   "userMetadataIsJson": true,
