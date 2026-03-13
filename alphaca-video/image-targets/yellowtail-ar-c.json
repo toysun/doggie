@@ -1,15 +1,15 @@
 {
-  "imagePath": "image-targets/yellowtail-black.jpg",
+  "imagePath": "image-targets/yellowtail-black-c.jpg",
   "name": "yellowtail-ar-c",
   "type": "CYLINDER",
   "properties": {
     "top": 0,
     "left": 0,
     "width": 361,
-    "height": 525,
+    "height": 545,
     "isRotated": false,
     "originalWidth": 361,
-    "originalHeight": 525,
+    "originalHeight": 545,
     "cylinderCircumferenceTop": 361,
     "cylinderCircumferenceBottom": 361,
     "targetCircumferenceTop": 100,
