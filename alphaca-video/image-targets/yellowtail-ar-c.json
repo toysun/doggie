@@ -16,7 +16,7 @@
     "cylinderSideLength": 35.54,
     "inputMode": "BASIC",
     "coniness": 0,
-    "arcAngle": 180,
+    "arcAngle": 140,
     "unit": "mm"
   },
   "userMetadataIsJson": true,
