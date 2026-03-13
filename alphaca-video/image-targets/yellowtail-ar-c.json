@@ -1,6 +1,6 @@
 {
   "imagePath": "image-targets/yellowtail-black.jpg",
-  "name": "yellowtail-ar",
+  "name": "yellowtail-ar-c",
   "type": "CYLINDER",
   "properties": {
     "top": 66,
