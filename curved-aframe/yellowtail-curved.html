@@ -52,6 +52,16 @@
       loop="true"
       src="./assets/Media/yellowtail-rvm.mp4">
     </video>
+        <video
+      id="wine-label-video1"
+       muted
+        autoplay
+        playsinline
+        webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/g-o-m.mp4">
+    </video>
   </a-assets>
 
   <a-camera
@@ -71,6 +81,7 @@
 
   <!-- COFFEE SLEEVE (Conical): 3D models inside and outside container -->
   <xrextras-named-image-target name="guiness-target">
+    <xrextras-target-video-fade video="#wine-label-video1"></xrextras-target-video-fade>
     <xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh>
     <a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity>
