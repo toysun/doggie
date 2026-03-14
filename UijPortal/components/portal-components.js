@@ -1,8 +1,8 @@
 // This component hides and shows certain elements as the camera moves
 const portalCameraComponent = {
   schema: {
-    width: {default: 20},
-    height: {default: 20},
+    width: {default: 10},
+    height: {default: 10},
   },
   init() {
     this.camera = this.el
@@ -65,7 +65,7 @@ const tapToPlacePortalComponent = {
         property: 'radius-inner',
         dur: 1500,
         from: '0.001',
-        to: '3.5',
+        to: '5.5',
         easing: 'easeOutElastic',
       })
 
