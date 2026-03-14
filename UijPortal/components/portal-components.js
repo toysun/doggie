@@ -1,8 +1,8 @@
 // This component hides and shows certain elements as the camera moves
 const portalCameraComponent = {
   schema: {
-    width: {default: 10},
-    height: {default: 10},
+    width: {default: 15},
+    height: {default: 15},
   },
   init() {
     this.camera = this.el
