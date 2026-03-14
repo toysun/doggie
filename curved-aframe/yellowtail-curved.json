@@ -1,0 +1,26 @@
+{
+  "imagePath": "assets/Media/yellowtail-black-o.jpg",
+  "name": "yellotail-curved",
+  "type": "CYLINDER",
+  "properties": {
+    "top": 0,
+    "left": 0,
+    "width": 361,
+    "height": 525,
+    "isRotated": false,
+    "originalWidth": 361,
+    "originalHeight": 525,
+    "cylinderCircumferenceTop": 361,
+    "cylinderCircumferenceBottom": 361,
+    "targetCircumferenceTop": 100,
+    "cylinderSideLength": 50,
+    "inputMode": "BASIC",
+    "coniness": 0,
+    "arcAngle": 180,
+    "unit": "mm"
+  },
+  "userMetadataIsJson": true,
+  "loadAutomatically": true,
+  "created": 1646873156804,
+  "updated": 1646873156804
+}
