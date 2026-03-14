@@ -89,7 +89,7 @@ const tapToPlacePortalComponent = {
         property: 'scale',
         dur: 1500,
         from: '0.001 0.001 0.001',
-        to: '15.5 2 11',
+        to: '31 4 22',
         easing: 'easeOutElastic',
       })
       sceneEl.removeEventListener('click', firstPlaceEvent)
