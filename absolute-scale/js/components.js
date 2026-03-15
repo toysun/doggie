@@ -92,8 +92,12 @@ const annotationComponent = {
   init() {
     this.camera = this.el.sceneEl.camera
     this.scene = new THREE.Scene()
-    let labelActivated; let
-      hsActivated
+
+    this.labelActivated = false
+    this.hsActivated = false
+    this.autoDismissTimer = null
+    this.labelManuallyActivated = false  // click으로 열린 경우 tick proximity 간섭 차단용
+    this._hotspotJustClicked = false     // 씬 터치 핸들러와의 충돌 방지용
 
     // hotspot inner - 초기 opacity 0
     this.el.setAttribute('radius', 0.03)
@@ -112,9 +116,7 @@ const annotationComponent = {
     this.el.appendChild(this.torus)
 
     this.activateLabel = () => {
-      if (labelActivated) {
-        return
-      }
+      if (this.labelActivated) return
       // hide hotspot torus
       this.torus.setAttribute('animation__scale', {
         property: 'scale',
@@ -125,7 +127,6 @@ const annotationComponent = {
       })
       // brighten hotspot inner
       this.el.setAttribute('color', '#FD835E')
-
       // show text label
       this.label.style.opacity = 0
       this.label.style.display = 'block'
@@ -134,14 +135,11 @@ const annotationComponent = {
         this.label.style.opacity = 1
         this.label.classList.remove('fade-in')
       }, 500)
-
-      labelActivated = true
+      this.labelActivated = true
     }
 
     this.deactivateLabel = () => {
-      if (!labelActivated) {
-        return
-      }
+      if (!this.labelActivated) return
       // show hotspot torus
       this.torus.setAttribute('animation__scale', {
         property: 'scale',
@@ -152,7 +150,6 @@ const annotationComponent = {
       })
       // revert to original hotspot inner color
       this.el.setAttribute('color', '#FF4713')
-
       // hide text label
       this.label.style.opacity = 1
       this.label.classList.add('fade-out')
@@ -161,57 +158,82 @@ const annotationComponent = {
         this.label.classList.remove('fade-out')
         this.label.style.display = 'none'
       }, 400)
-
-      labelActivated = false
+      this.labelActivated = false
+      this.labelManuallyActivated = false  // 수동 활성 플래그 해제
     }
 
     // show hotspot
     this.activateHs = () => {
-      if (hsActivated) {
-        return
-      }
+      if (this.hsActivated) return
       this.el.setAttribute('animation__fading', {
-        property: 'opacity',
-        from: 0,
-        to: 1,
-        easing: 'easeInOutQuad',
-        dur: 1000,
+        property: 'opacity', from: 0, to: 1, easing: 'easeInOutQuad', dur: 1000,
       })
-
       this.torus.setAttribute('animation__fade', {
-        property: 'opacity',
-        from: 0,
-        to: 1,
-        easing: 'easeInOutQuad',
-        dur: 1000,
+        property: 'opacity', from: 0, to: 1, easing: 'easeInOutQuad', dur: 1000,
       })
-
-      hsActivated = true
+      this.hsActivated = true
     }
 
     // hide hotspot
     this.deactivateHs = () => {
-      if (!hsActivated) {
-        return
-      }
+      if (!this.hsActivated) return
       this.el.setAttribute('animation__fading', {
-        property: 'opacity',
-        from: 1,
-        to: 0,
-        easing: 'easeInOutQuad',
-        dur: 1000,
+        property: 'opacity', from: 1, to: 0, easing: 'easeInOutQuad', dur: 1000,
       })
-
       this.torus.setAttribute('animation__fade', {
-        property: 'opacity',
-        from: 1,
-        to: 0,
-        easing: 'easeInOutQuad',
-        dur: 1000,
+        property: 'opacity', from: 1, to: 0, easing: 'easeInOutQuad', dur: 1000,
       })
-
-      hsActivated = false
+      this.hsActivated = false
     }
+
+    // 3초 자동 닫힘 타이머
+    this.startAutoDismiss = () => {
+      clearTimeout(this.autoDismissTimer)
+      this.autoDismissTimer = setTimeout(() => {
+        this.labelManuallyActivated = false
+        this.deactivateLabel()
+      }, 3000)
+    }
+
+    // hotspot 클릭 핸들러
+    // A-Frame click은 touchend 이후 synthetic으로 발생하므로
+    // _hotspotJustClicked를 여기서 set하면 document touchend 핸들러(200ms delay)가 무시 가능
+    this.el.addEventListener('click', () => {
+      this._hotspotJustClicked = true
+      setTimeout(() => { this._hotspotJustClicked = false }, 300)
+
+      if (this.labelActivated) {
+        // 이미 열려있으면 닫기
+        clearTimeout(this.autoDismissTimer)
+        this.labelManuallyActivated = false
+        this.deactivateLabel()
+      } else {
+        // 다른 hotspot label 먼저 닫기
+        document.querySelectorAll('[annotation]').forEach(otherEl => {
+          if (otherEl !== this.el && otherEl.components && otherEl.components.annotation) {
+            clearTimeout(otherEl.components.annotation.autoDismissTimer)
+            otherEl.components.annotation.labelManuallyActivated = false
+            otherEl.components.annotation.deactivateLabel()
+          }
+        })
+        this.labelManuallyActivated = true  // tick proximity 간섭 차단
+        this.activateLabel()
+        this.startAutoDismiss()
+      }
+    })
+
+    // 빈 공간 터치 감지: touchend + 200ms delay로 A-Frame click 이후에 처리
+    // (touchstart/click은 A-Frame click보다 먼저 발생하여 플래그 체크 불가)
+    this.onSceneTouch = () => {
+      setTimeout(() => {
+        if (this._hotspotJustClicked) return  // hotspot 클릭이면 무시
+        clearTimeout(this.autoDismissTimer)
+        this.labelManuallyActivated = false
+        this.deactivateLabel()
+      }, 200)
+    }
+    document.addEventListener('touchend', this.onSceneTouch)
+    document.addEventListener('mouseup', this.onSceneTouch)  // 데스크톱 대응
 
     // create label renderer for text
     this.labelRenderer = new THREE.CSS2DRenderer()
@@ -225,6 +247,7 @@ const annotationComponent = {
     this.label = document.createElement('h1')
     this.label.style.color = 'white'
     this.label.style.opacity = 0
+    this.label.style.display = 'none'
     this.label.style.fontFamily = '\'Nunito\', sans-serif'
     this.label.style.fontWeight = 'bold'
     this.label.style.fontSize = '1.3em'
@@ -239,14 +262,29 @@ const annotationComponent = {
     this.labelObj.position.copy(new THREE.Vector3(this.worldPos.x, this.worldPos.y + this.data.offsetY, this.worldPos.z))
     this.scene.add(this.labelObj)
   },
+
+  remove() {
+    clearTimeout(this.autoDismissTimer)
+    document.removeEventListener('touchend', this.onSceneTouch)
+    document.removeEventListener('mouseup', this.onSceneTouch)
+  },
+
   tick() {
-    // hotspot-group이 숨겨진 상태면 처리 건너뜀 (scale 전환 중 빨간 구름 방지)
+    // hotspot-group이 숨겨진 상태면 전부 초기화
     const group = this.el.parentNode
     if (group && !group.object3D.visible) {
-      this.deactivateLabel()
-      // opacity 강제 0 유지
-      if (this.el.components.material) this.el.components.material.material.opacity = 0
-      if (this.torus && this.torus.components.material) this.torus.components.material.material.opacity = 0
+      if (this.hsActivated || this.labelActivated) {
+        clearTimeout(this.autoDismissTimer)
+        this.el.removeAttribute('animation__fading')
+        this.torus.removeAttribute('animation__fade')
+        if (this.el.components.material) this.el.components.material.material.opacity = 0
+        if (this.torus.components.material) this.torus.components.material.material.opacity = 0
+        this.label.style.display = 'none'
+        this.label.style.opacity = 0
+        this.hsActivated = false
+        this.labelActivated = false
+        this.labelManuallyActivated = false
+      }
       return
     }
 
@@ -255,14 +293,18 @@ const annotationComponent = {
     this.labelObj.position.copy(new THREE.Vector3(this.worldPos.x, this.worldPos.y + this.data.offsetY, this.worldPos.z))
     this.labelRenderer.render(this.scene, this.camera)
 
-    // proximity monitoring
     const distance = this.worldPos.distanceTo(this.camera.el.object3D.position)
-    if (distance < this.data.labeldistance) {
-      this.activateLabel()
-    } else {
-      this.deactivateLabel()
+
+    // label proximity: 수동 활성 상태(labelManuallyActivated)면 tick이 닫지 않음
+    if (!this.labelManuallyActivated) {
+      if (distance < this.data.labeldistance) {
+        this.activateLabel()
+      } else {
+        this.deactivateLabel()
+      }
     }
 
+    // hotspot sphere proximity
     if (distance < this.data.hsdistance) {
       this.activateHs()
     } else {
