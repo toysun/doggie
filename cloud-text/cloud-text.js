@@ -3,9 +3,9 @@ import {initScenePipelineModule} from './threejs-scene-init.js'
 const cloudTextComponent = {
   schema: {
     content: {type: 'string'},
-    fontName: {type: 'string', default: 'Pretendard'},
-    textureFontSize: {type: 'number', default: 60},
-    fontScaleFactor: {type: 'number', default: 0.08},
+    fontName: {type: 'string', default: 'AppleSDGothicNeoH00'},
+    textureFontSize: {type: 'number', default: 50},
+    fontScaleFactor: {type: 'number', default: 0.1},
   },
   init() {
     const string = this.data.content
