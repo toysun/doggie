@@ -3,7 +3,7 @@ import {initScenePipelineModule} from './threejs-scene-init.js'
 const cloudTextComponent = {
   schema: {
     content: {type: 'string'},
-    fontName: {type: 'string', default: 'Verdana'},
+    fontName: {type: 'string', default: 'Noto-sans'},
     textureFontSize: {type: 'number', default: 60},
     fontScaleFactor: {type: 'number', default: 0.08},
   },
