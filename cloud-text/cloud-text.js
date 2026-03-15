@@ -5,7 +5,7 @@ const cloudTextComponent = {
     content: {type: 'string'},
     fontName: {type: 'string', default: 'AppleSDGothicNeoH00'},
     textureFontSize: {type: 'number', default: 50},
-    fontScaleFactor: {type: 'number', default: 0.1},
+    fontScaleFactor: {type: 'number', default: 0.08},
   },
   init() {
     const string = this.data.content
