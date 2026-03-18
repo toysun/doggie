@@ -6,7 +6,7 @@ const selectionPlaceComponent = {
     const entries = [
       {id: '#narcissusModel', img: './assets/icons/narcissus.jpg'},
       {id: '#tulipModel', img: './assets/icons/tulip.jpg'},
-      {id: '#margaritaModel', img: './assets/icons/margarita.jpg'},
+      {id: '#margaritaModel', img: './assets/icons/chineserose.jpg'},
       {id: 'eraser', img: './assets/icons/eraser.jpg'},
     ]
 
