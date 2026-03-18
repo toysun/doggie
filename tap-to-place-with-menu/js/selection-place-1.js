@@ -4,9 +4,9 @@ const selectionPlaceComponent = {
     const ground = document.getElementById('ground')
     const scene = document.querySelector('a-scene')
     const entries = [
-      {id: '#benchModel', img: './assets/icons/narcissus.jpg'},
-      {id: '#trashcanModel', img: './assets/icons/tulip.jpg'},
-      {id: '#lanternModel', img: './assets/icons/margarita-i.jpg'},
+      {id: '#narcissusModel', img: './assets/icons/narcissus.jpg'},
+      {id: '#tulipModel', img: './assets/icons/tulip.jpg'},
+      {id: '#margaritaModel', img: './assets/icons/margarita-i.jpg'},
       {id: 'eraser', img: './assets/icons/eraser.jpg'},
     ]
 
