@@ -74,6 +74,7 @@
      <a-asset-item id="o-fireworks" src="./fireworks_orange.glb"></a-asset-item>
      <a-asset-item id="b-fireworks" src="./fireworks_blue.glb"></a-asset-item>
     <a-asset-item id="r-fireworks" src="./fireworks_red.glb"></a-asset-item>
+    <a-asset-item id="c-fireworks" src="./colorful_fireworks.glb"></a-asset-item>
   </a-assets>
   <a-box
     xrextras-one-finger-rotate
@@ -125,6 +126,16 @@
   
   <a-entity
     gltf-model="#r-fireworks"
+    position="5 1.5 -2.0"
+    rotation="0 0 0"
+    scale="1 1 1"
+    shadow="receive: false"
+    animation-mixer
+     >
+  </a-entity></a-entity>
+
+    <a-entity
+    gltf-model="#c-fireworks"
     position="5 1.5 -2.0"
     rotation="0 0 0"
     scale="1 1 1"
