@@ -69,7 +69,7 @@
 
   <a-camera position="0 2 2"></a-camera>
   <a-assets>
-    <a-asset-item id="carModel" src="./colorful_jellyfish.glb"></a-asset-item>
+    <a-asset-item id="jellyfish" src="./colorful_jellyfish.glb"></a-asset-item>
   </a-assets>
   <a-box
     xrextras-one-finger-rotate
@@ -90,9 +90,11 @@
     shadow
     data-bloom="bloom">
   </a-box>
+  
    <a-entity
     id="target"
     gltf-model="#jellyfish"
+    position="0 0.5 -1.0"
     rotation="0 30 0"
     xrextras-two-finger-rotate
     xrextras-pinch-scale
@@ -101,6 +103,7 @@
     change-color
     shadow="receive: false">
   </a-entity>
+  
   <a-plane
     height="2000"
     width="2000"
