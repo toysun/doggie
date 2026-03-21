@@ -70,9 +70,9 @@
 
   <a-camera position="0 2 2"></a-camera>
   <a-assets>
-    <a-asset-item id="blb" src="./8-animated-butterflies.glb"></a-asset-item>
-     <!--a-asset-item id="o-fireworks" src="./fireworks_orange.glb"></a-asset-item>
-     <a-asset-item id="b-fireworks" src="./fireworks_blue.glb"></a-asset-item>
+    <a-asset-item id="6b" src="./6-animated-butterflies.glb"></a-asset-item>
+     <a-asset-item id="blb" src="./blb-low.glb"></a-asset-item>
+     <!--a-asset-item id="b-fireworks" src="./fireworks_blue.glb"></a-asset-item>
     <a-asset-item id="r-fireworks" src="./fireworks_red.glb"></a-asset-item>
     <a-asset-item id="c-fireworks" src="./colorful-fireworks.glb"></a-asset-item-->
   </a-assets>
@@ -96,8 +96,17 @@
     data-bloom="bloom">
   </a-box>
   
-   <a-entity
+     <a-entity
     gltf-model="#blb"
+    position="0 2.5 -1.5"
+    rotation="0 0 0"
+    scale="10 10 10"
+    shadow="receive: false"
+    animation-mixer
+     >
+  </a-entity> 
+  <a-entity
+    gltf-model="#6b"
     position="0 2.5 -1.5"
     rotation="0 0 0"
     scale="10 10 10"
@@ -106,7 +115,7 @@
      >
   </a-entity>
      <a-entity
-    gltf-model="#blb"
+    gltf-model="#6b"
     position="-5 2.5 -2.2"
     rotation="0 0 0"
     scale="10 10 10"
@@ -116,7 +125,7 @@
   </a-entity>
   
   <a-entity
-    gltf-model="#blb"
+    gltf-model="#6b"
     position="-3 1.5 -10.5"
     rotation="0 0 0"
     scale="10 10 10"
@@ -126,7 +135,7 @@
 
   
   <a-entity
-    gltf-model="#blb"
+    gltf-model="#6b"
     position="5 3.5 -20.0"
     rotation="0 0 0"
     scale="10 10 10"
@@ -135,7 +144,7 @@
      >
   </a-entity>
     <a-entity
-    gltf-model="#blb"
+    gltf-model="#6b"
     position="7 4.5 -3.0"
     rotation="0 0 0"
     scale="10 10 10"
