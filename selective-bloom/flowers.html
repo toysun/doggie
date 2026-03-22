@@ -70,8 +70,8 @@
 
   <a-camera position="0 2 2"></a-camera>
   <a-assets>
-    <a-asset-item id="blb" src="./flower-bloom-90.glb"></a-asset-item>
-     <!--a-asset-item id="o-fireworks" src="./flower-bloom-90.glb"></a-asset-item>
+    <a-asset-item id="flower" src="./flower-bloom-90.glb"></a-asset-item>
+     <a-asset-item id="show" src="./show-ring-big.glb"></a-asset-item>
      <a-asset-item id="b-fireworks" src="./fireworks_blue.glb"></a-asset-item>
     <a-asset-item id="r-fireworks" src="./fireworks_red.glb"></a-asset-item>
     <a-asset-item id="c-fireworks" src="./colorful-fireworks.glb"></a-asset-item-->
@@ -97,8 +97,8 @@
   </a-box>
   
    <a-entity
-    gltf-model="#blb"
-    position="0 3.5 -20"
+    gltf-model="#flower"
+    position="0 3.5 -5"
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
@@ -106,8 +106,17 @@
      >
   </a-entity>
      <a-entity
-    gltf-model="#blb"
-    position="-10 2.5 -15.2"
+    gltf-model="#show"
+    position="0 3.5 -5"
+    rotation="0 0 0"
+    scale="1 1 1"
+    shadow="receive: false"
+    animation-mixer
+     >
+  </a-entity>
+     <a-entity
+    gltf-model="#flower"
+    position="-10 2.5 -5"
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
@@ -116,33 +125,33 @@
   </a-entity>
   
   <a-entity
-    gltf-model="#blb"
-    position="0 1.5 -12.5"
+    gltf-model="#flower"
+    position="0 1.5 -7"
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
     animation-mixer
-     >
+     ></a-entity>
   
   <a-entity
-    gltf-model="#blb"
+    gltf-model="#flower"
     position="10 1.5 -10.0"
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
     animation-mixer
      >
-  </a-entity></a-entity>
+  </a-entity>
 
     <a-entity
-    gltf-model="#blb"
+    gltf-model="#flower"
     position="15 1.5 -15.0"
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
     animation-mixer
      >
-  </a-entity></a-entity>
+  </a-entity>
   
   <a-plane
     height="2000"
