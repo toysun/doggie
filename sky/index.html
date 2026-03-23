@@ -36,6 +36,9 @@
         
       <a-assets>
         <a-asset-item id="legoModel" src="./colorful-fireworks.glb"></a-asset-item>
+        <a-asset-item id="legoMode2" src="./fireworks_blue.glb"></a-asset-item>
+        <a-asset-item id="legoMode3" src="./fireworks_red.glb"></a-asset-item>
+        <a-asset-item id="legoMode4" src="./fireworks_orange.glb"></a-asset-item>
         <img id="skyTexture" src='./space.png'>
       </a-assets>
 
@@ -65,6 +68,30 @@
                gltf-model="#legoModel"
                position="8 -5 -30"
                scale="100 100 100"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+                      <a-entity
+               id="model"
+               gltf-model="#legoModel2"
+               position="0 -10 -20"
+               scale="10 10 10"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+            <a-entity
+               id="model"
+               gltf-model="#legoModel3"
+               position="-10 -2 -25"
+               scale="10 10 10"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+                      <a-entity
+               id="model"
+               gltf-model="#legoModel4"
+               position="8 -5 -30"
+               scale="10 10 10"
                shadow="receive: false"
                animation-mixer>
             </a-entity>
