@@ -1,26 +1,19 @@
 {
-  "imagePath": "assets/Media/3d_printable_radial_pneumatic_engine.png",
+{
+  "imagePath": "image-targets/3d_printable_radial_pneumatic_engine.png",
   "name": "w-engine",
-  "type": "PLANE",
+  "type": "PLANAR",
   "properties": {
     "top": 0,
     "left": 0,
-    "width": 361,
-    "height": 525,
-    "isRotated": false,
-    "originalWidth": 361,
-    "originalHeight": 525,
-    "cylinderCircumferenceTop": 361,
-    "cylinderCircumferenceBottom": 361,
-    "targetCircumferenceTop": 100,
-    "cylinderSideLength": 140,
-    "inputMode": "BASIC",
-    "coniness": 0,
-    "arcAngle": 140,
-    "unit": "mm"
+    "width": 1089,
+    "height": 1077,
+    "isRotated": true,
+    "originalWidth": 1089,
+    "originalHeight": 1077
   },
   "userMetadataIsJson": true,
   "loadAutomatically": true,
-  "created": 1646873156804,
-  "updated": 1646873156804
+  "created": 1646873156802,
+  "updated": 1646873156802
 }
