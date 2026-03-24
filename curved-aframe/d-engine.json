@@ -1,0 +1,19 @@
+{
+{
+  "imagePath": "image-targets/oscillating_cylinder_motor_for_lego_3d_print.png",
+  "name": "d-engine",
+  "type": "PLANAR",
+  "properties": {
+    "top": 0,
+    "left": 0,
+    "width": 1089,
+    "height": 1077,
+    "isRotated": true,
+    "originalWidth": 1089,
+    "originalHeight": 1077
+  },
+  "userMetadataIsJson": true,
+  "loadAutomatically": true,
+  "created": 1646873156802,
+  "updated": 1646873156802
+}
