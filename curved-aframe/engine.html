@@ -14,9 +14,9 @@
   <!--script src="./aframe-hologram-shader.js"></script-->
   <script>
      const onxrloaded = async () => {
-       const res = await fetch('./yellowtail-curved.json')
+       const res = await fetch('./w-engine.json')
        const json = await res.json()
-       const res1 = await fetch('./ballentine-target.json')
+       const res1 = await fetch('./d-engine.json')
        const json1 = await res1.json()
 
        XR8.XrController.configure({
@@ -75,21 +75,21 @@
   <a-light type="ambient" intensity="0.25"></a-light>
   
   <!-- WINE LABEL (Cylindrical): video fades in on label -->
-  <xrextras-named-image-target name="yellowtail-curved">
+  <xrextras-named-image-target name="w-engine">
     <xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade>
     <xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <a-entity gltf-model="#bean-glb" position="0 0.5 0" rotation="45 45 45" scale="0.3 0.3 0.3" xrextras-spin></a-entity>
+    <a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1"  xrextras-spin="speed: 10000"></a-entity>
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
   </xrextras-named-image-target>
 
   <!-- COFFEE SLEEVE (Conical): 3D models inside and outside container -->
-  <xrextras-named-image-target name="ballentine-target">
+  <xrextras-named-image-target name="d-engine">
     <xrextras-target-video-fade video="#wine-label-video1"></xrextras-target-video-fade>
     <xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
-    <a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity>
+    <a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity>
     <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
   </xrextras-named-image-target>
   
