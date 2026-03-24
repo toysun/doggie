@@ -44,8 +44,8 @@
   <a-assets>
     <!-- models -->
     <a-asset-item id="portal-rim-model" src="./assets/models/ring-s2.glb"></a-asset-item>
-    <a-asset-item id="moon-model" src="./assets/models/dirt_ground.glb"></a-asset-item>
-    <a-asset-item id="platform-model" src="./assets/models/grass.glb"></a-asset-item>
+    <a-asset-item id="moon-model" src="./assets/models/grass.glb"></a-asset-item>
+    <a-asset-item id="platform-model" src="./assets/models/transparent_ground.glb"></a-asset-item>
     <a-asset-item id="flag-model" src="./assets/models/dreadnoughtus.glb"></a-asset-item>
     <a-asset-item id="rocks-model" src="./assets/models/animated_rexy.glb"></a-asset-item>
     <a-asset-item id="birds-model" src="./assets/models/fly-dino-idle-big.glb"></a-asset-item>
@@ -103,22 +103,22 @@
   <!-- Portal Contents -->
   <a-entity id="portal-contents">
       
-    <!--a-entity
+    <a-entity
       gltf-model="#moon-model"
       rotation="0 90 0"
-      position="8 -0.5 -5"
+      position="8 -20.5 -5"
       scale="1.5 1.5 1.5"
       shadow="cast: false">
-    </a-entity-->
+    </a-entity>
 
-    <a-entity
+    <!--a-entity
       gltf-model="#platform-model"
       rotation="0 -90 0"
       reflections="type: static"
       position="-0.4 -15 -70"
       scale="9 9 9"
       shadow="receive: false">
-    </a-entity>
+    </a-entity-->
     
     <a-plane
       material="src: #satellite-img; transparent: true; roughness: 0.8; metalness: 0"
