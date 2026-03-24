@@ -18,9 +18,14 @@
        const json = await res.json()
        const res1 = await fetch('./d-engine.json')
        const json1 = await res1.json()
+       const res2 = await fetch('./w1-engine.json')
+       const json2 = await res.json()
+       const res3 = await fetch('./d1-engine.json')
+       const json3 = await res1.json()
+
 
        XR8.XrController.configure({
-         imageTargetData: [json, json1],
+         imageTargetData: [json, json1, json2, json3],
        })
      }
      window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
@@ -40,6 +45,8 @@
   <a-assets>
     <a-asset-item id="bean-glb" src="./assets/Models/3d_printable_radial_pneumatic_engine.glb"></a-asset-item>
     <a-asset-item id="blades-glb" src="./assets/Models/oscillating_cylinder_motor_for_lego_3d_print.glb"></a-asset-item>
+    <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
+    <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
     <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item>
     <!--img id="logo" src="./assets/Media/sleeve-logo.jpg"-->
     <video
@@ -83,13 +90,27 @@
       ></a-entity>
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <a-entity gltf-model="#bean-glb" scale="0.01 0.01 0.01" position="0 0 2" xrextras-spin="speed: 10000" animation-mixer></a-entity>
+    <a-entity gltf-model="#bean-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" animation-mixer></a-entity>
     <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
   </xrextras-named-image-target>
 
+    <xrextras-named-image-target name="w1-engine">
+    <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
+          <a-entity
+        xrextras-play-video="video: #wine-label-video; canstop: true"
+        geometry="primitive: plane; height: 1; width: 1;"
+      ></a-entity>
+    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
+    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
+    <a-entity gltf-model="#bean-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" animation-mixer></a-entity>
+    <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
+    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
+  </xrextras-named-image-target>
+  
+
   <!-- COFFEE SLEEVE (Conical): 3D models inside and outside container -->
-  <xrextras-named-image-target name="d-engine">
+  <xrextras-named-image-target name="d1-engine">
     <!--xrextras-target-video-fade video="#wine-label-video1"></xrextras-target-video-fade-->
           <a-entity
         xrextras-play-video="video: #wine-label-video1; canstop: true"
@@ -98,7 +119,21 @@
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
-         <a-entity gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 2" xrextras-spin="speed: 10000" animation-mixer></a-entity>
+         <a-entity gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" animation-mixer></a-entity>
+    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
+    <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
+  </xrextras-named-image-target>
+
+    <xrextras-named-image-target name="d-engine">
+    <!--xrextras-target-video-fade video="#wine-label-video1"></xrextras-target-video-fade-->
+          <a-entity
+        xrextras-play-video="video: #wine-label-video1; canstop: true"
+        geometry="primitive: plane; height: 1; width: 1;"
+      ></a-entity>
+    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
+    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
+    <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
+         <a-entity gltf-model="#blades-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" animation-mixer></a-entity>
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
   </xrextras-named-image-target>
