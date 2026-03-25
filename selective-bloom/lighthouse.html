@@ -86,8 +86,9 @@
   </a-box-->
   <a-cylinder
     xrextras-one-finger-rotate
-    theta-start="50" theta-length="1000" side="double"
+    theta-start="10" theta-length="100000" side="double"
     position="0 0.5 -1.0"
+    rotation="0 90 0"
     material="
       color: #AD50FF; shader: flat; 
       src: ./cube-texture-w.png"
@@ -137,10 +138,10 @@
               <a-entity
     id="target"
     gltf-model="#ct-jellyfish"
-    position="2 5.5 -30.0"
+    position="0 1.5 -5.0"
     rotation="0 0 0"
-    scale="100 100 100"
-                data-bloom="bloom"
+    scale="10 10 10"
+    shadow="receive: false"
     animation-mixer
      >
   </a-entity>
