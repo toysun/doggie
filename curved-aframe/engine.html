@@ -76,8 +76,19 @@
     raycaster="objects: .cantap"
     cursor="fuse: false; rayOrigin: mouse;">
   </a-camera>
-
-  <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+      <a-entity
+        light="
+          type: directional;
+          intensity: 0.8;
+          castShadow: true;
+          shadowMapHeight:2048;
+          shadowMapWidth:2048;
+          shadowCameraTop: 10;
+          target: #model;"
+        xrextras-attach="target: model; offset: 1 15 3;"
+        shadow>
+      </a-entity>
+  <!--a-light type="directional" intensity="1.5" position="0 1 0"></a-light-->
 
   <a-light type="ambient" intensity="0.25"></a-light>
   
@@ -90,7 +101,7 @@
       ></a-entity>
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <a-entity gltf-model="#bean-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
+    <a-entity id="model" gltf-model="#bean-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
     <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
   </xrextras-named-image-target>
@@ -103,7 +114,7 @@
       ></a-entity>
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <a-entity gltf-model="#bean-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
+    <a-entity id="model" gltf-model="#bean-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
     <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
   </xrextras-named-image-target>
@@ -119,7 +130,7 @@
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
-         <a-entity gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
+         <a-entity id="model" gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
   </xrextras-named-image-target>
@@ -133,7 +144,7 @@
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
-         <a-entity gltf-model="#blades-glb-1" scale="0.3 0.3 0.3" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
+         <a-entity id="model" gltf-model="#blades-glb-1" scale="0.3 0.3 0.3" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
   </xrextras-named-image-target>
