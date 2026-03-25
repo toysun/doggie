@@ -47,15 +47,6 @@
         
         <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
             <a-sky material="src: #skyTexture; transparent: true; opacity: 1;"></a-sky>
-
-          <a-cylinder
-                xrextras-one-finger-rotate
-                theta-start="10" theta-length="100000" side="double"
-                position="0 0.5 -1.0"
-                rotation="0 90 0"
-                material="color: #AD50FF; shader: flat; src: ./cube-texture-w.png"shadow
-                data-bloom="bloom">
-          </a-cylinder>  
           <a-entity
                id="model"
                gltf-model="#boat"
@@ -68,10 +59,9 @@
             <a-entity
                id="model"
                gltf-model="#light"
-               position="1 15 -30"
+               position="-1 2 -1"
                scale="10 10 10"
                rotation="0 0 0"
-               data-bloom="bloom"
                animation-mixer>
             </a-entity>
             <!--a-box 
