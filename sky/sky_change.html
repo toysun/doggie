@@ -40,7 +40,7 @@
       <a-assets>
         <a-asset-item id="boat" src="./fishing_boat_s.glb"></a-asset-item>
         <a-asset-item id="light" src="./light-lhl.glb"></a-asset-item>
-        <img id="skyTexture" src='./aurora_sky.png'>
+        <img id="skyTexture" src='./space.png'>
       </a-assets>
 
         <a-camera position="0 3 0"></a-camera>
@@ -53,7 +53,7 @@
                gltf-model="#boat"
                position="1 2 -10"
                scale="2 2 2"
-               rotate="0 90 10"
+               rotation="0 90 10"
                shadow="receive: false"
                animation-mixer>
             </a-entity>
@@ -61,8 +61,8 @@
                id="model"
                gltf-model="#light"
                position="1 4 -10"
-               scale="1 1 1"
-               rotate="0 0 0"
+               scale="10 10 10"
+               rotation="0 0 0"
                shadow="receive: false"
                animation-mixer>
             </a-entity>
