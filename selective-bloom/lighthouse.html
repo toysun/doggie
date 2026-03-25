@@ -75,7 +75,7 @@
      <a-asset-item id="b-jellyfish" src="./blue_jellyfish.glb"></a-asset-item>
     <a-asset-item id="ct-jellyfish" src="./ligh-lh.glb"></a-asset-item>
   </a-assets>
-  <a-box
+  <!--a-box
     xrextras-one-finger-rotate
     position="0 0.5 -1.0"
     material="
@@ -83,8 +83,17 @@
       src: ./cube-texture-w.png"
     shadow
     data-bloom="bloom">
-  </a-box>
-
+  </a-box-->
+  <a-cylinder
+    xrextras-one-finger-rotate
+    theta-start="50" theta-length="1000" side="double"
+    position="0 0.5 -1.0"
+    material="
+      color: #AD50FF; shader: flat; 
+      src: ./cube-texture-w.png"
+    shadow
+    data-bloom="bloom">
+  </a-cylinder>
   <a-box
     xrextras-one-finger-rotate
     position="-0.5 0.5 -2.5"
