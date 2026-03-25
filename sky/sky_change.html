@@ -78,6 +78,15 @@
         
         <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
             <a-sky material="src: #skyTexture; transparent: true; opacity: 1;"></a-sky>
+
+           <a-entity
+    light="
+      type: directional; 
+      castShadow: true; 
+      color: white; 
+      intensity: 0.5"
+    position="5 10 7">
+  </a-entity>
             <a-cylinder
     xrextras-one-finger-rotate
     theta-start="10" theta-length="100000" side="double"
