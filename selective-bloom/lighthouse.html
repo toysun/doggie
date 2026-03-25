@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <title>camera shader</title>
+
+  <script src="./../xr_st/8frame-1.4.1.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>  
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+
+<script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.147.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.147.0/examples/jsm/"
+    }
+  }
+</script>
+
+<script type="module">
+  import * as THREE from 'three';
+  import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+  import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+  import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+  import { GlitchPass } from 'three/addons/postprocessing/GlitchPass.js';
+  import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+  import { TexturePass } from 'three/addons/postprocessing/TexturePass.js';
+  import { AfterimagePass } from 'three/addons/postprocessing/AfterimagePass.js';
+  import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+
+  window.THREE = { ...THREE };
+  window.THREE.GLTFLoader = GLTFLoader;
+  window.THREE.EffectComposer = EffectComposer;
+  window.THREE.RenderPass = RenderPass;
+  window.THREE.GlitchPass = GlitchPass;
+  window.THREE.UnrealBloomPass = UnrealBloomPass;
+  window.THREE.TexturePass = TexturePass;
+  window.THREE.AfterimagePass = AfterimagePass;
+  window.THREE.ShaderPass = ShaderPass;
+  window.dispatchEvent(new CustomEvent('threeloaded'));
+</script>
+
+  <script type="module" src="./app.js" defer></script>
+</head>
+
+<body>
+<a-scene
+  xrextras-tap-recenter
+  landing-page
+  xrextras-loading
+  xrextras-runtime-error
+  xrextras-gesture-detector
+  xrweb="allowedDevices: any"
+  postprocessing>
+  <a-entity
+    light="
+      type: directional; 
+      castShadow: true; 
+      color: white; 
+      intensity: 0.5"
+    position="5 10 7">
+  </a-entity>
+
+  <a-light type="ambient" intensity="0.5"></a-light>
+
+  <a-camera position="0 2 2"></a-camera>
+  <a-assets>
+    <a-asset-item id="c-jellyfish" src="./colorful_jellyfish.glb"></a-asset-item>
+     <a-asset-item id="h-jellyfish" src="./hat_jellyfish.glb"></a-asset-item>
+     <a-asset-item id="b-jellyfish" src="./blue_jellyfish.glb"></a-asset-item>
+    <a-asset-item id="ct-jellyfish" src="./ligh-lh.glb"></a-asset-item>
+  </a-assets>
+  <a-box
+    xrextras-one-finger-rotate
+    position="0 0.5 -1.0"
+    material="
+      color: #AD50FF; shader: flat; 
+      src: ./cube-texture-w.png"
+    shadow
+    data-bloom="bloom">
+  </a-box>
+
+  <a-box
+    xrextras-one-finger-rotate
+    position="-0.5 0.5 -2.5"
+    material="
+      color: #AD50FF; shader: flat; 
+      src: ./cube-texture.png"
+    shadow
+    data-bloom="bloom">
+  </a-box>
+  
+   <a-entity
+    id="target"
+    gltf-model="#c-jellyfish"
+    position="0 3.5 -1.0"
+    rotation="0 30 0"
+    scale="1 1 1"
+    shadow="receive: false"
+    animation-mixer
+     >
+  </a-entity>
+     <a-entity
+    id="target"
+    gltf-model="#h-jellyfish"
+    position="-2 3.5 -2.2"
+    rotation="0 30 0"
+    scale="0.5 0.5 0.5"
+    shadow="receive: false"
+    animation-mixer
+     >
+  </a-entity>
+       <a-entity
+    id="target"
+    gltf-model="#b-jellyfish"
+    position="2 2.5 -5.5"
+    rotation="0 30 0"
+    scale="4 4 4"
+    shadow="receive: false"
+    animation-mixer
+     >
+  
+              <a-entity
+    id="target"
+    gltf-model="#ct-jellyfish"
+    position="2 5.5 -2.0"
+    rotation="0 -30 0"
+    scale="0.5 0.5 0.5"
+    shadow="receive: false"
+    animation-mixer
+     >
+  </a-entity></a-entity>
+  
+  <a-plane
+    height="2000"
+    width="2000"
+    rotation="-90 0 0"
+    material="shader: shadow; opacity: 0.67"
+    shadow>
+  </a-plane>
+</a-scene>
+
+</body>
+</html>
