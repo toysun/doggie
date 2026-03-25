@@ -90,7 +90,7 @@
       ></a-entity>
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <a-entity gltf-model="#bean-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" animation-mixer></a-entity>
+    <a-entity gltf-model="#bean-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
     <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
   </xrextras-named-image-target>
@@ -103,7 +103,7 @@
       ></a-entity>
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <a-entity gltf-model="#bean-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" animation-mixer></a-entity>
+    <a-entity gltf-model="#bean-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
     <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
   </xrextras-named-image-target>
@@ -119,7 +119,7 @@
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
-         <a-entity gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" animation-mixer></a-entity>
+         <a-entity gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
   </xrextras-named-image-target>
@@ -133,11 +133,18 @@
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
-         <a-entity gltf-model="#blades-glb-1" scale="0.3 0.3 0.3" position="0 0 1" xrextras-spin="speed: 10000" animation-mixer></a-entity>
+         <a-entity gltf-model="#blades-glb-1" scale="0.3 0.3 0.3" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
     <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
   </xrextras-named-image-target>
-  
+        <a-plane
+        id="ground"
+        rotation="-90 0 0"
+        width="1000"
+        height="1000"
+        material="shader: shadow"
+        shadow>
+      </a-plane>
 </a-scene>
 </body>
 </html>
