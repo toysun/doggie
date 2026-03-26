@@ -54,8 +54,8 @@
     <a-light type="ambient" intensity="1"></a-light>
 
     <!-- Note: "name:" must be set to the name of the image target uploaded to the 8th Wall Console -->
-    <!--a-entity
-      target-video="name: aigirl-ar; video: #alpha-video;"
+    <a-entity
+      target-video="name: hajodo-lh; video: #alpha-video;"
       material="shader: chromakey; src: #alpha-video; color: 0.1 0.9 0.2"
       geometry="primitive: plane; height: 1; width: 1;"
       rotation="0 90 0">
@@ -69,11 +69,11 @@
       rotate="0 0 0"
       shadow
       animation-mixer>
-    </a-entity-->
-  <xrextras-named-image-target name="hajodo-lh">
+    </a-entity>
+  <!--xrextras-named-image-target name="hajodo-lh">
     <xrextras-target-video-sound video="#alpha-video" height="1" width="1"></xrextras-target-video-sound>
     <a-entity gltf-model="#snow" position="0 -7 -1" scale="2 2 2" xrextras-spin class="cantap"></a-entity>
-  </xrextras-named-image-target>
+  </xrextras-named-image-target-->
 
   </a-scene>
   <script> 
