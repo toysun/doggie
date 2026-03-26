@@ -5,11 +5,11 @@
   "properties": {
     "top": 0,
     "left": 0,
-    "width": 1089,
-    "height": 1077,
+    "width": 1149,
+    "height": 1485,
     "isRotated": true,
-    "originalWidth": 1089,
-    "originalHeight": 1077
+    "originalWidth": 1149,
+    "originalHeight": 1485
   },
   "userMetadataIsJson": true,
   "loadAutomatically": true,
