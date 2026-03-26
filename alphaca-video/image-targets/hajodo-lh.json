@@ -1,15 +1,15 @@
 {
-  "imagePath": "image-targets/ai-girl-hanbok.png",
+  "imagePath": "image-targets/hajodo-lh.jpg",
   "name": "hajodo-lh",
   "type": "PLANAR",
   "properties": {
     "top": 0,
     "left": 0,
-    "width": 1036,
-    "height": 1304,
+    "width": 1280,
+    "height": 1924,
     "isRotated": true,
-    "originalWidth": 1036,
-    "originalHeight": 1304
+    "originalWidth": 1280,
+    "originalHeight": 1924
   },
   "userMetadataIsJson": true,
   "loadAutomatically": true,
