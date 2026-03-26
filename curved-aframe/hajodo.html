@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <title>curved-aframe</title>
+
+  <script src="./../xr_st/8frame-1.5.0.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>  
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <!--script src="./aframe-hologram-shader.js"></script-->
+  <script>
+     const onxrloaded = async () => {
+       const res = await fetch('./w-engine.json')
+       const json = await res.json()
+       const res1 = await fetch('./d-engine.json')
+       const json1 = await res1.json()
+       const res2 = await fetch('./w1-engine.json')
+       const json2 = await res2.json()
+       const res3 = await fetch('./d1-engine.json')
+       const json3 = await res3.json()
+
+
+       XR8.XrController.configure({
+         imageTargetData: [json, json1, json2, json3],
+       })
+     }
+     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
+
+  </script>
+
+</head>
+
+<body>
+<a-scene
+  landing-page
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement: true; physicallyBasedRendering: true;"
+  xrweb="disableWorldTracking: true">
+  
+  <a-assets>
+    <a-asset-item id="bean-glb" src="./assets/Models/3d_printable_radial_pneumatic_engine.glb"></a-asset-item>
+    <a-asset-item id="blades-glb" src="./assets/Models/oscillating_cylinder_motor_for_lego_3d_print.glb"></a-asset-item>
+    <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
+    <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
+    <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item>
+    <!--img id="logo" src="./assets/Media/sleeve-logo.jpg"-->
+    <video
+      id="wine-label-video"
+       muted
+        autoplay
+        playsinline
+        webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/white-bg-engine-1.mp4">
+    </video>
+        <video
+      id="wine-label-video1"
+       muted
+        autoplay
+        playsinline
+        webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/dark-bg-engine-1.mp4">
+    </video>
+  </a-assets>
+
+  <a-camera
+    position="0 1 1"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
+      <!--a-entity
+        light="
+          type: directional;
+          intensity: 0.8;
+          castShadow: true;
+          shadowMapHeight:2048;
+          shadowMapWidth:2048;
+          shadowCameraTop: 10;
+          target: #model;"
+        xrextras-attach="target: model; offset: 1 15 3;"
+        shadow>
+      </a-entity-->
+  <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+
+  <a-light type="ambient" intensity="0.7"></a-light>
+  
+  <!-- WINE LABEL (Cylindrical): video fades in on label -->
+  <xrextras-named-image-target name="w-engine">
+    <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
+          <a-entity
+        xrextras-play-video="video: #wine-label-video; canstop: true"
+        geometry="primitive: plane; height: 1; width: 1;"
+      ></a-entity>
+    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
+    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
+    <a-entity id="model" gltf-model="#bean-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
+    <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
+    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
+  </xrextras-named-image-target>
+
+    <xrextras-named-image-target name="w1-engine">
+    <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
+          <a-entity
+        xrextras-play-video="video: #wine-label-video; canstop: true"
+        geometry="primitive: plane; height: 1; width: 1;"
+      ></a-entity>
+    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
+    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
+    <a-entity id="model" gltf-model="#bean-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
+    <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
+    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
+  </xrextras-named-image-target>
+  
+
+  <!-- COFFEE SLEEVE (Conical): 3D models inside and outside container -->
+  <xrextras-named-image-target name="d-engine">
+    <!--xrextras-target-video-fade video="#wine-label-video1"></xrextras-target-video-fade-->
+          <a-entity
+        xrextras-play-video="video: #wine-label-video1; canstop: true"
+        geometry="primitive: plane; height: 1; width: 1;"
+      ></a-entity>
+    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
+    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
+    <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
+         <a-entity id="model" gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
+    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
+    <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
+  </xrextras-named-image-target>
+
+    <xrextras-named-image-target name="d1-engine">
+    <!--xrextras-target-video-fade video="#wine-label-video1"></xrextras-target-video-fade-->
+          <a-entity
+        xrextras-play-video="video: #wine-label-video1; canstop: true"
+        geometry="primitive: plane; height: 1; width: 1;"
+      ></a-entity>
+    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
+    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
+    <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
+         <a-entity id="model" gltf-model="#blades-glb-1" scale="0.3 0.3 0.3" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
+    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
+    <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
+  </xrextras-named-image-target>
+        <a-plane
+        id="ground"
+        rotation="-90 0 0"
+        width="1000"
+        height="1000"
+        material="shader: shadow"
+        shadow>
+      </a-plane>
+</a-scene>
+</body>
+</html>
