@@ -76,7 +76,7 @@
         <a-camera position="0 3 0"></a-camera>
         
         <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
-            <a-sky material="src: #skyTexture; transparent: true; opacity: 1;" data-bloom="bloom"></a-sky>
+            <a-sky material="src: #skyTexture; transparent: true; opacity: 1;"></a-sky>
 
             <a-entity
                id="model"
@@ -85,6 +85,7 @@
                scale="1 1 1"
                rotation="0 0 0"
                shadow="receive: false"
+               data-bloom="bloom"
                animation-mixer>
             </a-entity>
 
