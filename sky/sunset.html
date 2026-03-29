@@ -46,13 +46,13 @@
         <a-camera position="0 3 0"></a-camera>
         
         <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
-            <a-sky material="src: #skyTexture; transparent: true; opacity: 1;" rotation="0 45 0"></a-sky>
+            <a-sky material="src: #skyTexture; transparent: true; opacity: 0.5;" rotation="0 0 0"></a-sky>
 
             <a-entity
                id="model"
                gltf-model="#legoModel"
                position="1 2 -10"
-               scale="0.1 0.1 0.1"
+               scale="1 1 1"
                rotation="0 0 0"
                shadow="receive: false"
                animation-mixer>
