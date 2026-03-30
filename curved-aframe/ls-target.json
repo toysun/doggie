@@ -1,15 +1,15 @@
 {
-  "imagePath": "assets/Media/hajodo-lh-2.png",
+  "imagePath": "assets/Media/stamp-yeongdo.png",
   "name": "ls-target",
   "type": "PLANAR",
   "properties": {
     "top": 0,
     "left": 0,
-    "width": 1485,
-    "height": 1149,
+    "width": 2126,
+    "height": 1984,
     "isRotated": true,
-    "originalWidth": 1485,
-    "originalHeight": 1149
+    "originalWidth": 2126,
+    "originalHeight": 1984
   },
   "userMetadataIsJson": true,
   "loadAutomatically": true,
