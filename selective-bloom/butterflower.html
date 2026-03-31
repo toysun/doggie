@@ -72,6 +72,7 @@
   <a-assets>
     <a-asset-item id="6b" src="./6-animated-butterflies.glb"></a-asset-item>
      <a-asset-item id="blb" src="./blb-low.glb"></a-asset-item>
+    <a-asset-item id="flower" src="./flower-bloom-90.glb"></a-asset-item>
      <!--a-asset-item id="b-fireworks" src="./fireworks_blue.glb"></a-asset-item>
     <a-asset-item id="r-fireworks" src="./fireworks_red.glb"></a-asset-item>
     <a-asset-item id="c-fireworks" src="./colorful-fireworks.glb"></a-asset-item-->
@@ -105,6 +106,15 @@
     animation-mixer
      >
   </a-entity> 
+     <a-entity
+    gltf-model="#flower"
+    position="0 0.5 -1"
+    rotation="0 0 0"
+    scale="0.6 0.6 0.6"
+    shadow="receive: false"
+    xrextras-spin="speed: 10000"
+    animation-mixer
+     ></a-entity>
   <a-entity
     gltf-model="#6b"
     position="0 2.5 -1.5"
