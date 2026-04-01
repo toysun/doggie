@@ -1,15 +1,15 @@
 {
-  "imagePath": "assets/Media/costume_ad2.jpg",
+  "imagePath": "assets/Media/costume_ad.jpg",
   "name": "costume",
   "type": "PLANAR",
   "properties": {
     "top": 0,
     "left": 0,
     "width": 764,
-    "height": 1024,
-    "isRotated": true,
+    "height": 764,
+    "isRotated": false,
     "originalWidth": 764,
-    "originalHeight": 1024
+    "originalHeight": 764
   },
   "userMetadataIsJson": true,
   "loadAutomatically": true,
