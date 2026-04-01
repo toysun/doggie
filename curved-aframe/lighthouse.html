@@ -17,7 +17,7 @@
      const onxrloaded = async () => {
        const res = await fetch('./ls-target.json')
        const json = await res.json()
-       const res1 = await fetch('./w1-engine.json')
+       const res1 = await fetch('./costume.json')
        const json1 = await res1.json()
        const res2 = await fetch('./oregage.json')
        const json2 = await res2.json()
@@ -117,7 +117,7 @@
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
   </xrextras-named-image-target>
 
-    <xrextras-named-image-target name="d-engine">
+    <xrextras-named-image-target name="costume">
     <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
           <a-entity
         xrextras-play-video="video: #wine-label-video2; canstop: true"
