@@ -107,7 +107,7 @@ const promptFlowComponent = {
 
     this.el.sceneEl.addEventListener('realityready', () => {
       this.overlay.style.display = 'block'
-      this.prompt.innerHTML = 'Tap to Place<br>Moon Portal'
+      this.prompt.innerHTML = '화면을 터치하여<br>포털을 여세요!'
       this.prompt.classList.add('fly-in')
     })
 
