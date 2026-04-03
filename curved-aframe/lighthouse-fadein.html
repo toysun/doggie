@@ -153,19 +153,62 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
 });
 </script-->
 <script>
-document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+scene.addEventListener('xrimagefound', (event) => {
   if (event.detail.name === 'ls-target') {
     const entity = document.querySelector('#model');
-    entity.setAttribute('material', 'opacity:0');
-
-    entity.setAttribute('animation', {
-      property: 'material.opacity',
-      from: 0,
-      to: 1,
-      dur: 3000,
-      easing: 'easeInOutQuad'
-    });
     entity.setAttribute('visible', true);
+
+    const mesh = entity.getObject3D('mesh');
+    if (!mesh) return;
+
+    // 모든 머티리얼을 투명하게 초기화
+    mesh.traverse((node) => {
+      if (node.material) {
+        if (Array.isArray(node.material)) {
+          node.material.forEach((mat) => {
+            mat.transparent = true;
+            mat.opacity = 0;
+          });
+        } else {
+          node.material.transparent = true;
+          node.material.opacity = 0;
+        }
+      }
+    });
+
+    // easeInOutQuad 함수 정의
+    function easeInOutQuad(t) {
+      return t < 0.5
+        ? 2 * t * t
+        : -1 + (4 - 2 * t) * t;
+    }
+
+    const duration = 1500; // 애니메이션 시간 (ms)
+    const start = performance.now();
+
+    function fade(now) {
+      const elapsed = now - start;
+      let progress = Math.min(elapsed / duration, 1); // 0 ~ 1
+      let eased = easeInOutQuad(progress);
+
+      mesh.traverse((node) => {
+        if (node.material) {
+          if (Array.isArray(node.material)) {
+            node.material.forEach((mat) => {
+              mat.opacity = eased;
+            });
+          } else {
+            node.material.opacity = eased;
+          }
+        }
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(fade);
+      }
+    }
+
+    requestAnimationFrame(fade);
   }
 });
 </script>
