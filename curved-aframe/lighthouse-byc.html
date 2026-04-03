@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <title>curved-aframe</title>
+
+  <script src="./../xr_st/8frame-1.5.0.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <!--script src="./../xr_st/landing-page.js"></script-->  
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+
+  <script>
+     const onxrloaded = async () => {
+       const res = await fetch('./ls-target.json')
+       const json = await res.json()
+       const res1 = await fetch('./costume.json')
+       const json1 = await res1.json()
+       const res2 = await fetch('./oregage.json')
+       const json2 = await res2.json()
+       const res3 = await fetch('./costume.json')
+       const json3 = await res3.json()
+
+       XR8.XrController.configure({
+         imageTargetData: [json, json1, json2, json3],
+       })
+     }
+     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
+  </script>
+
+  <script>
+    AFRAME.registerComponent('target-fade-in', {
+      schema: {
+        duration: { default: 1500 }
+      },
+
+      init: function () {
+        this.meshReady = false;
+        this.pendingFade = false; // xrimagefound가 mesh 로드보다 먼저 온 경우 기억
+
+        // ── GLB 로드 완료 처리 ────────────────────────────────────
+        this.el.addEventListener('model-loaded', () => {
+          this.initMesh();
+          // xrimagefound가 이미 왔었다면 지금 바로 fade 시작
+          if (this.pendingFade) {
+            this.pendingFade = false;
+            this.fadeIn();
+          }
+        });
+
+        // ── 이미지 타겟 이벤트 ────────────────────────────────────
+        this.el.parentElement.addEventListener('xrimagefound', () => {
+          if (this.meshReady) {
+            this.fadeIn();           // mesh 준비됨 → 즉시 시작
+          } else {
+            this.pendingFade = true; // mesh 미준비 → 로드 완료 후 시작
+          }
+        });
+
+        this.el.parentElement.addEventListener('xrimagelost', () => {
+          this.pendingFade = false;
+          this.resetMesh();
+        });
+      },
+
+      // GLB 내부 mesh 머티리얼을 opacity 0으로 초기화
+      initMesh: function () {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh) return;
+
+        mesh.traverse(node => {
+          if (node.isMesh) {
+            node.material = node.material.clone();
+            node.material.transparent = true;
+            node.material.opacity = 0;
+            node.material.depthWrite = false;
+          }
+        });
+
+        this.meshReady = true;
+      },
+
+      // 이미지 사라질 때 opacity 리셋
+      resetMesh: function () {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh) return;
+
+        mesh.traverse(node => {
+          if (node.isMesh) {
+            node.material.opacity = 0;
+            node.material.depthWrite = false;
+          }
+        });
+      },
+
+      fadeIn: function () {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh) return;
+
+        let startTime = null;
+        const duration = this.data.duration;
+
+        const animate = (timestamp) => {
+          if (!startTime) startTime = timestamp;
+          const progress = Math.min((timestamp - startTime) / duration, 1);
+          const opacity = 1 - (1 - progress) * (1 - progress); // easeOutQuad
+
+          mesh.traverse(node => {
+            if (node.isMesh) node.material.opacity = opacity;
+          });
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            // 페이드 완료 후 depthWrite 복원
+            mesh.traverse(node => {
+              if (node.isMesh) node.material.depthWrite = true;
+            });
+          }
+        };
+
+        requestAnimationFrame(animate);
+      }
+    });
+  </script>
+
+</head>
+
+<body>
+<a-scene
+  landing-page
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement: true; physicallyBasedRendering: true;"
+  xrweb="disableWorldTracking: true">
+  
+  <a-assets>
+    <a-asset-item id="bean-glb" src="./assets/Models/lighthouse-rock-seagull.glb"></a-asset-item>
+    <video
+      id="wine-label-video"
+      muted autoplay playsinline webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/wave-square-ns.mp4">
+    </video>
+    <video
+      id="wine-label-video1"
+      muted autoplay playsinline webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/oregage-3d_ns.mp4">
+    </video>
+    <video
+      id="wine-label-video2"
+      muted autoplay playsinline webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/costume_ad.mp4">
+    </video>
+  </a-assets>
+
+  <a-camera
+    position="0 1 1"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
+
+  <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+  <a-light type="ambient" intensity="0.7"></a-light>
+  
+  <xrextras-named-image-target name="ls-target">
+    <a-entity
+        xrextras-play-video="video: #wine-label-video; canstop: true"
+        geometry="primitive: plane; height: 1; width: 1;">
+    </a-entity>
+
+    <!-- animation 컴포넌트와 material 속성 제거 → target-fade-in이 단독 제어 -->
+    <a-entity
+        id="model"
+        gltf-model="#bean-glb"
+        scale="0.05 0.05 0.05"
+        position="0 0 1.5"
+        rotation="0 0 0"
+        shadow="receive: false"
+        animation-mixer
+        target-fade-in="duration: 1800">
+    </a-entity>
+  </xrextras-named-image-target>
+
+  <a-plane
+    id="ground"
+    rotation="-90 0 0"
+    width="1000"
+    height="1000"
+    material="shader: shadow"
+    shadow>
+  </a-plane>
+</a-scene>
+</body>
+</html>
