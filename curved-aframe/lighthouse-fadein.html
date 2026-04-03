@@ -69,26 +69,6 @@ AFRAME.registerComponent('target-fade-in', {
 })
 
 </script-->
-<script>
-document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === 'ls-target') {
-    const entity = document.querySelector('#model');
-    entity.setAttribute('visible', true);
-
-    // 투명도 애니메이션 처리
-    let opacity = 0;
-    const interval = setInterval(() => {
-      opacity += 0.05;
-      entity.setAttribute('material', 'opacity', opacity);
-
-      if (opacity >= 1) {
-        clearInterval(interval);
-      }
-    }, 50);
-  }
-});
-</script>
-
 
 </head>
 
@@ -152,5 +132,26 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     shadow>
   </a-plane>
 </a-scene>
+
+<script>
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  if (event.detail.name === 'ls-target') {
+    const entity = document.querySelector('#model');
+    entity.setAttribute('visible', true);
+
+    // 투명도 애니메이션 처리
+    let opacity = 0;
+    const interval = setInterval(() => {
+      opacity += 0.05;
+      entity.setAttribute('material', 'opacity', opacity);
+
+      if (opacity >= 1) {
+        clearInterval(interval);
+      }
+    }, 50);
+  }
+});
+</script>
+
 </body>
 </html>
