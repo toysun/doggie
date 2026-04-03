@@ -45,9 +45,10 @@
           this.initMeshes();
         });
 
-        // ✅ 씬이 완전히 로딩된 후 DOM 탐색 (init 시점엔 null일 수 있음)
+        // ✅ 씬이 완전히 로딩된 후 부모 탐색
+        // closest('[attr]')는 속성 선택자라 태그명엔 안 먹힘 → parentEl 사용
         const setupListeners = () => {
-          const target = this.el.closest('[xrextras-named-image-target]');
+          const target = this.el.parentEl;
           if (!target) return;
 
           // 이미지 인식됨 → 페이드인 시작
