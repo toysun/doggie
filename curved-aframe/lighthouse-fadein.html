@@ -186,7 +186,7 @@
         xrextras-play-video="video: #wine-label-video; canstop: true"
         geometry="primitive: plane; height: 1; width: 1;"
       ></a-entity>
-    <a-entity 
+    <!--a-entity 
         id="model" 
         gltf-model="#bean-glb" 
         scale="0.05 0.05 0.05" 
@@ -195,7 +195,17 @@
         shadow="receive: false" 
         animation-mixer
         fade-in="duration: 1800">
+    </a-entity-->
+    <a-entity 
+        id="model" 
+        gltf-model="#bean-glb" 
+        scale="0.05 0.05 0.05" 
+        position="0 0 0" 
+        rotation="90 0 0"  
+        shadow="receive: false" 
+        animation="property: components.material.material.opacity; from: 0; to: 1">
     </a-entity>
+
   </xrextras-named-image-target>
 
   <!--xrextras-named-image-target name="costume">
