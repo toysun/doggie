@@ -133,7 +133,7 @@ AFRAME.registerComponent('target-fade-in', {
   </a-plane>
 </a-scene>
 
-<script>
+<!--script>
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   if (event.detail.name === 'ls-target') {
     const entity = document.querySelector('#model');
@@ -151,7 +151,25 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     }, 50);
   }
 });
+</script-->
+<script>
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  if (event.detail.name === 'ls-target') {
+    const entity = document.querySelector('#model');
+    entity.setAttribute('visible', true);
+    entity.setAttribute('material', 'opacity:0');
+
+    entity.setAttribute('animation', {
+      property: 'material.opacity',
+      from: 0,
+      to: 1,
+      dur: 1500,
+      easing: 'easeInOutQuad'
+    });
+  }
+});
 </script>
+
 
 </body>
 </html>
