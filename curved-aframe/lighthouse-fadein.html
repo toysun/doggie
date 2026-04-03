@@ -41,55 +41,32 @@
         this.startTime = null;
         this.meshesReady = false;
 
-        // ── 모델 로드 처리 ──────────────────────────────────────────
+        // ── 모델 로드 처리 ─────────────────────────────────────────
         this.el.addEventListener('model-loaded', () => {
-          console.log('[fade-in] model-loaded 이벤트 수신');
           this.initMeshes();
         });
 
-        // GLB가 캐시되어 init() 이전에 이미 로드된 경우도 처리
+        // 캐시로 인해 이미 로드된 경우
         if (this.el.getObject3D('mesh')) {
-          console.log('[fade-in] 이미 로드된 mesh 감지 → initMeshes 즉시 실행');
           this.initMeshes();
         }
 
-        // ── 이미지 타겟 이벤트 수신 ─────────────────────────────────
-        // 핵심 변경: document에 capture:true 로 등록
-        // → xrextras가 bubbles:false 로 dispatch해도 캡처 단계에서 반드시 수신됨
-        // → parentNode에 직접 달거나 sceneEl에 달면 놓치는 케이스를 모두 방지
-        this._targetEl = this.el.parentNode;
-        console.log('[fade-in] targetEl:', this._targetEl);
+        // ── 이미지 타겟 이벤트 수신 ────────────────────────────────
+        // 핵심: xrextras는 부모(xrextras-named-image-target)가 아닌
+        //       각 자식 <a-entity>에 직접 이벤트를 dispatch한다.
+        //       xrextras-play-video 컴포넌트와 동일한 패턴.
+        this.el.addEventListener('xrimagefound', () => {
+          this.startFade();
+        });
 
-        this._onFound = (e) => {
-          if (e.target === this._targetEl) {
-            console.log('[fade-in] xrimagefound 수신 → startFade');
-            this.startFade();
-          }
-        };
-
-        this._onLost = (e) => {
-          if (e.target === this._targetEl) {
-            console.log('[fade-in] xrimagelost 수신 → resetOpacity');
-            this.resetOpacity();
-          }
-        };
-
-        document.addEventListener('xrimagefound', this._onFound, true);
-        document.addEventListener('xrimagelost', this._onLost, true);
-      },
-
-      // 컴포넌트 제거 시 리스너 정리 (메모리 누수 방지)
-      remove: function () {
-        document.removeEventListener('xrimagefound', this._onFound, true);
-        document.removeEventListener('xrimagelost', this._onLost, true);
+        this.el.addEventListener('xrimagelost', () => {
+          this.resetOpacity();
+        });
       },
 
       initMeshes: function () {
         const mesh = this.el.getObject3D('mesh');
-        if (!mesh) {
-          console.warn('[fade-in] initMeshes: mesh 없음');
-          return;
-        }
+        if (!mesh) return;
 
         mesh.traverse(node => {
           if (node.isMesh) {
@@ -101,7 +78,6 @@
         });
 
         this.meshesReady = true;
-        console.log('[fade-in] meshesReady = true');
       },
 
       startFade: function () {
@@ -113,7 +89,6 @@
         this.resetOpacity();
         this.fading = true;
         this.startTime = performance.now();
-        console.log('[fade-in] fade 시작');
       },
 
       resetOpacity: function () {
@@ -144,7 +119,6 @@
           mesh?.traverse(node => {
             if (node.isMesh) node.material.depthWrite = true;
           });
-          console.log('[fade-in] fade 완료');
         }
       }
     });
