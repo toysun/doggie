@@ -30,100 +30,7 @@
      window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
   </script>
 
-  <!--script>
-    AFRAME.registerComponent('fade-in', {
-      schema: {
-        duration: { type: 'number', default: 1500 }
-      },
-
-      init: function () {
-        this.fading = false;
-        this.startTime = null;
-        this.meshesReady = false;
-
-        // ── 모델 로드 처리 ─────────────────────────────────────────
-        this.el.addEventListener('model-loaded', () => {
-          this.initMeshes();
-        });
-
-        // 캐시로 인해 이미 로드된 경우
-        if (this.el.getObject3D('mesh')) {
-          this.initMeshes();
-        }
-
-        // ── 이미지 타겟 이벤트 수신 ────────────────────────────────
-        // 핵심: xrextras는 부모(xrextras-named-image-target)가 아닌
-        //       각 자식 <a-entity>에 직접 이벤트를 dispatch한다.
-        //       xrextras-play-video 컴포넌트와 동일한 패턴.
-        this.el.addEventListener('xrimagefound', () => {
-          this.startFade();
-        });
-
-        this.el.addEventListener('xrimagelost', () => {
-          this.resetOpacity();
-        });
-      },
-
-      initMeshes: function () {
-        const mesh = this.el.getObject3D('mesh');
-        if (!mesh) return;
-
-        mesh.traverse(node => {
-          if (node.isMesh) {
-            node.material = node.material.clone();
-            node.material.transparent = true;
-            node.material.opacity = 0;
-            node.material.depthWrite = false;
-          }
-        });
-
-        this.meshesReady = true;
-      },
-
-      startFade: function () {
-        if (!this.meshesReady) {
-          setTimeout(() => this.startFade(), 100);
-          return;
-        }
-
-        this.resetOpacity();
-        this.fading = true;
-        this.startTime = performance.now();
-      },
-
-      resetOpacity: function () {
-        this.fading = false;
-        const mesh = this.el.getObject3D('mesh');
-        mesh?.traverse(node => {
-          if (node.isMesh) {
-            node.material.opacity = 0;
-            node.material.depthWrite = false;
-          }
-        });
-      },
-
-      tick: function () {
-        if (!this.fading) return;
-
-        const elapsed = performance.now() - this.startTime;
-        const progress = Math.min(elapsed / this.data.duration, 1);
-        const opacity = 1 - (1 - progress) * (1 - progress); // easeOutQuad
-
-        const mesh = this.el.getObject3D('mesh');
-        mesh?.traverse(node => {
-          if (node.isMesh) node.material.opacity = opacity;
-        });
-
-        if (progress >= 1) {
-          this.fading = false;
-          mesh?.traverse(node => {
-            if (node.isMesh) node.material.depthWrite = true;
-          });
-        }
-      }
-    });
-  </script-->
-<script>
+<!--script>
 AFRAME.registerComponent('target-fade-in', {
   schema: {
     duration: {default: 1500} // duration in milliseconds
@@ -161,7 +68,27 @@ AFRAME.registerComponent('target-fade-in', {
   }
 })
 
+</script-->
+<script>
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  if (event.detail.name === 'ls-target') {
+    const entity = document.querySelector('#model');
+    entity.setAttribute('visible', true);
+
+    // 투명도 애니메이션 처리
+    let opacity = 0;
+    const interval = setInterval(() => {
+      opacity += 0.05;
+      entity.setAttribute('material', 'opacity', opacity);
+
+      if (opacity >= 1) {
+        clearInterval(interval);
+      }
+    }, 50);
+  }
+});
 </script>
+
 
 </head>
 
@@ -186,26 +113,6 @@ AFRAME.registerComponent('target-fade-in', {
       loop="true"
       src="./assets/Media/wave-square-ns.mp4">
     </video>
-    <video
-      id="wine-label-video1"
-       muted
-        autoplay
-        playsinline
-        webkit-playsinline
-      crossorigin="anonymous"
-      loop="true"
-      src="./assets/Media/oregage-3d_ns.mp4">
-    </video>
-    <video
-      id="wine-label-video2"
-       muted
-        autoplay
-        playsinline
-        webkit-playsinline
-      crossorigin="anonymous"
-      loop="true"
-      src="./assets/Media/costume_ad.mp4">
-    </video>
   </a-assets>
 
   <a-camera
@@ -222,24 +129,16 @@ AFRAME.registerComponent('target-fade-in', {
         xrextras-play-video="video: #wine-label-video; canstop: true"
         geometry="primitive: plane; height: 1; width: 1;"
       ></a-entity>
-    <!--a-entity 
-        id="model" 
-        gltf-model="#bean-glb" 
-        scale="0.05 0.05 0.05" 
-        position="0 0 0" 
-        rotation="90 0 0"  
-        shadow="receive: false" 
-        animation-mixer
-        fade-in="duration: 1800">
-    </a-entity-->
     <a-entity 
         id="model" 
         gltf-model="#bean-glb" 
         scale="0.05 0.05 0.05" 
-        position="0 0 0" 
-        rotation="90 0 0"  
+        position="0 0 1.5" 
+        rotation="0 0 0"  
         shadow="receive: false" 
-        >
+        target-fade-in
+        visible="false"
+    >
     </a-entity>
 
   </xrextras-named-image-target>
