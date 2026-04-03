@@ -37,41 +37,55 @@
       },
 
       init: function () {
-        this.meshReady = false;
-        this.pendingFade = false; // xrimagefound가 mesh 로드보다 먼저 온 경우 기억
+        this.meshReady   = false;
+        this.pendingFade = false;
 
-        // ── GLB 로드 완료 처리 ────────────────────────────────────
         this.el.addEventListener('model-loaded', () => {
           this.initMesh();
-          // xrimagefound가 이미 왔었다면 지금 바로 fade 시작
           if (this.pendingFade) {
             this.pendingFade = false;
             this.fadeIn();
           }
         });
 
-        // ── 이미지 타겟 이벤트 ────────────────────────────────────
         this.el.parentElement.addEventListener('xrimagefound', () => {
           if (this.meshReady) {
-            this.fadeIn();           // mesh 준비됨 → 즉시 시작
+            this.fadeIn();
           } else {
-            this.pendingFade = true; // mesh 미준비 → 로드 완료 후 시작
+            this.pendingFade = true;
           }
         });
 
         this.el.parentElement.addEventListener('xrimagelost', () => {
           this.pendingFade = false;
-          this.resetMesh();
+          this.setOpacity(0);
         });
       },
 
-      // GLB 내부 mesh 머티리얼을 opacity 0으로 초기화
+      // node.material은 단일 객체일 수도, 배열일 수도 있음
+      // → 반드시 배열로 통일해서 처리
+      getMaterials: function (node) {
+        if (!node.material) return [];
+        return Array.isArray(node.material) ? node.material : [node.material];
+      },
+
       initMesh: function () {
         const mesh = this.el.getObject3D('mesh');
         if (!mesh) return;
 
         mesh.traverse(node => {
-          if (node.isMesh) {
+          if (!node.isMesh) return;
+
+          // 배열인 경우 각 머티리얼을 clone해서 교체
+          if (Array.isArray(node.material)) {
+            node.material = node.material.map(mat => {
+              const m = mat.clone();
+              m.transparent = true;
+              m.opacity = 0;
+              m.depthWrite = false;
+              return m;
+            });
+          } else {
             node.material = node.material.clone();
             node.material.transparent = true;
             node.material.opacity = 0;
@@ -82,16 +96,16 @@
         this.meshReady = true;
       },
 
-      // 이미지 사라질 때 opacity 리셋
-      resetMesh: function () {
+      setOpacity: function (opacity) {
         const mesh = this.el.getObject3D('mesh');
         if (!mesh) return;
 
         mesh.traverse(node => {
-          if (node.isMesh) {
-            node.material.opacity = 0;
-            node.material.depthWrite = false;
-          }
+          if (!node.isMesh) return;
+          this.getMaterials(node).forEach(mat => {
+            mat.opacity = opacity;
+            mat.depthWrite = (opacity >= 1);
+          });
         });
       },
 
@@ -105,18 +119,24 @@
         const animate = (timestamp) => {
           if (!startTime) startTime = timestamp;
           const progress = Math.min((timestamp - startTime) / duration, 1);
-          const opacity = 1 - (1 - progress) * (1 - progress); // easeOutQuad
+          const opacity  = 1 - (1 - progress) * (1 - progress); // easeOutQuad
 
           mesh.traverse(node => {
-            if (node.isMesh) node.material.opacity = opacity;
+            if (!node.isMesh) return;
+            this.getMaterials(node).forEach(mat => {
+              mat.opacity = opacity;
+            });
           });
 
           if (progress < 1) {
             requestAnimationFrame(animate);
           } else {
-            // 페이드 완료 후 depthWrite 복원
+            // 페이드 완료 → depthWrite 복원
             mesh.traverse(node => {
-              if (node.isMesh) node.material.depthWrite = true;
+              if (!node.isMesh) return;
+              this.getMaterials(node).forEach(mat => {
+                mat.depthWrite = true;
+              });
             });
           }
         };
@@ -138,13 +158,18 @@
   
   <a-assets>
     <a-asset-item id="bean-glb" src="./assets/Models/lighthouse-rock-seagull.glb"></a-asset-item>
-    <video
-      id="wine-label-video"
+    <video id="wine-label-video"
       muted autoplay playsinline webkit-playsinline
-      crossorigin="anonymous"
-      loop="true"
-      src="./assets/Media/wave-square-ns.mp4">
-    </video>
+      crossorigin="anonymous" loop="true"
+      src="./assets/Media/wave-square-ns.mp4"></video>
+    <video id="wine-label-video1"
+      muted autoplay playsinline webkit-playsinline
+      crossorigin="anonymous" loop="true"
+      src="./assets/Media/oregage-3d_ns.mp4"></video>
+    <video id="wine-label-video2"
+      muted autoplay playsinline webkit-playsinline
+      crossorigin="anonymous" loop="true"
+      src="./assets/Media/costume_ad.mp4"></video>
   </a-assets>
 
   <a-camera
@@ -161,12 +186,11 @@
         xrextras-play-video="video: #wine-label-video; canstop: true"
         geometry="primitive: plane; height: 1; width: 1;">
     </a-entity>
-
-    <!-- animation 컴포넌트와 material 속성 제거 → target-fade-in이 단독 제어 -->
     <a-entity
         id="model"
         gltf-model="#bean-glb"
         scale="0.05 0.05 0.05"
+        position="0 0 1.5"
         rotation="0 0 0"
         shadow="receive: false"
         animation-mixer
