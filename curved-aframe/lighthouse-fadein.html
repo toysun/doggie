@@ -113,7 +113,7 @@ AFRAME.registerComponent('target-fade-in', {
         id="model" 
         gltf-model="#bean-glb" 
         scale="0.05 0.05 0.05" 
-        position="0 0 1.5" 
+        position="0 0 1" 
         rotation="0 0 0"  
         shadow="receive: false" 
         target-fade-in
@@ -156,16 +156,16 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   if (event.detail.name === 'ls-target') {
     const entity = document.querySelector('#model');
-    entity.setAttribute('visible', true);
     entity.setAttribute('material', 'opacity:0');
 
     entity.setAttribute('animation', {
       property: 'material.opacity',
       from: 0,
       to: 1,
-      dur: 1500,
+      dur: 3000,
       easing: 'easeInOutQuad'
     });
+    entity.setAttribute('visible', true);
   }
 });
 </script>
