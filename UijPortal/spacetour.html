@@ -100,13 +100,13 @@
   
   <a-light type="ambient" intensity="0.4"></a-light>
 
-  <!-- Portal Contents -->
+<!-- Portal Contents -->
   <a-entity id="portal-contents">
       
     <a-entity
       gltf-model="#moon-model"
       rotation="0 90 0"
-      position="8 -35.5 -5"
+      position="8 -0.5 -5"
       scale="1.5 1.5 1.5"
       shadow="cast: false">
     </a-entity>
@@ -125,24 +125,23 @@
       rotation="0 30 0"
       position="-200 150 -250"
       scale="120 80 1"
-      shadow="receive: false">
-     
+      shadow="receive: false">     
     </a-plane>
+    
     <a-plane
       material="src: #palanquin-low-img; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="100 -15 -250"
-      scale="100 100 10"
+      rotation="0 30 0"
+      position="20 -15 -250"
+      scale="60 40 1"
       shadow="receive: false">
      </a-plane>
     
      <a-entity
       gltf-model="#flag-model"
-      rotation="0 -90 0"
+      rotation="0 -45 0"
       reflections="type: static"
-      position="-150 -25 -153"
-       rotation="0 -45 0"
-      scale="5 5 5"
+      position="-34 -15 -123"
+      scale="30 30 30"
       shadow="receive: false"
        animation-mixer>
      </a-entity>
@@ -150,34 +149,35 @@
      <a-entity
       gltf-model="#rocks-model"
       reflections="type: static"
-      rotation="0 0 0"
-      position="0 -20 -150"
-      scale="80 80 80"
+      rotation="0 -30 0"
+      position="5 -15 -90"
+      scale="0.8 0.8 0.8"
       shadow="receive: false"
        animation-mixer>
      </a-entity>
-    
+    <a-entity rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
     <a-entity
       gltf-model="#birds-model"
       position="150 150 -25"
-      scale="30.75 30.75 30.75"
+      scale="50.75 50.75 50.75"
       shadow="receive: false"
       animation-mixer>
      </a-entity>
+      </a-entity>
 
         <a-entity
     id="palanquinVideo"
     auto-play-video="video: #palanquin-video"
     material="shader: chromakey; src: #palanquin-video; color: 0.9 1 0.8; opacity: 1"
-    geometry="primitive: plane; height: 2.5; width: 2.5;"
-    position="0 5.5 -9.1"
+    geometry="primitive: plane; height: 3.5; width: 2.5;"
+    position="0 5.5 -12.1"
     scale="10 10 10">
   </a-entity>
     
      <a-sky src="#skybox-img" rotation="0 -90 0"></a-sky>
 
   <!-- Portal -->
-   <a-entity
+  <a-entity
     id="portalRim"
     gltf-model="#portal-rim-model"
     spin="axis: x; speed: 14000"
