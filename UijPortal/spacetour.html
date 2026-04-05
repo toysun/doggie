@@ -20,6 +20,14 @@
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
 
   <script type="module" src="./app.js" defer></script>
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.147.0/build/three.module.js",
+      "three/addons/": "https://unpkg.com/three@0.147.0/examples/jsm/"
+    }
+  }
+</script>
 <script type="module">
   import * as THREE from 'three';
   import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -161,8 +169,8 @@
     <a-plane
       material="src: #palanquin-low-img; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 30 0"
-      position="-300 -150 -250"
-      scale="240 160 1"
+      position="300 -150 -250"
+      scale="720 640 1"
       shadow="receive: false">
      </a-plane>
     
