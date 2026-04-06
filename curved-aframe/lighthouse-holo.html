@@ -97,97 +97,110 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     const entity = document.querySelector('#model');
     entity.setAttribute('visible', true);
 
-    // GLTF 로딩 완료 후 실행
     const tryFade = () => {
       const mesh = entity.getObject3D('mesh');
       if (!mesh) { requestAnimationFrame(tryFade); return; }
-      startHologramFade(mesh);
+      collectAndFade(mesh);
     };
     tryFade();
   }
 });
 
-function startHologramFade(mesh) {
-  // hologram effect 설정
+function collectAndFade(mesh) {
   const hologramColor = new THREE.Color(0x5588ff);
   const hologramAlpha = 0.5;
 
-  // ① 원본 머티리얼 정보 저장 & 초기 홀로그램 상태로 설정
-  const savedMats = [];
+  // ① 원본 색상을 UUID 기준으로 저장 (최초 1회)
+  const origMap = new Map();
 
   mesh.traverse((node) => {
     if (!node.isMesh) return;
     const mats = Array.isArray(node.material) ? node.material : [node.material];
-
     mats.forEach((mat) => {
-      savedMats.push({
-        mat,
-        origColor:    mat.color    ? mat.color.clone()    : new THREE.Color(1, 1, 1),
-        origEmissive: mat.emissive ? mat.emissive.clone() : new THREE.Color(0, 0, 0),
-      });
-
-      mat.transparent = true;
-      mat.opacity = 0; // 처음엔 완전 투명
-
-      // 홀로그램 색상으로 초기화
-      if (mat.color)    mat.color.set(hologramColor);
-      if (mat.emissive) mat.emissive.set(hologramColor);
+      if (!origMap.has(mat.uuid)) {
+        origMap.set(mat.uuid, {
+          mat,
+          origColor:    mat.color    ? mat.color.clone()    : new THREE.Color(1, 1, 1),
+          origEmissive: mat.emissive ? mat.emissive.clone() : new THREE.Color(0, 0, 0),
+        });
+        mat.transparent = true;
+        mat.opacity = 0;
+        if (mat.color)    mat.color.set(hologramColor);
+        if (mat.emissive) mat.emissive.set(hologramColor);
+      }
     });
   });
 
-  // easeInOutQuad
   function easeInOutQuad(t) {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   }
 
-  // ② 애니메이션: 두 단계로 분리
-  //    Phase 1 (0 ~ 50%) : opacity 0 → hologramAlpha, 색상은 홀로그램 유지
-  //    Phase 2 (50% ~ 100%) : opacity hologramAlpha → 1, 색상 홀로그램 → 원본
-
-  const duration = 2000; // 전체 애니메이션 시간 (ms)
-  const phaseBreak = 0.5; // Phase 전환 지점
-  const start = performance.now();
+  const duration   = 2000;
+  const phaseBreak = 0.5;
+  const start      = performance.now();
 
   function fade(now) {
     const progress = Math.min((now - start) / duration, 1);
-    const eased = easeInOutQuad(progress);
 
-    savedMats.forEach(({ mat, origColor, origEmissive }) => {
-      if (progress <= phaseBreak) {
-        // Phase 1: 홀로그램 색 유지, opacity 0 → hologramAlpha
-        const p1 = easeInOutQuad(progress / phaseBreak);
-        mat.opacity = hologramAlpha * p1;
+    // ② 매 프레임 다시 traverse → 애니메이션으로 교체된 머티리얼도 포착
+    mesh.traverse((node) => {
+      if (!node.isMesh) return;
+      const mats = Array.isArray(node.material) ? node.material : [node.material];
 
-        if (mat.color)    mat.color.set(hologramColor);
-        if (mat.emissive) mat.emissive.set(hologramColor);
-
-      } else {
-        // Phase 2: 색상 홀로그램 → 원본, opacity hologramAlpha → 1
-        const p2 = easeInOutQuad((progress - phaseBreak) / (1 - phaseBreak));
-        mat.opacity = hologramAlpha + (1 - hologramAlpha) * p2;
-
-        if (mat.color) {
-          mat.color.r = hologramColor.r + (origColor.r - hologramColor.r) * p2;
-          mat.color.g = hologramColor.g + (origColor.g - hologramColor.g) * p2;
-          mat.color.b = hologramColor.b + (origColor.b - hologramColor.b) * p2;
+      mats.forEach((mat) => {
+        // 새로 생긴 머티리얼이면 origMap에 등록
+        if (!origMap.has(mat.uuid)) {
+          origMap.set(mat.uuid, {
+            mat,
+            origColor:    mat.color    ? mat.color.clone()    : new THREE.Color(1, 1, 1),
+            origEmissive: mat.emissive ? mat.emissive.clone() : new THREE.Color(0, 0, 0),
+          });
         }
-        if (mat.emissive) {
-          mat.emissive.r = hologramColor.r * (1 - p2) + origEmissive.r * p2;
-          mat.emissive.g = hologramColor.g * (1 - p2) + origEmissive.g * p2;
-          mat.emissive.b = hologramColor.b * (1 - p2) + origEmissive.b * p2;
+
+        const { origColor, origEmissive } = origMap.get(mat.uuid);
+        mat.transparent = true;
+
+        if (progress <= phaseBreak) {
+          // Phase 1: 홀로그램 색 유지, opacity 0 → hologramAlpha
+          const p1 = easeInOutQuad(progress / phaseBreak);
+          mat.opacity = hologramAlpha * p1;
+          if (mat.color)    mat.color.set(hologramColor);
+          if (mat.emissive) mat.emissive.set(hologramColor);
+
+        } else {
+          // Phase 2: 색상 홀로그램 → 원본, opacity hologramAlpha → 1
+          const p2 = easeInOutQuad((progress - phaseBreak) / (1 - phaseBreak));
+          mat.opacity = hologramAlpha + (1 - hologramAlpha) * p2;
+
+          if (mat.color) {
+            mat.color.r = hologramColor.r + (origColor.r - hologramColor.r) * p2;
+            mat.color.g = hologramColor.g + (origColor.g - hologramColor.g) * p2;
+            mat.color.b = hologramColor.b + (origColor.b - hologramColor.b) * p2;
+          }
+          if (mat.emissive) {
+            mat.emissive.r = hologramColor.r * (1 - p2) + origEmissive.r * p2;
+            mat.emissive.g = hologramColor.g * (1 - p2) + origEmissive.g * p2;
+            mat.emissive.b = hologramColor.b * (1 - p2) + origEmissive.b * p2;
+          }
         }
-      }
+      });
     });
 
     if (progress < 1) {
       requestAnimationFrame(fade);
     } else {
-      // 마지막: 완전히 원본 상태로 복원
-      savedMats.forEach(({ mat, origColor, origEmissive }) => {
-        mat.opacity = 1;
-        mat.transparent = false;
-        if (mat.color)    mat.color.copy(origColor);
-        if (mat.emissive) mat.emissive.copy(origEmissive);
+      // ③ 종료: 모든 머티리얼 원본 상태로 완전 복원
+      mesh.traverse((node) => {
+        if (!node.isMesh) return;
+        const mats = Array.isArray(node.material) ? node.material : [node.material];
+        mats.forEach((mat) => {
+          const saved = origMap.get(mat.uuid);
+          if (!saved) return;
+          mat.opacity     = 1;
+          mat.transparent = false;
+          if (mat.color)    mat.color.copy(saved.origColor);
+          if (mat.emissive) mat.emissive.copy(saved.origEmissive);
+        });
       });
     }
   }
@@ -195,6 +208,5 @@ function startHologramFade(mesh) {
   requestAnimationFrame(fade);
 }
 </script>
-
 </body>
 </html>
