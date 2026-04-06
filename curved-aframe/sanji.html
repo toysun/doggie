@@ -81,7 +81,7 @@ AFRAME.registerComponent('target-fade-in', {
   xrweb="disableWorldTracking: true">
   
   <a-assets>
-    <a-asset-item id="bean-glb" src="./assets/Models/lighthouse-rock-seagull.glb"></a-asset-item>
+    <a-asset-item id="bean-glb" src="./assets/Models/sanji-c.glb"></a-asset-item>
 
     <video
       id="wine-label-video"
@@ -110,7 +110,7 @@ AFRAME.registerComponent('target-fade-in', {
     <a-entity 
         id="model" 
         gltf-model="#bean-glb" 
-        scale="0.05 0.05 0.05" 
+        scale="1 1 1" 
         position="0 0 0" 
         rotation="90 0 0"  
         shadow="receive: false" 
@@ -152,7 +152,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
 </script-->
 <script>
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === 'ls-target') {
+  if (event.detail.name === 'sanji-target') {
     const entity = document.querySelector('#model');
     entity.setAttribute('visible', true);
 
