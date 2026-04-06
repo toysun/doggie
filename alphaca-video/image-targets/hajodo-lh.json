@@ -1,15 +1,15 @@
 {
-  "imagePath": "image-targets/bigwave-ar.jpg",
-  "name": "hajodo-lh",
+  "imagePath": "image-targets/stamp-sanji.png",
+  "name": "sanji-target",
   "type": "PLANAR",
   "properties": {
     "top": 0,
     "left": 0,
-    "width": 1149,
-    "height": 1485,
+    "width": 2062,
+    "height": 2048,
     "isRotated": true,
-    "originalWidth": 1149,
-    "originalHeight": 1485
+    "originalWidth": 2062,
+    "originalHeight": 2048
   },
   "userMetadataIsJson": true,
   "loadAutomatically": true,
