@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <title>curved-aframe</title>
+
+  <script src="./../xr_st/8frame-1.5.0.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <!--script src="./../xr_st/landing-page.js"></script-->  
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+
+  <script>
+     const onxrloaded = async () => {
+       const res = await fetch('./ls-target.json')
+       const json = await res.json()
+       const res1 = await fetch('./costume.json')
+       const json1 = await res1.json()
+       const res2 = await fetch('./oregage.json')
+       const json2 = await res2.json()
+       const res3 = await fetch('./costume.json')
+       const json3 = await res3.json()
+
+       XR8.XrController.configure({
+         imageTargetData: [json, json1, json2, json3],
+       })
+     }
+     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
+  </script>
+
+<!--script>
+AFRAME.registerComponent('target-fade-in', {
+  schema: {
+    duration: {default: 1500} // duration in milliseconds
+  },
+  init: function() {
+    this.el.setAttribute('visible', false) // Start hidden
+    
+    // Listen for the image target found event
+    this.el.parentElement.addEventListener('xrimagefound', () => {
+      this.el.setAttribute('visible', true)
+      this.fadeIn()
+    })
+  },
+  fadeIn: function() {
+    const mesh = this.el.getObject3D('mesh')
+    if (!mesh) return
+
+    let startTime = null
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp
+      const progress = Math.min((timestamp - startTime) / this.data.duration, 1)
+      
+      mesh.traverse(node => {
+        if (node.isMesh) {
+          node.material.transparent = true
+          node.material.opacity = progress
+        }
+      })
+
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+    requestAnimationFrame(animate)
+  }
+})
+
+</script-->
+
+</head>
+
+<body>
+<a-scene
+  landing-page
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement: true; physicallyBasedRendering: true;"
+  xrweb="disableWorldTracking: true">
+  
+  <a-assets>
+    <a-asset-item id="bean-glb" src="./assets/Models/sanji-c.glb"></a-asset-item>
+
+    <video
+      id="wine-label-video"
+      preload="auto"
+      muted
+      autoplay
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/wave-square-ns.mp4">
+    </video>
+  </a-assets>
+
+  <a-camera
+    position="0 1 1"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
+
+  <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+  <a-light type="ambient" intensity="0.7"></a-light>
+  
+  <xrextras-named-image-target name="sanji-target">
+    <xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade>
+    <a-entity 
+        id="model" 
+        gltf-model="#bean-glb" 
+        scale="0.05 0.05 0.05" 
+        position="0 0 0" 
+        rotation="90 0 0"  
+        shadow="receive: false" 
+        animation-mixer
+        visible="false"
+    >
+    </a-entity>
+
+  </xrextras-named-image-target>
+
+  <a-plane
+    id="ground"
+    rotation="-90 0 0"
+    width="1000"
+    height="1000"
+    material="shader: shadow"
+    shadow>
+  </a-plane>
+</a-scene>
+
+<!--script>
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  if (event.detail.name === 'ls-target') {
+    const entity = document.querySelector('#model');
+    entity.setAttribute('visible', true);
+
+    // 투명도 애니메이션 처리
+    let opacity = 0;
+    const interval = setInterval(() => {
+      opacity += 0.05;
+      entity.setAttribute('material', 'opacity', opacity);
+
+      if (opacity >= 1) {
+        clearInterval(interval);
+      }
+    }, 50);
+  }
+});
+</script-->
+<script>
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  if (event.detail.name === 'ls-target') {
+    const entity = document.querySelector('#model');
+    entity.setAttribute('visible', true);
+
+    const mesh = entity.getObject3D('mesh');
+    if (!mesh) return;
+
+    // 모든 머티리얼을 투명하게 초기화
+    mesh.traverse((node) => {
+      if (node.material) {
+        if (Array.isArray(node.material)) {
+          node.material.forEach((mat) => {
+            mat.transparent = true;
+            mat.opacity = 0;
+          });
+        } else {
+          node.material.transparent = true;
+          node.material.opacity = 0;
+        }
+      }
+    });
+
+    // easeInOutQuad 함수 정의
+    function easeInOutQuad(t) {
+      return t < 0.5
+        ? 2 * t * t
+        : -1 + (4 - 2 * t) * t;
+    }
+
+    const duration = 1500; // 애니메이션 시간 (ms)
+    const start = performance.now();
+
+    function fade(now) {
+      const elapsed = now - start;
+      let progress = Math.min(elapsed / duration, 1); // 0 ~ 1
+      let eased = easeInOutQuad(progress);
+
+      mesh.traverse((node) => {
+        if (node.material) {
+          if (Array.isArray(node.material)) {
+            node.material.forEach((mat) => {
+              mat.opacity = eased;
+            });
+          } else {
+            node.material.opacity = eased;
+          }
+        }
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(fade);
+      }
+    }
+
+    requestAnimationFrame(fade);
+  }
+});
+</script>
+
+
+</body>
+</html>
