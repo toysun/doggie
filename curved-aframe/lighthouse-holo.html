@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <title>curved-aframe</title>
+
+  <script src="./../xr_st/8frame-1.5.0.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <!--script src="./../xr_st/landing-page.js"></script-->  
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+
+  <script>
+     const onxrloaded = async () => {
+       const res = await fetch('./ls-target.json')
+       const json = await res.json()
+       const res1 = await fetch('./costume.json')
+       const json1 = await res1.json()
+       const res2 = await fetch('./oregage.json')
+       const json2 = await res2.json()
+       const res3 = await fetch('./costume.json')
+       const json3 = await res3.json()
+
+       XR8.XrController.configure({
+         imageTargetData: [json, json1, json2, json3],
+       })
+     }
+     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
+  </script>
+
+</head>
+
+<body>
+<a-scene
+  landing-page
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement: true; physicallyBasedRendering: true;"
+  xrweb="disableWorldTracking: true">
+  
+  <a-assets>
+    <a-asset-item id="bean-glb" src="./assets/Models/lighthouse-rock-seagull.glb"></a-asset-item>
+
+    <video
+      id="wine-label-video"
+      preload="auto"
+      muted
+      autoplay
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/wave-square-ns.mp4">
+    </video>
+  </a-assets>
+
+  <a-camera
+    position="0 1 1"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
+
+  <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+  <a-light type="ambient" intensity="0.7"></a-light>
+  
+  <xrextras-named-image-target name="ls-target">
+    <xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade>
+    <a-entity 
+        id="model" 
+        gltf-model="#bean-glb" 
+        scale="0.05 0.05 0.05" 
+        position="0 0 1" 
+        rotation="0 0 0"  
+        shadow="receive: false" 
+        animation-mixer
+        visible="false"
+    >
+    </a-entity>
+
+  </xrextras-named-image-target>
+
+  <a-plane
+    id="ground"
+    rotation="-90 0 0"
+    width="1000"
+    height="1000"
+    material="shader: shadow"
+    shadow>
+  </a-plane>
+</a-scene>
+
+<script>
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  if (event.detail.name === 'ls-target') {
+    const entity = document.querySelector('#model');
+    entity.setAttribute('visible', true);
+
+    // GLTF 로딩 완료 후 실행
+    const tryFade = () => {
+      const mesh = entity.getObject3D('mesh');
+      if (!mesh) { requestAnimationFrame(tryFade); return; }
+      startHologramFade(mesh);
+    };
+    tryFade();
+  }
+});
+
+function startHologramFade(mesh) {
+  // hologram effect 설정
+  const hologramColor = new THREE.Color(0x5588ff);
+  const hologramAlpha = 0.5;
+
+  // ① 원본 머티리얼 정보 저장 & 초기 홀로그램 상태로 설정
+  const savedMats = [];
+
+  mesh.traverse((node) => {
+    if (!node.isMesh) return;
+    const mats = Array.isArray(node.material) ? node.material : [node.material];
+
+    mats.forEach((mat) => {
+      savedMats.push({
+        mat,
+        origColor:    mat.color    ? mat.color.clone()    : new THREE.Color(1, 1, 1),
+        origEmissive: mat.emissive ? mat.emissive.clone() : new THREE.Color(0, 0, 0),
+      });
+
+      mat.transparent = true;
+      mat.opacity = 0; // 처음엔 완전 투명
+
+      // 홀로그램 색상으로 초기화
+      if (mat.color)    mat.color.set(hologramColor);
+      if (mat.emissive) mat.emissive.set(hologramColor);
+    });
+  });
+
+  // easeInOutQuad
+  function easeInOutQuad(t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  }
+
+  // ② 애니메이션: 두 단계로 분리
+  //    Phase 1 (0 ~ 50%) : opacity 0 → hologramAlpha, 색상은 홀로그램 유지
+  //    Phase 2 (50% ~ 100%) : opacity hologramAlpha → 1, 색상 홀로그램 → 원본
+
+  const duration = 2000; // 전체 애니메이션 시간 (ms)
+  const phaseBreak = 0.5; // Phase 전환 지점
+  const start = performance.now();
+
+  function fade(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = easeInOutQuad(progress);
+
+    savedMats.forEach(({ mat, origColor, origEmissive }) => {
+      if (progress <= phaseBreak) {
+        // Phase 1: 홀로그램 색 유지, opacity 0 → hologramAlpha
+        const p1 = easeInOutQuad(progress / phaseBreak);
+        mat.opacity = hologramAlpha * p1;
+
+        if (mat.color)    mat.color.set(hologramColor);
+        if (mat.emissive) mat.emissive.set(hologramColor);
+
+      } else {
+        // Phase 2: 색상 홀로그램 → 원본, opacity hologramAlpha → 1
+        const p2 = easeInOutQuad((progress - phaseBreak) / (1 - phaseBreak));
+        mat.opacity = hologramAlpha + (1 - hologramAlpha) * p2;
+
+        if (mat.color) {
+          mat.color.r = hologramColor.r + (origColor.r - hologramColor.r) * p2;
+          mat.color.g = hologramColor.g + (origColor.g - hologramColor.g) * p2;
+          mat.color.b = hologramColor.b + (origColor.b - hologramColor.b) * p2;
+        }
+        if (mat.emissive) {
+          mat.emissive.r = hologramColor.r * (1 - p2) + origEmissive.r * p2;
+          mat.emissive.g = hologramColor.g * (1 - p2) + origEmissive.g * p2;
+          mat.emissive.b = hologramColor.b * (1 - p2) + origEmissive.b * p2;
+        }
+      }
+    });
+
+    if (progress < 1) {
+      requestAnimationFrame(fade);
+    } else {
+      // 마지막: 완전히 원본 상태로 복원
+      savedMats.forEach(({ mat, origColor, origEmissive }) => {
+        mat.opacity = 1;
+        mat.transparent = false;
+        if (mat.color)    mat.color.copy(origColor);
+        if (mat.emissive) mat.emissive.copy(origEmissive);
+      });
+    }
+  }
+
+  requestAnimationFrame(fade);
+}
+</script>
+
+</body>
+</html>
