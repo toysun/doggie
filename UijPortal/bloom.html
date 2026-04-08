@@ -116,7 +116,7 @@
 
   
   <!-- Lights -->
-  <a-entity
+  <!--a-entity
     light="
       type: directional;
       castShadow: true;
@@ -129,16 +129,23 @@
       target: #portalRim"
     xrextras-attach="target: portalRim; offset: 18 7 14"
     shadow>
+  </a-entity-->
+    <a-entity
+    light="
+      type: directional; 
+      castShadow: true; 
+      color: white; 
+      intensity: 0.5"
+    position="5 10 7">
   </a-entity>
-  
-  <a-light type="ambient" intensity="0.4"></a-light>
+  <a-light type="ambient" intensity="0.5"></a-light>
 
 <!-- Portal Contents -->
   <a-entity id="portal-contents">
     <a-sphere
     xrextras-one-finger-rotate
     position="0 0.5 -1.0"
-    radius="10"
+    radius="1"
     material="
       color: #AD50FF; shader: flat; 
       src:./assets/textures/cube-texture-w.png"
