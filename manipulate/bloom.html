@@ -14,6 +14,8 @@
     <!-- Landing Pages - see https://www.8thwall.com/docs/web/#landing-pages -->
     <script src='./../xr_st/landing-page/landing-page.js'></script>
 
+    <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+
     <!-- 8thWall Web - Replace the app key here with your own app key -->
      <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
 
@@ -48,6 +50,8 @@
   window.THREE.ShaderPass = ShaderPass;
   window.dispatchEvent(new CustomEvent('threeloaded'));
 </script>
+
+      <script type="module" src="./app.js" defer></script>
   </head>
 
   <body>
