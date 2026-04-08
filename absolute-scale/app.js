@@ -1,3 +1,5 @@
+import {postprocessingComponent} from './postprocessing.js'
+AFRAME.registerComponent('postprocessing', postprocessingComponent)
 import {changeColorComponent, absPinchScaleComponent, annotationComponent, proximityComponent, gltfMorphComponent, ignoreRaycast} from './js/components.js'
 AFRAME.registerComponent('change-color', changeColorComponent)
 AFRAME.registerComponent('annotation', annotationComponent)
