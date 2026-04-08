@@ -176,16 +176,17 @@
       scale="480 480 1"
       shadow="receive: false">
      </a-plane-->
-    
+     <a-entity rotation="0 0 0" animation="property: rotation; to: 0 -360 0; loop: true; dur: 10000">
      <a-entity
       gltf-model="#flag-model"
-      rotation="0 180 0"
+      rotation="0 90 0"
       reflections="type: static"
-      position="-54 -15 -123"
-      scale="10 10 10"
+      position="-84 -15 -123"
+      scale="30 30 30"
       shadow="receive: false"
        animation-mixer>
      </a-entity>
+          </a-entity>
     
      <a-entity
       gltf-model="#rocks-model"
@@ -210,7 +211,7 @@
     <a-entity rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
     <a-entity
       gltf-model="#birds-model"
-      position="150 150 -25"
+      position="150 100 -25"
       rotation="0 180 0"
       scale="50 50 50"
       shadow="receive: false"
