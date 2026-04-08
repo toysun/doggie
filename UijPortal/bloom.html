@@ -135,10 +135,10 @@
       type: directional; 
       castShadow: true; 
       color: yellow; 
-      intensity: 0.01"
+      intensity: 0.3"
     position="5 10 7">
   </a-entity>
-  <a-light type="ambient" intensity="0.01"></a-light>
+  <a-light type="ambient" intensity="0.3"></a-light>
 
 <!-- Portal Contents -->
   <a-entity id="portal-contents">
@@ -151,16 +151,7 @@
       scale="1.5 1.5 1.5"
       shadow="cast: false">
     </a-entity-->
-          <a-sphere
-    xrextras-one-finger-rotate
-    position="0 0.5 -1.0"
-    radius="0.1"
-    material="
-      color: #AD50FF; shader: flat; 
-      src:./assets/textures/cube-texture-w.png"
-    shadow
-    data-bloom="bloom">
-  </a-sphere>
+
     <a-entity
       gltf-model="#platform-model"
       rotation="0 -90 0"
@@ -188,10 +179,10 @@
     
      <a-entity
       gltf-model="#flag-model"
-      rotation="0 0 0"
+      rotation="0 180 0"
       reflections="type: static"
       position="-54 -15 -123"
-      scale="50 50 50"
+      scale="10 10 10"
       shadow="receive: false"
        animation-mixer>
      </a-entity>
@@ -201,9 +192,19 @@
       reflections="type: static"
       rotation="0 0 0"
       position="5 -15 -90"
-      scale="50 50 50"
+      scale="30 30 30"
       shadow="receive: false"
        animation-mixer>
+                 <a-sphere
+    xrextras-one-finger-rotate
+    position="0 0.5 -1.0"
+    radius="0.1"
+    material="
+      color: #AD50FF; shader: flat; 
+      src:./assets/textures/cube-texture-w.png"
+    shadow
+    data-bloom="bloom">
+  </a-sphere>
      </a-entity>
     
     <a-entity rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
@@ -211,7 +212,7 @@
       gltf-model="#birds-model"
       position="150 150 -25"
       rotation="0 180 0"
-      scale="10 10 10"
+      scale="50 50 50"
       shadow="receive: false"
       animation-mixer>
      </a-entity>
