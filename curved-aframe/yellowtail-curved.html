@@ -41,7 +41,11 @@
   
   <a-assets>
     <a-asset-item id="bean-glb" src="./assets/Models/lighted_spheres_2.glb"></a-asset-item>
+    <a-asset-item id="bean-glb1" src="./assets/Models/Sunshine_Pure.glb"></a-asset-item>
+    <a-asset-item id="bean-glb2" src="./assets/Models/Crossing_Sign.glb"></a-asset-item>
     <a-asset-item id="blades-glb" src="./assets/Models/ring-cross-hollow.glb"></a-asset-item>
+    <a-asset-item id="blades-glb1" src="./assets/Models/steadfast_Ballentine.glb"></a-asset-item>
+    <a-asset-item id="blades-glb2" src="./assets/Models/bond.glb"></a-asset-item>
     <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item>
     <img id="most-loved" src="./assets/Media/most-loved-barnd.jpg">
     <img id="kangaroo-alert" src="./assets/Media/kangaroo-alert.jpeg">
@@ -85,6 +89,8 @@
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container-->
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <a-entity id="model" gltf-model="#bean-glb" position="0 0.5 0" rotation="45 45 45" scale="0.3 0.3 0.3" xrextras-spin></a-entity>
+    <a-entity id="model" gltf-model="#bean-glb1" position="1.2 -0.5 0" rotation="0 0 0" scale="0.1 0.1 0.1"></a-entity>
+    <a-entity id="model" gltf-model="#bean-glb2" position="-0.9 -0.5 0" rotation="0 0 0" scale="0.1 0.1 0.1"></a-entity>
     <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 3000"></a-entity-->
     <!--a-plane
       material="src: #most-loved; transparent: true; roughness: 0.8; metalness: 0"
@@ -113,8 +119,10 @@
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
     <a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 3000"></a-entity>
+    <a-entity gltf-model="#blades-glb1" position="1.2 -0.5 0" rotation="0 0 0" scale="0.1 0.1 0.1"></a-entity>
+    <a-entity gltf-model="#blades-glb2" position="-0.9 -0.5 0" rotation="0 0 0" scale="0.1 0.1 0.1"></a-entity>
     <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
-    <a-plane
+    <!--a-plane
       material="src: #ballentine-17; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
       position="1.2 -0.5 0"
@@ -131,7 +139,7 @@
       width="1"
       animation="property: position; from: -15.5 -10.5 0; to: -0.9 -0.5 0; dir: linear; delay: 6000; dur: 2000; loop: false"
       animation__1="property: rotation; from: -0.9 -0.5 7.5; to: -0.9 -0.5 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
-    </a-plane>
+    </a-plane-->
   </xrextras-named-image-target>
   
 </a-scene>
