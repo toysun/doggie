@@ -73,6 +73,9 @@ AFRAME.registerComponent('target-fade-in', {
 </head>
 
 <body>
+  <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
+  <img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
+</div>
 <a-scene
   landing-page
   xrextras-loading
@@ -152,28 +155,19 @@ AFRAME.registerComponent('target-fade-in', {
   </a-plane>
 </a-scene>
 
-<!--script>
-document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === 'ls-target') {
-    const entity = document.querySelector('#model');
-    entity.setAttribute('visible', true);
-
-    // 투명도 애니메이션 처리
-    let opacity = 0;
-    const interval = setInterval(() => {
-      opacity += 0.05;
-      entity.setAttribute('material', 'opacity', opacity);
-
-      if (opacity >= 1) {
-        clearInterval(interval);
-      }
-    }, 50);
-  }
-});
-</script-->
 <script>
+const overlay = document.getElementById('scanning-overlay');  //수정
+  
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   if (event.detail.name === 'ls-target') {
+    //수정
+  if (overlay) {
+      overlay.style.animation = 'fadeOut 0.5s forwards';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 500);
+    }
+
     const entity = document.querySelector('#model');
     entity.setAttribute('visible', true);
 
@@ -228,6 +222,18 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     }
 
     requestAnimationFrame(fade);
+  }
+});
+
+  //수정
+// 이미지를 잃어버렸을 때 다시 표시
+document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+  if (event.detail.name === 'ls-target') {
+    if (overlay) {
+      overlay.style.display = 'flex';
+      overlay.style.animation = 'none';
+      overlay.style.opacity = '1';
+    }
   }
 });
 </script>
