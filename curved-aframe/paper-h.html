@@ -33,46 +33,9 @@
 </head>
 
 <body>
-<div id="scanning-overlay" style="
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  color: white;
-  font-family: Arial, sans-serif;
-  pointer-events: none;
-">
-  <div style="text-align: center; padding: 20px;">
-    <!-- 손 흔드는 SVG 아이콘 -->
-    <svg width="100" height="100" viewBox="0 0 100 100" style="animation: shake 1.5s infinite;">
-      <rect x="30" y="20" width="40" height="60" rx="5" fill="#fff" stroke="#333" stroke-width="2"/>
-      <circle cx="50" cy="50" r="8" fill="#333"/>
-      <path d="M 20 50 Q 10 50 10 60 L 10 70" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
-      <path d="M 80 50 Q 90 50 90 60 L 90 70" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>
-    </svg>
-    <h2 style="margin: 20px 0; font-size: 24px;">이미지를 찾는 중...</h2>
-    <p style="font-size: 16px; opacity: 0.8;">카메라를 천천히 움직여주세요</p>
-  </div>
+<div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
+  <img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
 </div>
-
-<style>
-@keyframes shake {
-  0%, 100% { transform: rotate(-10deg); }
-  50% { transform: rotate(10deg); }
-}
-
-@keyframes fadeOut {
-  from { opacity: 1; }
-  to { opacity: 0; }
-}
-</style>
 
 <a-scene
   landing-page
