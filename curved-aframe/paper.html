@@ -30,45 +30,6 @@
      window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
   </script>
 
-<!--script>
-AFRAME.registerComponent('target-fade-in', {
-  schema: {
-    duration: {default: 1500} // duration in milliseconds
-  },
-  init: function() {
-    this.el.setAttribute('visible', false) // Start hidden
-    
-    // Listen for the image target found event
-    this.el.parentElement.addEventListener('xrimagefound', () => {
-      this.el.setAttribute('visible', true)
-      this.fadeIn()
-    })
-  },
-  fadeIn: function() {
-    const mesh = this.el.getObject3D('mesh')
-    if (!mesh) return
-
-    let startTime = null
-    const animate = (timestamp) => {
-      if (!startTime) startTime = timestamp
-      const progress = Math.min((timestamp - startTime) / this.data.duration, 1)
-      
-      mesh.traverse(node => {
-        if (node.isMesh) {
-          node.material.transparent = true
-          node.material.opacity = progress
-        }
-      })
-
-      if (progress < 1) {
-        requestAnimationFrame(animate)
-      }
-    }
-    requestAnimationFrame(animate)
-  }
-})
-
-</script-->
 
 </head>
 
