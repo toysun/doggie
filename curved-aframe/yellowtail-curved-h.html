@@ -62,7 +62,7 @@
       loop="true"
       src="./assets/Media/yellowtail-rvm.mp4">
     </video>
-        <video
+    <video
       id="wine-label-video1"
        muted
         autoplay
@@ -83,18 +83,7 @@
 
   <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
   <a-light type="ambient" intensity="1.5"></a-light>
-
-  <!--a-plane
-    id="model" 
-    material="src: #most-loved;"
-    rotation="0 0 0"
-    position="-0.5 0.5 -1"
-    visible="true" 
-    width="0.3"
-    height="0.4"    
-    animation="property: position; from: -1.5 0.5 -1; to: -0.5 0.5 -1; dir: normal; delay: 1000; dur: 3000; loop: false"    
-    animation__1="property: rotation; from: 0 0 -15; to: 0 0 15; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
-</a-plane-->
+  
 <a-plane
     id="model-1" 
     smooth-follow="target: #anchor-1; speed: 0.05" 
@@ -117,12 +106,7 @@
   <!-- WINE LABEL (Cylindrical): video fades in on label -->
   <xrextras-named-image-target name="yellow-target">
     <xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade>
-    <a-entity
-      id="plane-anchor"
-      position="-0.5 0.5 -1"
-      rotation="0 0 0">
-    </a-entity>
-
+    
     <a-entity
       id="anchor-1"
       position="-0.5 0.5 -1"
@@ -149,54 +133,33 @@
     <a-entity gltf-model="#blades-glb2" position="-1.2 -0.5 0" rotation="0 30 0" scale="1 1 1"
       animation="property: position; from: -15.5 -10.5 0; to: -1.2 -0.5 0; dir: linear; delay: 6000; dur: 2000; loop: false"
       animation__1="property: rotation; from: -1.2 -0.5 7.5; to: -1.2 -0.5 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true"></a-entity>
-    <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
-    <!--a-plane
-      material="src: #ballentine-17; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="1.2 -0.5 0"
-      height="1.5" 
-      width="1"
-      animation="property: position; from: 15.5 -10.5 0; to: 1.2 -0.5 0; dir: linear; delay: 6000; dur: 2000; loop: false"
-      animation__1="property: rotation; from: 1.2 -0.5 -7.5; to: 1.2 -0.5 7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
-    </a-plane>
-    <a-plane
-      material="src: #family-crest; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="-0.9 -0.5 0"
-      height="1.5" 
-      width="1"
-      animation="property: position; from: -15.5 -10.5 0; to: -0.9 -0.5 0; dir: linear; delay: 6000; dur: 2000; loop: false"
-      animation__1="property: rotation; from: -0.9 -0.5 7.5; to: -0.9 -0.5 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
-    </a-plane-->
+    
   </xrextras-named-image-target>
   
 </a-scene>
 <script>
 const overlay = document.getElementById('scanning-overlay'); 
-const entity = document.getElementById('model');
 
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === 'yellow-target') {
-    //수정
+  if (event.detail.name === 'yellow-target' || event.detail.name === 'ballentine-target') {
+    
     if (overlay) {
       overlay.style.animation = 'fadeOut 0.5s forwards';
       setTimeout(() => {
         overlay.style.display = 'none';
       }, 500);
     }
-//   entity.setAttribute('visible', 'true');
   }
 })
 
 // 이미지를 잃어버렸을 때 다시 표시
 document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
-  if (event.detail.name === 'yellow-target') {
+  if (event.detail.name === 'yellow-target' || event.detail.name === 'ballentine-target') {
     if (overlay) {
       overlay.style.display = 'flex';
       overlay.style.animation = 'none';
       overlay.style.opacity = '1';
     }
-//    entity.setAttribute('visible', 'false');
   }
 });
 
