@@ -6,18 +6,18 @@
   "properties": {
     "left": 0,
     "top": 0,
-    "width": 3000,
-    "height": 4000,
+    "width": 300,
+    "height": 400,
     "isRotated": false,
-    "originalWidth": 3000,
-    "originalHeight": 4000,
+    "originalWidth": 300,
+    "originalHeight": 400,
     "targetCircumferenceTop": 110,
     "cylinderCircumferenceTop": 230,
     "cylinderCircumferenceBottom": 230,
     "cylinderSideLength": 82.5,
     "arcAngle": 172.17391304347828,
     "coniness": 0,
-    "inputMode": "ADVANCED",
+    "inputMode": "BASIC",
     "unit": "mm"
   },
   "resources": {
