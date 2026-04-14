@@ -97,13 +97,12 @@
   </a-plane-->
   <a-plane
       id="model" 
-      material="src: #most-loved; transparent: true; roughness: 0.8; metalness: 0"
+      material="src: #most-loved;"
       rotation="0 0 0"
-      position="0 1 1"
+      position="0 1.5 -2"
       visible="true"
-      height="3" 
-      width="3"
-  >     
+      width="1.2"
+      height="1.6">     
   </a-plane>
   <!-- WINE LABEL (Cylindrical): video fades in on label -->
   <xrextras-named-image-target name="yellow-target">
@@ -182,7 +181,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
         overlay.style.display = 'none';
       }, 500);
     }
-    entity.setAttribute("visible", "true");
+//   entity.setAttribute("visible", "true");
   }
 })
 
@@ -194,7 +193,7 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
       overlay.style.animation = 'none';
       overlay.style.opacity = '1';
     }
-    entity.setAttribute("visible", "false");
+//    entity.setAttribute("visible", "false");
   }
 });
 </script>
