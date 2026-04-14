@@ -99,10 +99,12 @@
       id="model" 
       material="src: #most-loved;"
       rotation="0 0 0"
-      position="0 1.5 -2"
+      position="-1 1.5 -2"
       visible="false"
-      width="1"
-      height="1.3">     
+      width="0.5"
+      height="0.7"
+      animation="property: position; from: -5 1.5 -2; to: -1 1.5 -2; dir: linear; delay: 6000; dur: 3000; loop: false"
+      animation__1="property: rotation; from: -1 1.5 -7.5; to: -1 1.5 7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
   </a-plane>
   <!-- WINE LABEL (Cylindrical): video fades in on label -->
   <xrextras-named-image-target name="yellow-target">
@@ -170,7 +172,7 @@
 </a-scene>
 <script>
 const overlay = document.getElementById('scanning-overlay'); 
-const entity = document.getElementById('model');
+const entity = document.getElementById('#model');
 
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   if (event.detail.name === 'yellow-target') {
@@ -181,7 +183,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
         overlay.style.display = 'none';
       }, 500);
     }
-   entity.setAttribute('visible', 'true');
+   entity.setAttribute("visible", "true");
   }
 })
 
@@ -193,7 +195,7 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
       overlay.style.animation = 'none';
       overlay.style.opacity = '1';
     }
-    entity.setAttribute('visible', 'false');
+    entity.setAttribute("visible", "false");
   }
 });
 </script>
