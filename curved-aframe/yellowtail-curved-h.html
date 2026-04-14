@@ -97,18 +97,21 @@
 </a-plane-->
 <a-plane
     id="model" 
-    material="src: #most-loved;"
+    smooth-follow="target: #plane-anchor; speed: 0.05" material="src: #most-loved;"
     frustumCulled="false"
-    rotation="0 0 0"
-    position="-0.5 0.5 -1"
-    visible="true" 
+    visible="false" 
     width="0.3"
-    height="0.4"    
-  >     
-</a-plane>
+    height="0.4">     
+  </a-plane>
+
   <!-- WINE LABEL (Cylindrical): video fades in on label -->
   <xrextras-named-image-target name="yellow-target">
     <xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade>
+    <a-entity
+      id="plane-anchor"
+      position="-0.5 0.5 -1"
+      rotation="0 0 0">
+    </a-entity>
     <!--a-entity id="model" gltf-model="#bean-glb" position="0 0.5 0" rotation="45 45 45" scale="0.3 0.3 0.3" xrextras-spin></a-entity>
     <a-entity id="model" gltf-model="#bean-glb1" position="1.3 -0.5 0" rotation="0 0 0" scale="0.8 0.8 0.8"
       animation="property: position; from: 15.5 -10.5 0; to: 1.3 -0.5 0; dir: linear; delay: 6000; dur: 3000; loop: false"
@@ -198,6 +201,40 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
 //    entity.setAttribute('visible', 'false');
   }
 });
+
+// A-Frame 커스텀 컴포넌트 등록
+  AFRAME.registerComponent('smooth-follow', {
+    schema: {
+      target: {type: 'selector'},     // 쫓아갈 대상 (앵커)
+      speed: {type: 'number', default: 0.05} // 따라가는 속도 (낮을수록 떨림이 적고 부드러움)
+    },
+    init: function() {
+      // 위치와 회전값을 담을 변수 미리 생성 (성능 최적화)
+      this.targetPos = new THREE.Vector3();
+      this.targetQuat = new THREE.Quaternion();
+    },
+    tick: function () {
+      if (!this.data.target) return;
+
+      const target3D = this.data.target.object3D;
+      const my3D = this.el.object3D;
+
+      // 타겟(마커)이 화면에서 사라지면, 이 오브젝트도 숨김 처리
+      if (!target3D.parent.visible) {
+        my3D.visible = false;
+        return;
+      }
+      my3D.visible = true; // 마커가 보이면 표시
+
+      // 앵커의 절대 좌표와 회전값을 가져옴
+      target3D.getWorldPosition(this.targetPos);
+      target3D.getWorldQuaternion(this.targetQuat);
+
+      // Lerp(위치)와 Slerp(회전)를 사용하여 현재 위치에서 목표 위치로 'speed'만큼만 부드럽게 이동
+      my3D.position.lerp(this.targetPos, this.data.speed);
+      my3D.quaternion.slerp(this.targetQuat, this.data.speed);
+    }
+  });
 </script>
 </body>
 </html>
