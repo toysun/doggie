@@ -58,7 +58,7 @@
       webkit-playsinline
       crossorigin="anonymous"
       loop="true"
-      src="./assets/Media/jungle-video.mp4">
+      src="./assets/Media/complete-video.mp4">
     </video>
   </a-assets>
   <xrextras-capture-button></xrextras-capture-button>
@@ -74,8 +74,15 @@
   
   <xrextras-named-image-target name="3dbox-target">
     <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
-          <a-entity
+      <a-entity
         xrextras-play-video="video: #wine-label-video; canstop: true"
+        material="shader: chromakey;
+                src: #completeVid;
+                color: 0.1 0.9 0.2;
+                threshold: 0.35;
+                smoothness: 0.08;
+                spill: 1.0;
+                opacity: 1"
         geometry="primitive: plane; height: 1.7; width: 1.2;"
         position="0 0 1" 
       ></a-entity>
