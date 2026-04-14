@@ -74,6 +74,11 @@
   
   <xrextras-named-image-target name="3dbox-target">
     <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
+          <a-entity
+        xrextras-play-video="video: #wine-label-video; canstop: true"
+        geometry="primitive: plane; height: 1.7; width: 1.2;"
+        position="0 0 -1" 
+      ></a-entity>
     <a-entity 
         id="model" 
         gltf-model="#bean-glb" 
