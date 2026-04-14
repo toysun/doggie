@@ -209,7 +209,7 @@
 const overlay = document.getElementById('scanning-overlay');  //수정
   
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === 'ls-target') {
+  if (event.detail.name === 'd-engine') {
     //수정
   if (overlay) {
       overlay.style.animation = 'fadeOut 0.5s forwards';
