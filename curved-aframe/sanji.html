@@ -30,49 +30,12 @@
      window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
   </script>
 
-<!--script>
-AFRAME.registerComponent('target-fade-in', {
-  schema: {
-    duration: {default: 1500} // duration in milliseconds
-  },
-  init: function() {
-    this.el.setAttribute('visible', false) // Start hidden
-    
-    // Listen for the image target found event
-    this.el.parentElement.addEventListener('xrimagefound', () => {
-      this.el.setAttribute('visible', true)
-      this.fadeIn()
-    })
-  },
-  fadeIn: function() {
-    const mesh = this.el.getObject3D('mesh')
-    if (!mesh) return
-
-    let startTime = null
-    const animate = (timestamp) => {
-      if (!startTime) startTime = timestamp
-      const progress = Math.min((timestamp - startTime) / this.data.duration, 1)
-      
-      mesh.traverse(node => {
-        if (node.isMesh) {
-          node.material.transparent = true
-          node.material.opacity = progress
-        }
-      })
-
-      if (progress < 1) {
-        requestAnimationFrame(animate)
-      }
-    }
-    requestAnimationFrame(animate)
-  }
-})
-
-</script-->
-
 </head>
 
 <body>
+<div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
+<img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
+</div>
 <a-scene
   landing-page
   xrextras-loading
@@ -82,7 +45,8 @@ AFRAME.registerComponent('target-fade-in', {
   
   <a-assets>
     <a-asset-item id="bean-glb" src="./assets/Models/sanji-lh-seagulls.glb"></a-asset-item>
-
+    <img id="haerangi" src="./assets/Media/haerangi.png">
+    <img id="sanji-text" src="./assets/Media/sanji.jpeg">
     <video
       id="wine-label-video"
       preload="auto"
@@ -95,7 +59,8 @@ AFRAME.registerComponent('target-fade-in', {
       src="./assets/Media/wave-square-ns.mp4">
     </video>
   </a-assets>
-
+  <xrextras-capture-button></xrextras-capture-button>
+  <xrextras-capture-preview></xrextras-capture-preview>
   <a-camera
     position="0 1 1"
     raycaster="objects: .cantap"
@@ -118,6 +83,24 @@ AFRAME.registerComponent('target-fade-in', {
         visible="false"
     >
     </a-entity>
+    <a-plane
+      material="src: #sanji-text; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="90 0 0"
+      position="0.5 1.5 0"
+      height="0.5" 
+      width="0.5"
+      animation="property: position; from: 0.5 -5.5 -10; to: 0.5 1 0; dir: linear; delay: 1000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 90 0 7.5; to: 90 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
+    </a-plane>
+    <a-plane
+      material="src: #haerangi; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="90 0 0"
+      position="-0.5 0.5 0"
+      height="0.5" 
+      width="0.5"
+      animation="property: position; from: 0.5 -5.5 -10; to: -0.5 1 0; dir: linear; delay: 2000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 90 0 15; to: 90 0 -15; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
 
   </xrextras-named-image-target>
 
@@ -130,29 +113,19 @@ AFRAME.registerComponent('target-fade-in', {
     shadow>
   </a-plane>
 </a-scene>
-
-<!--script>
-document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === 'ls-target') {
-    const entity = document.querySelector('#model');
-    entity.setAttribute('visible', true);
-
-    // 투명도 애니메이션 처리
-    let opacity = 0;
-    const interval = setInterval(() => {
-      opacity += 0.05;
-      entity.setAttribute('material', 'opacity', opacity);
-
-      if (opacity >= 1) {
-        clearInterval(interval);
-      }
-    }, 50);
-  }
-});
-</script-->
 <script>
+const overlay = document.getElementById('scanning-overlay');  //수정
+  
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   if (event.detail.name === 'sanji-target') {
+     //수정
+  if (overlay) {
+      overlay.style.animation = 'fadeOut 0.5s forwards';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 500);
+    }
+
     const entity = document.querySelector('#model');
     entity.setAttribute('visible', true);
 
@@ -209,8 +182,20 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     requestAnimationFrame(fade);
   }
 });
+
+   //수정
+// 이미지를 잃어버렸을 때 다시 표시
+document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+  if (event.detail.name === 'ls-target') {
+    if (overlay) {
+      overlay.style.display = 'flex';
+      overlay.style.animation = 'none';
+      overlay.style.opacity = '1';
+    }
+  }
+});
+
 </script>
-
-
+  
 </body>
 </html>
