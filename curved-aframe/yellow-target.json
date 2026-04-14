@@ -1,0 +1,31 @@
+{
+  "imagePath": "assets/Media//yellow-target_luminance.jpg",
+  "metadata": null,
+  "name": "yellow-target",
+  "type": "CYLINDER",
+  "properties": {
+    "left": 0,
+    "top": 0,
+    "width": 3000,
+    "height": 4000,
+    "isRotated": true,
+    "originalWidth": 3000,
+    "originalHeight": 4000,
+    "targetCircumferenceTop": 110,
+    "cylinderCircumferenceTop": 230,
+    "cylinderCircumferenceBottom": 230,
+    "cylinderSideLength": 82.5,
+    "arcAngle": 172.17391304347828,
+    "coniness": 0,
+    "inputMode": "ADVANCED",
+    "unit": "mm"
+  },
+  "resources": {
+    "originalImage": "assets/Media/yellow-target_original.jpg",
+    "croppedImage": "assets/Media/yellow-target_cropped.jpg",
+    "thumbnailImage": "assets/Media/yellow-target_thumbnail.jpg",
+    "luminanceImage": "assets/Media/yellow-target_luminance.jpg"
+  },
+  "created": 1776134517051,
+  "updated": 1776134517051
+}
