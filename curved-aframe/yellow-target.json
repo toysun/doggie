@@ -8,7 +8,7 @@
     "top": 0,
     "width": 3000,
     "height": 4000,
-    "isRotated": true,
+    "isRotated": false,
     "originalWidth": 3000,
     "originalHeight": 4000,
     "targetCircumferenceTop": 110,
