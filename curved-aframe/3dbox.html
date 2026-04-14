@@ -48,7 +48,7 @@
     <a-asset-item id="bean-glb" src="./assets/Models/3d-box-jungle.glb"></a-asset-item>
     <img id="macaw" src="./assets/Media/macaw.png">
     <img id="tropical" src="./assets/Media/tropical-leaves.png">
-    <img id="tropical" src="./assets/Media/jungle-vertical.jpg">
+    <img id="jvt" src="./assets/Media/jungle-vertical-t.png">
     <video
       id="wine-label-video"
       preload="auto"
@@ -84,21 +84,30 @@
         animation-mixer
         visible="false">
     </a-entity>
+        <a-plane
+      material="src: #jvt; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="0 0 0"
+      height="1.5" 
+      width="1"
+      animation="property: position; from: 0.5 -5.5 -10; to: 0 1 -0.3; dir: linear; delay: 1000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 0 0 7.5; to: 0 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
+    </a-plane>
     <a-plane
       material="src: #macaw; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
-      position="0 1 -0.3"
-      height="3" 
-      width="2"
+      position="0 0 -0.3"
+      height="1.5" 
+      width="1"
       animation="property: position; from: 0.5 -5.5 -10; to: 0 1 -0.3; dir: linear; delay: 1000; dur: 2000; loop: false"
       animation__1="property: rotation; from: 0 0 7.5; to: 0 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
     </a-plane>
     <a-plane
       material="src: #tropical; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
-      position="0 01 0.1"
-      height="3" 
-      width="2"
+      position="0 0 0.1"
+      height="1.5" 
+      width="1"
       animation="property: position; from: 0.5 -5.5 -10; to: 0 1 -0.1; dir: linear; delay: 2000; dur: 2000; loop: false"
       animation__1="property: rotation; from: 0 0 -7.5; to: 0 0 7.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
     </a-plane>
