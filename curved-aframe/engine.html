@@ -35,6 +35,9 @@
 </head>
 
 <body>
+<div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
+  <img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
+</div>
 <a-scene
   landing-page
   xrextras-loading
@@ -48,7 +51,11 @@
     <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
     <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
     <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item>
-    <!--img id="logo" src="./assets/Media/sleeve-logo.jpg"-->
+    <img id="pneumatic" src="./assets/Media/pneumatic.jpg">
+    <img id="pneumatic1" src="./assets/Media/pneumatic_1.jpg">
+    <img id="airengine" src="./assets/Media/air-balloon-engine.jpg">
+    <img id="airengine1" src="./assets/Media/air-balloon-engine-1.jpg">
+    <img id="airmotor" src="./assets/Media/air-balloon-motor.jpeg">
     <video
       id="wine-label-video"
        muted
@@ -70,7 +77,8 @@
       src="./assets/Media/dark-bg-engine-1.mp4">
     </video>
   </a-assets>
-
+  <xrextras-capture-button></xrextras-capture-button>
+  <xrextras-capture-preview></xrextras-capture-preview>
   <a-camera
     position="0 1 1"
     raycaster="objects: .cantap"
@@ -95,15 +103,32 @@
   <!-- WINE LABEL (Cylindrical): video fades in on label -->
   <xrextras-named-image-target name="w-engine">
     <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
-          <a-entity
+      <a-entity
         xrextras-play-video="video: #wine-label-video; canstop: true"
         geometry="primitive: plane; height: 1; width: 1;"
       ></a-entity>
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <a-entity id="model" gltf-model="#bean-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
-    <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
-    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
+    <a-plane
+      material="src: #pneumatic; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="90 0 0"
+      position="0.5 1.5 0"
+      height="0.5" 
+      width="0.5"
+      animation="property: position; from: 0.5 -5.5 -10; to: 0.5 1 0; dir: linear; delay: 1000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 90 0 7.5; to: 90 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
+    </a-plane>
+    <a-plane
+      material="src: #pneumatic1; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="90 0 0"
+      position="-0.5 0.5 0"
+      height="0.5" 
+      width="0.5"
+      animation="property: position; from: 0.5 -5.5 -10; to: -0.5 1 0; dir: linear; delay: 2000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 90 0 15; to: 90 0 -15; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
+
   </xrextras-named-image-target>
 
     <xrextras-named-image-target name="w1-engine">
@@ -115,8 +140,24 @@
     <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <a-entity id="model" gltf-model="#bean-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
-    <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
-    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
+    <a-plane
+      material="src: #airengine; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="90 0 0"
+      position="0.5 1.5 0"
+      height="0.5" 
+      width="0.5"
+      animation="property: position; from: 0.5 -5.5 -10; to: 0.5 1 0; dir: linear; delay: 1000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 90 0 7.5; to: 90 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
+    </a-plane>
+    <a-plane
+      material="src: #airengine1; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="90 0 0"
+      position="-0.5 0.5 0"
+      height="0.5" 
+      width="0.5"
+      animation="property: position; from: 0.5 -5.5 -10; to: -0.5 1 0; dir: linear; delay: 2000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 90 0 15; to: 90 0 -15; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
   </xrextras-named-image-target>
   
 
@@ -131,8 +172,15 @@
     <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
     <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
          <a-entity id="model" gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
-    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
-    <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
+     <a-plane
+      material="src: #airmotor; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="90 0 0"
+      position="0.5 1.5 0"
+      height="0.5" 
+      width="0.5"
+      animation="property: position; from: 0.5 -5.5 -10; to: 0.5 1 0; dir: linear; delay: 1000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 90 0 7.5; to: 90 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
+    </a-plane>
   </xrextras-named-image-target>
 
     <xrextras-named-image-target name="d1-engine">
@@ -157,5 +205,88 @@
         shadow>
       </a-plane>
 </a-scene>
+  <script>
+const overlay = document.getElementById('scanning-overlay');  //수정
+  
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  if (event.detail.name === 'ls-target') {
+    //수정
+  if (overlay) {
+      overlay.style.animation = 'fadeOut 0.5s forwards';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 500);
+    }
+
+    const entity = document.querySelector('#model');
+    entity.setAttribute('visible', true);
+
+    const mesh = entity.getObject3D('mesh');
+    if (!mesh) return;
+
+    // 모든 머티리얼을 투명하게 초기화
+    mesh.traverse((node) => {
+      if (node.material) {
+        if (Array.isArray(node.material)) {
+          node.material.forEach((mat) => {
+            mat.transparent = true;
+            mat.opacity = 0;
+          });
+        } else {
+          node.material.transparent = true;
+          node.material.opacity = 0;
+        }
+      }
+    });
+
+    // easeInOutQuad 함수 정의
+    function easeInOutQuad(t) {
+      return t < 0.5
+        ? 2 * t * t
+        : -1 + (4 - 2 * t) * t;
+    }
+
+    const duration = 1500; // 애니메이션 시간 (ms)
+    const start = performance.now();
+
+    function fade(now) {
+      const elapsed = now - start;
+      let progress = Math.min(elapsed / duration, 1); // 0 ~ 1
+      let eased = easeInOutQuad(progress);
+
+      mesh.traverse((node) => {
+        if (node.material) {
+          if (Array.isArray(node.material)) {
+            node.material.forEach((mat) => {
+              mat.opacity = eased;
+            });
+          } else {
+            node.material.opacity = eased;
+          }
+        }
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(fade);
+      }
+    }
+
+    requestAnimationFrame(fade);
+  }
+});
+
+  //수정
+// 이미지를 잃어버렸을 때 다시 표시
+document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+  if (event.detail.name === 'ls-target') {
+    if (overlay) {
+      overlay.style.display = 'flex';
+      overlay.style.animation = 'none';
+      overlay.style.opacity = '1';
+    }
+  }
+});
+</script>
+
 </body>
 </html>
