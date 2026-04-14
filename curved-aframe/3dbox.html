@@ -76,7 +76,7 @@
     <a-entity 
         id="model" 
         gltf-model="#bean-glb" 
-        scale="0.05 0.05 0.05" 
+        scale="1 1 1" 
         position="0 0 0" 
         rotation="0 0 0"  
         shadow="receive: false" 
@@ -87,8 +87,8 @@
       material="src: #macaw; transparent: true; roughness: 0.8; metalness: 0"
       rotation="90 0 0"
       position="0 0 -0.3"
-      height="0.5" 
-      width="0.5"
+      height="1" 
+      width="1"
       animation="property: position; from: 0.5 -5.5 -10; to: 0 0 -0.3; dir: linear; delay: 1000; dur: 2000; loop: false"
       animation__1="property: rotation; from: 0 0 7.5; to: 0 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
     </a-plane>
@@ -96,15 +96,11 @@
       material="src: #tropical; transparent: true; roughness: 0.8; metalness: 0"
       rotation="90 0 0"
       position="0 0 -0.2"
-      height="0.5" 
-      width="0.5"
+      height="1" 
+      width="1"
       animation="property: position; from: 0.5 -5.5 -10; to: 0 0 -0.2; dir: linear; delay: 2000; dur: 2000; loop: false"
       animation__1="property: rotation; from: 0 0 15; to: 90 0 -15; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
     </a-plane>
-    <!--a-entity geometry="primitive: plane; height: 0.8; width: 0.8;" src="#sanji-text" position="0.5 0.5 0" rotation="-90 0 0" 
-      animation="property: rotation; from: 0 0 -10; to: 0 0 10; direction: alternate; dur: 3000; easing: easeInOutSine; loop: true"></a-entity>
-    <a-entity geometry="primitive: plane; height: 0.5; width: 0.5;" src="#haerangi" position="-0.5 0.5 0" rotation="-90 0 0" 
-      animation="property: rotation; from: 0 0 10; to: 0 0 -10; direction: alternate; dur: 3000; easing: easeInOutSine; loop: true"></a-entity-->
   </xrextras-named-image-target>
 
   <a-plane
