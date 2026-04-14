@@ -85,7 +85,7 @@
   
   <!-- WINE LABEL (Cylindrical): video fades in on label -->
   <xrextras-named-image-target name="yellow-target">
-    <xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade>
+    <xrextras-target-video-fade video="#wine-label-video" rotate="0 -90 0"></xrextras-target-video-fade>
     <!--a-entity id="model" gltf-model="#bean-glb" position="0 0.5 0" rotation="45 45 45" scale="0.3 0.3 0.3" xrextras-spin></a-entity>
     <a-entity id="model" gltf-model="#bean-glb1" position="1.3 -0.5 0" rotation="0 0 0" scale="0.8 0.8 0.8"
       animation="property: position; from: 15.5 -10.5 0; to: 1.3 -0.5 0; dir: linear; delay: 6000; dur: 3000; loop: false"
@@ -152,7 +152,7 @@ const overlay = document.getElementById('scanning-overlay');
 const entity = document.getElementById('#model');
 
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === 'yellowtail-curved') {
+  if (event.detail.name === 'yellow-target') {
     //수정
     if (overlay) {
       overlay.style.animation = 'fadeOut 0.5s forwards';
@@ -166,7 +166,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
 
 // 이미지를 잃어버렸을 때 다시 표시
 document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
-  if (event.detail.name === 'yellowtail-curved') {
+  if (event.detail.name === 'yellow-target') {
     if (overlay) {
       overlay.style.display = 'flex';
       overlay.style.animation = 'none';
