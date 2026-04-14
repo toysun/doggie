@@ -45,9 +45,9 @@
   xrweb="disableWorldTracking: true">
   
   <a-assets>
-    <a-asset-item id="bean-glb" src="./assets/Models/lighthouse-rock-seagull.glb"></a-asset-item>
-    <img id="haerangi" src="./assets/Media/haerangi.png">
-    <img id="sanji-text" src="./assets/Media/sanji.jpeg">
+    <a-asset-item id="bean-glb" src="./assets/Models/3d-box-jungle.glb"></a-asset-item>
+    <img id="macaw" src="./assets/Media/macaw.png">
+    <img id="tropical" src="./assets/Media/tropical-leaves.png">
     <video
       id="wine-label-video"
       preload="auto"
@@ -57,7 +57,7 @@
       webkit-playsinline
       crossorigin="anonymous"
       loop="true"
-      src="./assets/Media/wave-square-ns.mp4">
+      src="./assets/Media/jungle-video.mp4">
     </video>
   </a-assets>
   <xrextras-capture-button></xrextras-capture-button>
@@ -78,28 +78,28 @@
         gltf-model="#bean-glb" 
         scale="0.05 0.05 0.05" 
         position="0 0 0" 
-        rotation="90 0 0"  
+        rotation="0 0 0"  
         shadow="receive: false" 
         animation-mixer
         visible="false">
     </a-entity>
     <a-plane
-      material="src: #sanji-text; transparent: true; roughness: 0.8; metalness: 0"
+      material="src: #macaw; transparent: true; roughness: 0.8; metalness: 0"
       rotation="90 0 0"
-      position="0.5 1.5 0"
+      position="0 0 -0.3"
       height="0.5" 
       width="0.5"
-      animation="property: position; from: 0.5 -5.5 -10; to: 0.5 1 0; dir: linear; delay: 1000; dur: 2000; loop: false"
-      animation__1="property: rotation; from: 90 0 7.5; to: 90 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
+      animation="property: position; from: 0.5 -5.5 -10; to: 0 0 -0.3; dir: linear; delay: 1000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 0 0 7.5; to: 0 0 -7.5; dir: alternate; dur: 500; easing: easeInOutSine; loop: true">     
     </a-plane>
     <a-plane
-      material="src: #haerangi; transparent: true; roughness: 0.8; metalness: 0"
+      material="src: #tropical; transparent: true; roughness: 0.8; metalness: 0"
       rotation="90 0 0"
-      position="-0.5 0.5 0"
+      position="0 0 -0.2"
       height="0.5" 
       width="0.5"
-      animation="property: position; from: 0.5 -5.5 -10; to: -0.5 1 0; dir: linear; delay: 2000; dur: 2000; loop: false"
-      animation__1="property: rotation; from: 90 0 15; to: 90 0 -15; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+      animation="property: position; from: 0.5 -5.5 -10; to: 0 0 -0.2; dir: linear; delay: 2000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 0 0 15; to: 90 0 -15; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
     </a-plane>
     <!--a-entity geometry="primitive: plane; height: 0.8; width: 0.8;" src="#sanji-text" position="0.5 0.5 0" rotation="-90 0 0" 
       animation="property: rotation; from: 0 0 -10; to: 0 0 10; direction: alternate; dur: 3000; easing: easeInOutSine; loop: true"></a-entity>
