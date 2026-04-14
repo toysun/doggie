@@ -170,7 +170,7 @@
 </a-scene>
 <script>
 const overlay = document.getElementById('scanning-overlay'); 
-const entity = document.getElementById('#model');
+const entity = document.getElementById('model');
 
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   if (event.detail.name === 'yellow-target') {
@@ -181,7 +181,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
         overlay.style.display = 'none';
       }, 500);
     }
-   entity.setAttribute("visible", "true");
+   entity.setAttribute('visible', 'true');
   }
 })
 
@@ -193,7 +193,7 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
       overlay.style.animation = 'none';
       overlay.style.opacity = '1';
     }
-    entity.setAttribute("visible", "false");
+    entity.setAttribute('visible', 'false');
   }
 });
 </script>
