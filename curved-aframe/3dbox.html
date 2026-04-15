@@ -47,6 +47,7 @@
   
   <a-assets>
     <a-asset-item id="bean-glb" src="./assets/Models/3d-box-jungle.glb"></a-asset-item>
+    <a-asset-item id="bean-glb-1" src="./assets/Models/3d-box-white.glb"></a-asset-item>
     <img id="macaw" src="./assets/Media/macaw.png">
     <img id="tropical" src="./assets/Media/tropical-leaves.png">
     <img id="jvt" src="./assets/Media/jungle-vertical-t.png">
@@ -102,6 +103,16 @@
     <a-entity 
         id="model" 
         gltf-model="#bean-glb" 
+        scale="0.68 1 1" 
+        position="0 0 0" 
+        rotation="90 0 0"  
+        shadow="receive: false" 
+        animation-mixer
+        visible="false">
+    </a-entity>
+    <a-entity 
+        id="model" 
+        gltf-model="#bean-glb-1" 
         scale="0.68 1 1" 
         position="0 0 0" 
         rotation="90 0 0"  
