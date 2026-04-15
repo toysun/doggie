@@ -111,7 +111,7 @@
         visible="false">
     </a-entity>
     <a-entity 
-        id="model" 
+        id="model1" 
         gltf-model="#bean-glb-1" 
         scale="0.68 1 1" 
         position="0 0 0" 
@@ -168,7 +168,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
       }, 500);
     }
 
-    const entity = document.querySelector('#model');
+    const entity = document.querySelector('#model' 'model1');
     entity.setAttribute('visible', true);
 
     const mesh = entity.getObject3D('mesh');
