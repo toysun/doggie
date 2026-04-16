@@ -51,6 +51,8 @@
     <img id="macaw" src="./assets/Media/macaw.png">
     <img id="tropical" src="./assets/Media/tropical-leaves.png">
     <img id="jvt" src="./assets/Media/jungle-vertical-t.png">
+    <img id="garden" src="./assets/Media/garden.jpg">
+    <img id="rooftop" src="./assets/Media/rooftop.jpg">
   </a-assets>
   <xrextras-capture-button></xrextras-capture-button>
   <xrextras-capture-preview></xrextras-capture-preview>
@@ -199,6 +201,10 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
       let isSoundPressed = false
       let isAniPressed = false
 
+    //배경용 배열
+      const imageList = ['#tropical', '#garden', '#rooftop'] 
+      let currentImgIdx = -1 // -1은 이미지가 안 보이는 상태를 의미
+
       this.sound = new window.Howl({
         src: ['./assets/Media/birds-song.mp3'],
         html5: true,
@@ -242,9 +248,21 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
         if (isAniPressed) return
         isAniPressed = true
 
+        currentImgIdx++
+
+// 배열의 끝에 도달하면 다시 숨김 상태(-1)로 돌아감
+      if (currentImgIdx >= imageList.length) {
+        exPlane.setAttribute('visible', false)
+        currentImgIdx = -1
+      } else {
+        // 현재 인덱스에 해당하는 이미지를 src에 적용하고 표시
+        exPlane.setAttribute('src', imageList[currentImgIdx])
+        exPlane.setAttribute('visible', true)
+      }
+
         // 이미지 표시 여부 토글
-        const isVisible = exPlane.getAttribute('visible')
-        exPlane.setAttribute('visible', !isVisible)
+  //      const isVisible = exPlane.getAttribute('visible')
+ //       exPlane.setAttribute('visible', !isVisible)
 
         // 눌림 효과 (사운드 버튼과 동일)
         aniBtn.object3D.scale.set(1.15, 0.65, 1.15)
@@ -269,6 +287,7 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
           }
           // 설명 이미지 숨기기
           exPlane.setAttribute('visible', false)
+          currentImgIdx = -1
         }
       })
     },
