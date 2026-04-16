@@ -47,7 +47,6 @@
   
   <a-assets>
     <a-asset-item id="bean-glb" src="./assets/Models/3d-box-jungle.glb"></a-asset-item>
-    <a-asset-item id="bean-glb-1" src="./assets/Models/3d-box-white.glb"></a-asset-item>
     <img id="macaw" src="./assets/Media/macaw.png">
     <img id="tropical" src="./assets/Media/tropical-leaves.png">
     <img id="jvt" src="./assets/Media/jungle-vertical-t.png">
@@ -110,16 +109,6 @@
         animation-mixer
         visible="false">
     </a-entity>
-    <a-entity 
-        id="model1" 
-        gltf-model="#bean-glb-1" 
-        scale="0.69 1.1 1" 
-        position="0 0 0" 
-        rotation="90 0 0"  
-        shadow="receive: false" 
-        animation-mixer
-        visible="false">
-    </a-entity>
         <!--a-plane
       material="src: #jvt; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
@@ -168,7 +157,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
       }, 500);
     }
 
-    const entity = document.querySelector('#model','model1');
+    const entity = document.querySelector('#model');
     entity.setAttribute('visible', true);
 
     const mesh = entity.getObject3D('mesh');
