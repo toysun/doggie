@@ -123,8 +123,6 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
       }, 500);
     }
 
-   ExPlane.setAttribute('visible', true);
-
     const entity = document.querySelector('#model');
     entity.setAttribute('visible', true);
 
@@ -197,15 +195,19 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
 
 });
 
-  AFRAME.registerComponent('tap-play-sound', {
+  AFRAME.registerComponent('ar-controller', {
     init() {
       const button = document.getElementById('sound-btn')
-      let isPressed = false
+      const aniBtn = document.getElementById('ani-btn')
+      const exPlane = document.getElementById('explain-img')
+
+      let isSoundPressed = false
+      let isAniPressed = false
 
       this.sound = new window.Howl({
         src: ['./assets/Media/birds-song.mp3'],
         html5: true,
-        loop: true // 필요에 따라 루프 설정
+        loop: true 
       })
 
       const setAnim = (name, props) => {
@@ -215,49 +217,70 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
         })
       }
 
-      const onTap = () => {
-        if (isPressed) return
-        isPressed = true
+// --- [붉은색 구체: 사운드 토글] ---
+      soundBtn.addEventListener('click', () => {
+        if (isSoundPressed) return
+        isSoundPressed = true
 
+        // 재생/일시정지 토글
         if (this.sound.playing()) {
-          this.sound.pause();
+          this.sound.pause()
         } else {
-          this.sound.play();
+          this.sound.play()
         }
 
-        button.object3D.scale.set(1.15, 0.65, 1.15)
-
-        // 100ms 후 복귀 애니메이션 시작
+        soundBtn.object3D.scale.set(1.15, 0.65, 1.15)
         setTimeout(() => {
-          setAnim('animation__unsquish', {
+          setAnim(soundBtn, 'animation__unsquish', {
             property: 'scale',
             from: '1.15 0.65 1.15',
             to: '1 1 1',
             easing: 'easeOutElastic',
             dur: 600,
           })
-
-          setTimeout(() => {
-            isPressed = false
-          }, 650)
+          setTimeout(() => { isSoundPressed = false }, 650)
         }, 100)
-      }
+      })
 
-      button.addEventListener('click', onTap)
+// --- [녹색 구체: 설명 이미지 토글] ---
+      aniBtn.addEventListener('click', () => {
+        if (isAniPressed) return
+        isAniPressed = true
 
-// 3. 이미지 유실(xrimagelost) 이벤트 리스너 추가
+        // 이미지 표시 여부 토글
+        const isVisible = exPlane.getAttribute('visible')
+        exPlane.setAttribute('visible', !isVisible)
+
+        // 눌림 효과 (사운드 버튼과 동일)
+        aniBtn.object3D.scale.set(1.15, 0.65, 1.15)
+        setTimeout(() => {
+          setAnim(aniBtn, 'animation__unsquish', {
+            property: 'scale',
+            from: '1.15 0.65 1.15',
+            to: '1 1 1',
+            easing: 'easeOutElastic',
+            dur: 600,
+          })
+          setTimeout(() => { isAniPressed = false }, 650)
+        }, 100)
+      })
+
+      // --- [공통: 이미지 유실 시 초기화] ---
       this.el.sceneEl.addEventListener('xrimagelost', (event) => {
         if (event.detail.name === '3dbox-target') {
+          // 사운드 정지
           if (this.sound && this.sound.playing()) {
-            this.sound.pause(); // 또는 stop()
+            this.sound.pause()
           }
+          // 설명 이미지 숨기기
+          exPlane.setAttribute('visible', false)
         }
       })
     },
   })
 
   document.querySelector('a-scene').addEventListener('loaded', () => {
-    document.querySelector('a-scene').setAttribute('tap-play-sound', '')
+    document.querySelector('a-scene').setAttribute('ar-controller', '')
   })
 </script>
 
