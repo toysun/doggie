@@ -77,7 +77,7 @@
   <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
   <a-light type="ambient" intensity="0.7"></a-light>
   
-  <xrextras-named-image-target name="3dbox-target">
+  <xrextras-named-image-target name="macaw-target">
     <a-plane
       material="src: #macaw; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
@@ -155,7 +155,7 @@ const VidEntity = document.getElementById('VidEntity');
 const video = document.getElementById('completeVid');
   
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === '3dbox-target') {
+  if (event.detail.name === 'macaw-target') {
     //수정
   if (overlay) {
       overlay.style.animation = 'fadeOut 0.5s forwards';
@@ -223,7 +223,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
 
 // 이미지를 잃어버렸을 때 다시 표시
 document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
-  if (event.detail.name === '3dbox-target') {
+  if (event.detail.name === 'macaw-target') {
     if (overlay) {
       overlay.style.display = 'flex';
       overlay.style.animation = 'none';
@@ -323,7 +323,7 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
 
       // --- [공통: 이미지 유실 시 초기화] ---
       this.el.sceneEl.addEventListener('xrimagelost', (event) => {
-        if (event.detail.name === '3dbox-target') {
+        if (event.detail.name === 'macaw-target') {
           // 사운드 정지
           if (this.sound && this.sound.playing()) {
             this.sound.pause()
