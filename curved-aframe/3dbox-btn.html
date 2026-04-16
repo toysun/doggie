@@ -111,7 +111,9 @@
 
 <script>
 const overlay = document.getElementById('scanning-overlay');  
-const ExPlane = document.getElementById('explain-img');
+const soundBtn = document.getElementById('sound-btn')
+const aniBtn = document.getElementById('ani-btn')
+const exPlane = document.getElementById('explain-img')
   
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   if (event.detail.name === '3dbox-target') {
@@ -180,7 +182,6 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   }
 });
 
-  //수정
 // 이미지를 잃어버렸을 때 다시 표시
 document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
   if (event.detail.name === '3dbox-target') {
@@ -191,16 +192,10 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
     }
   }
  
-  ExPlane.setAttribute('visible', false);
-
 });
 
   AFRAME.registerComponent('ar-controller', {
     init() {
-      const button = document.getElementById('sound-btn')
-      const aniBtn = document.getElementById('ani-btn')
-      const exPlane = document.getElementById('explain-img')
-
       let isSoundPressed = false
       let isAniPressed = false
 
@@ -211,9 +206,9 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
       })
 
       const setAnim = (name, props) => {
-        button.removeAttribute(name)
+        soundBtn.removeAttribute(name)
         requestAnimationFrame(() => {
-          button.setAttribute(name, props)
+          soundBtn.setAttribute(name, props)
         })
       }
 
