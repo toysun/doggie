@@ -1,6 +1,6 @@
 {
   "imagePath": "assets/Media/cardinal-vertical.png",
-  "name": "vertical-target",
+  "name": "cardinal-target",
   "type": "PLANAR",
   "properties": {
     "top": 0,
