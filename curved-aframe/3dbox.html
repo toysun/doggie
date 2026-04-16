@@ -15,13 +15,13 @@
 
   <script>
      const onxrloaded = async () => {
-       const res = await fetch('./3dbox-target.json')
+       const res = await fetch('./macaw-target.json')
        const json = await res.json()
-       const res1 = await fetch('./costume.json')
+       const res1 = await fetch('./bluejay-target.json')
        const json1 = await res1.json()
-       const res2 = await fetch('./oregage.json')
+       const res2 = await fetch('./cardinal-target.json')
        const json2 = await res2.json()
-       const res3 = await fetch('./costume.json')
+       const res3 = await fetch('./puffin-target.json')
        const json3 = await res3.json()
 
        XR8.XrController.configure({
@@ -46,12 +46,12 @@
   xrweb="disableWorldTracking: true">
   
   <a-assets>
-    <a-asset-item id="bean-glb" src="./assets/Models/3d-box-jungle.glb"></a-asset-item>
+    <a-asset-item id="macaw" src="./assets/Models/3d-box-jungle.glb"></a-asset-item>
     <img id="macaw" src="./assets/Media/macaw.png">
     <img id="tropical" src="./assets/Media/tropical-leaves.png">
-    <img id="jvt" src="./assets/Media/jungle-vertical-t.png">
+    <img id="m-vertical" src="./assets/Media/jungle-vertical-t.png">
     <video
-      id="wine-label-video"
+      id="macaw-video"
       preload="auto"
       muted
       autoplay
@@ -61,8 +61,13 @@
       loop="true"
       src="./assets/Media/complete_video.mp4">
     </video>
-        <video
-      id="wine-label-video1"
+    
+    <a-asset-item id="bluejay" src="./assets/Models/3d-box-bluejay.glb"></a-asset-item>
+    <img id="bluejay" src="./assets/Media/blue-jay.png">
+    <img id="bj-leaves" src="./assets/Media/bj-leaves.png">
+    <img id="b-vertical" src="./assets/Media/bluejay-vertical.png">
+    <video
+      id="bluejay-video"
       preload="auto"
       muted
       autoplay
@@ -70,7 +75,38 @@
       webkit-playsinline
       crossorigin="anonymous"
       loop="true"
-      src="./assets/Media/jungle-video.mp4">
+      src="./assets/Media/blue-jay.mp4">
+    </video>    
+    
+    <a-asset-item id="cardinal" src="./assets/Models/3d-box-cardinal.glb"></a-asset-item>
+    <img id="cardianl" src="./assets/Media/cardinal.png">
+    <img id="c-leaves" src="./assets/Media/cardinal-leaves.png">
+    <img id="c-vertical" src="./assets/Media/cardinal-vertical.png">
+    <video
+      id="cardinal-video"
+      preload="auto"
+      muted
+      autoplay
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/cardinal.mp4">
+    </video>
+    
+    <img id="puffin" src="./assets/Media/puffin.png">
+    <img id="pf-leaves" src="./assets/Media/pf-leaves.png">
+    <img id="pf-vertical" src="./assets/Media/puffin-vertical.png">
+    <video
+      id="puffin-video"
+      preload="auto"
+      muted
+      autoplay
+      playsinline
+      webkit-playsinline
+      crossorigin="anonymous"
+      loop="true"
+      src="./assets/Media/puffin-bg.mp4">
     </video>
   </a-assets>
   <xrextras-capture-button></xrextras-capture-button>
@@ -90,23 +126,10 @@
       <a-plane scale="1.5 0.5 0.5" position="0 0.016 -1.2" rotation="0 0 0" xrextras-hider-material></a-plane-->
       <a-plane scale="0.5 2.2 0.5" position="-0.877 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
       <a-plane scale="0.5 2.2 0.5" position="0.777 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
-      <!--a-box scale="1 10 10" position="30 50 50" xrextras-hider-material></a-box-->
     </a-entity>
   </xrextras-opaque-background>
     <xrextras-target-video-fade video="#wine-label-video1"
       position="0 0 -0.1"></xrextras-target-video-fade>
-      <!--a-entity
-        xrextras-play-video="video: #wine-label-video; canstop: true"
-        material="shader: chromakey;
-                src: #wine-label-video;
-                color: 0.1 0.9 0.2;
-                threshold: 0.35;
-                smoothness: 0.08;
-                spill: 1.0;
-                opacity: 1"
-        geometry="primitive: plane; height: 1.7; width: 1.2;"
-        position="0 0 -0.1" 
-      ></a-entity-->
     <a-entity 
         id="model" 
         gltf-model="#bean-glb" 
@@ -117,14 +140,7 @@
         animation-mixer
         visible="false">
     </a-entity>
-        <!--a-plane
-      material="src: #jvt; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="0 0 0"
-      height="1.7" 
-      width="1.2">     
-    </a-plane-->
-        <a-plane
+    <a-plane
       material="src: #macaw; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
       position="-0.2 0 -0.05"
@@ -142,6 +158,123 @@
     </a-plane>
   </xrextras-named-image-target>
 
+  <xrextras-named-image-target name="bluejay-target">
+  <xrextras-opaque-background remove="true">
+    <a-entity id="hider-walls">
+      <!--a-plane scale="1.5 0.5 0.5" position="0 0.016 1.2" rotation="0 0 0" xrextras-hider-material></a-plane>
+      <a-plane scale="1.5 0.5 0.5" position="0 0.016 -1.2" rotation="0 0 0" xrextras-hider-material></a-plane-->
+      <a-plane scale="0.5 2.2 0.5" position="-0.877 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+      <a-plane scale="0.5 2.2 0.5" position="0.777 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+    </a-entity>
+  </xrextras-opaque-background>
+    <xrextras-target-video-fade video="#bluejay-video"
+      position="0 0 -0.1"></xrextras-target-video-fade>
+    <a-entity 
+        id="model" 
+        gltf-model="#bluejay" 
+        scale="0.68 1 1" 
+        position="0 0 0" 
+        rotation="90 0 0"  
+        shadow="receive: false" 
+        animation-mixer
+        visible="false">
+    </a-entity>
+    <a-plane
+      material="src: #bluejay; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="-0.2 0 -0.05"
+      height="1.4" 
+      width="0.9"
+      animation="property: position; from: 0.5 -5.5 -10; to: 0 0 -0.05; dir: linear; delay: 2000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
+    <a-plane
+      material="src: #bj-leaves; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="0 0 0"
+      height="1.8" 
+      width="1.3">     
+    </a-plane>
+  </xrextras-named-image-target>
+
+    <xrextras-named-image-target name="cardinal-target">
+  <xrextras-opaque-background remove="true">
+    <a-entity id="hider-walls">
+      <!--a-plane scale="1.5 0.5 0.5" position="0 0.016 1.2" rotation="0 0 0" xrextras-hider-material></a-plane>
+      <a-plane scale="1.5 0.5 0.5" position="0 0.016 -1.2" rotation="0 0 0" xrextras-hider-material></a-plane-->
+      <a-plane scale="0.5 2.2 0.5" position="-0.877 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+      <a-plane scale="0.5 2.2 0.5" position="0.777 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+    </a-entity>
+  </xrextras-opaque-background>
+    <xrextras-target-video-fade video="#cardinal-video"
+      position="0 0 -0.1"></xrextras-target-video-fade>
+    <a-entity 
+        id="model" 
+        gltf-model="#cardinal" 
+        scale="0.68 1 1" 
+        position="0 0 0" 
+        rotation="90 0 0"  
+        shadow="receive: false" 
+        animation-mixer
+        visible="false">
+    </a-entity>
+    <a-plane
+      material="src: #cardinal; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="-0.2 0 -0.05"
+      height="1.4" 
+      width="0.9"
+      animation="property: position; from: 0.5 -5.5 -10; to: 0 0 -0.05; dir: linear; delay: 2000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
+    <a-plane
+      material="src: #c-leaves; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="0 0 0"
+      height="1.8" 
+      width="1.3">     
+    </a-plane>
+  </xrextras-named-image-target>
+
+      <xrextras-named-image-target name="puffin-target">
+  <xrextras-opaque-background remove="true">
+    <a-entity id="hider-walls">
+      <!--a-plane scale="1.5 0.5 0.5" position="0 0.016 1.2" rotation="0 0 0" xrextras-hider-material></a-plane>
+      <a-plane scale="1.5 0.5 0.5" position="0 0.016 -1.2" rotation="0 0 0" xrextras-hider-material></a-plane-->
+      <a-plane scale="0.5 2.2 0.5" position="-0.877 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+      <a-plane scale="0.5 2.2 0.5" position="0.777 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+    </a-entity>
+  </xrextras-opaque-background>
+    <xrextras-target-video-fade video="#puffin-video"
+      position="0 0 -0.1"></xrextras-target-video-fade>
+    <a-entity 
+        id="model" 
+        gltf-model="#puffin" 
+        scale="0.68 1 1" 
+        position="0 0 0" 
+        rotation="90 0 0"  
+        shadow="receive: false" 
+        animation-mixer
+        visible="false">
+    </a-entity>
+    <a-plane
+      material="src: #puffin; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="-0.2 0 -0.05"
+      height="1.4" 
+      width="0.9"
+      animation="property: position; from: 0.5 -5.5 -10; to: 0 0 -0.05; dir: linear; delay: 2000; dur: 2000; loop: false"
+      animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
+    <a-plane
+      material="src: #pf-leaves; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="0 0 0"
+      height="1.8" 
+      width="1.3">     
+    </a-plane>
+  </xrextras-named-image-target>
+  
   <a-plane
     id="ground"
     rotation="-90 0 0"
