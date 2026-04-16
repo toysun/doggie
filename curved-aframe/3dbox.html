@@ -289,7 +289,7 @@
 const overlay = document.getElementById('scanning-overlay');  //수정
   
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === '3dbox-target') {
+  if (event.detail.name === 'macaw-target' || event.detail.name === 'bluejay-target' || event.detail.name === 'cardinal-target' || event.detail.name === 'puffin-target') {
     //수정
   if (overlay) {
       overlay.style.animation = 'fadeOut 0.5s forwards';
@@ -358,7 +358,7 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   //수정
 // 이미지를 잃어버렸을 때 다시 표시
 document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
-  if (event.detail.name === 'ls-target') {
+  if (event.detail.name === 'macaw-target' || event.detail.name === 'bluejay-target' || event.detail.name === 'cardinal-target' || event.detail.name === 'puffin-target') {
     if (overlay) {
       overlay.style.display = 'flex';
       overlay.style.animation = 'none';
