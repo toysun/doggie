@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <title>curved-aframe</title>
+
+  <script src="./../xr_st/8frame-1.5.0.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <!-- 수정: landing-page.js 주석 해제 (a-scene에서 landing-page 컴포넌트 사용 중) -->
+  <script src="./../xr_st/landing-page.js"></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+
+  <!-- 수정: fadeOut 키프레임 애니메이션 추가 -->
+  <style>
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to   { opacity: 0; }
+    }
+  </style>
+
+  <script>
+    const onxrloaded = async () => {
+      const res  = await fetch('./macaw-target.json')
+      const json  = await res.json()
+      const res1 = await fetch('./bluejay-target.json')
+      const json1 = await res1.json()
+      const res2 = await fetch('./cardinal-target.json')
+      const json2 = await res2.json()
+      const res3 = await fetch('./puffin-target.json')
+      const json3 = await res3.json()
+
+      XR8.XrController.configure({
+        imageTargetData: [json, json1, json2, json3],
+      })
+    }
+    window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
+  </script>
+</head>
+
+<body>
+  <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%;
+       transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
+    <img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
+  </div>
+
+  <a-scene
+    landing-page
+    xrextras-loading
+    xrextras-runtime-error
+    renderer="colorManagement: true; physicallyBasedRendering: true;"
+    xrweb="disableWorldTracking: true">
+
+    <a-assets>
+      <a-asset-item id="macaw-model" src="./assets/Models/3d-box-jungle.glb"></a-asset-item>
+      <!-- 수정: id 중복 제거 — 'macaw'→'macaw-img', 'macaw'(asset-item)→'macaw-model' -->
+      <img id="macaw-img"  src="./assets/Media/macaw.png">
+      <img id="tropical"   src="./assets/Media/tropical-leaves.png">
+      <img id="m-vertical" src="./assets/Media/jungle-vertical-t.png">
+      <video
+        id="macaw-video"
+        preload="auto" muted autoplay playsinline webkit-playsinline
+        crossorigin="anonymous" loop="true"
+        src="./assets/Media/jungle_video.mp4">
+      </video>
+
+      <a-asset-item id="bluejay-model" src="./assets/Models/3d-box-bluejay.glb"></a-asset-item>
+      <!-- 수정: 'bluejay'→'bluejay-model' -->
+      <img id="blue-jay"   src="./assets/Media/blue-jay.png">
+      <img id="bj-leaves"  src="./assets/Media/bj-leaves.png">
+      <img id="b-vertical" src="./assets/Media/bluejay-vertical.png">
+      <video
+        id="bluejay-video"
+        preload="auto" muted autoplay playsinline webkit-playsinline
+        crossorigin="anonymous" loop="true"
+        src="./assets/Media/blue-jay.mp4">
+      </video>
+
+      <a-asset-item id="cardinal-model" src="./assets/Models/3d-box-cardinal.glb"></a-asset-item>
+      <!-- 수정: 'cardinal'→'cardinal-model' -->
+      <img id="cardinal-1"  src="./assets/Media/cardinal.png">
+      <img id="c-leaves"    src="./assets/Media/cardinal-leaves.png">
+      <img id="c-vertical"  src="./assets/Media/cardinal-vertical.png">
+      <video
+        id="cardinal-video"
+        preload="auto" muted autoplay playsinline webkit-playsinline
+        crossorigin="anonymous" loop="true"
+        src="./assets/Media/cardinal.mp4">
+      </video>
+
+      <a-asset-item id="puffin-model" src="./assets/Models/3d-box-puffin.glb"></a-asset-item>
+      <!-- 수정: 'puffin'→'puffin-model' -->
+      <img id="puffin-1"   src="./assets/Media/puffin.png">
+      <img id="pf-leaves"  src="./assets/Media/pf-leaves.png">
+      <img id="pf-vertical" src="./assets/Media/puffin-vertical.png">
+      <video
+        id="puffin-video"
+        preload="auto" muted autoplay playsinline webkit-playsinline
+        crossorigin="anonymous" loop="true"
+        src="./assets/Media/puffin-bg.mp4">
+      </video>
+    </a-assets>
+
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+
+    <a-camera
+      position="0 1 1"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+    <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+    <a-light type="ambient" intensity="0.7"></a-light>
+
+    <!-- 수정: gltf-model 참조를 변경된 id에 맞게 수정 (#macaw→#macaw-model 등) -->
+    <!-- 수정: 각 타겟의 model entity id를 고유하게 변경 (id 중복 제거) -->
+    <!-- 수정: a-plane material src도 변경된 img id에 맞게 수정 (#macaw→#macaw-img) -->
+
+    <xrextras-named-image-target name="macaw-target">
+      <xrextras-opaque-background remove="true">
+        <a-entity id="hider-walls-macaw">
+          <a-plane scale="0.5 2.2 0.5" position="-0.877 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+          <a-plane scale="0.5 2.2 0.5" position="0.777 0.016 0.025"  rotation="0 0 0" xrextras-hider-material></a-plane>
+        </a-entity>
+      </xrextras-opaque-background>
+      <xrextras-target-video-fade video="#macaw-video" position="0 0 -0.1"></xrextras-target-video-fade>
+      <a-entity
+        id="model-macaw"
+        gltf-model="#macaw-model"
+        scale="0.68 1 1" position="0 0 0" rotation="90 0 0"
+        shadow="receive: false" animation-mixer visible="false">
+      </a-entity>
+      <a-plane
+        material="src: #macaw-img; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0" position="-0.2 0 -0.05" height="1.4" width="0.9"
+        animation="property: position; from: 0.5 -5.5 -10; to: -0.2 0 -0.05; dir: linear; delay: 2000; dur: 2000; loop: false"
+        animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
+      </a-plane>
+      <!-- 수정: animation to 값이 원래 position과 일치하도록 수정 (0 0 -0.05 → -0.2 0 -0.05) -->
+      <a-plane
+        material="src: #tropical; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0" position="0 0 0" height="1.8" width="1.3">
+      </a-plane>
+    </xrextras-named-image-target>
+
+    <xrextras-named-image-target name="bluejay-target">
+      <xrextras-opaque-background remove="true">
+        <a-entity id="hider-walls-bluejay">
+          <a-plane scale="0.5 2.2 0.5" position="-0.877 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+          <a-plane scale="0.5 2.2 0.5" position="0.777 0.016 0.025"  rotation="0 0 0" xrextras-hider-material></a-plane>
+        </a-entity>
+      </xrextras-opaque-background>
+      <xrextras-target-video-fade video="#bluejay-video" position="0 0 -0.1"></xrextras-target-video-fade>
+      <a-entity
+        id="model-bluejay"
+        gltf-model="#bluejay-model"
+        scale="0.68 1 1" position="0 0 0" rotation="90 0 0"
+        shadow="receive: false" animation-mixer visible="false">
+      </a-entity>
+      <a-plane
+        material="src: #blue-jay; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0" position="-0.2 0 -0.05" height="1.4" width="0.9"
+        animation="property: position; from: 0.5 -5.5 -10; to: -0.2 0 -0.05; dir: linear; delay: 2000; dur: 2000; loop: false"
+        animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
+      </a-plane>
+      <a-plane
+        material="src: #bj-leaves; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0" position="0 0 0" height="1.8" width="1.3">
+      </a-plane>
+    </xrextras-named-image-target>
+
+    <xrextras-named-image-target name="cardinal-target">
+      <xrextras-opaque-background remove="true">
+        <a-entity id="hider-walls-cardinal">
+          <a-plane scale="0.5 2.2 0.5" position="-0.877 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+          <a-plane scale="0.5 2.2 0.5" position="0.777 0.016 0.025"  rotation="0 0 0" xrextras-hider-material></a-plane>
+        </a-entity>
+      </xrextras-opaque-background>
+      <xrextras-target-video-fade video="#cardinal-video" position="0 0 -0.1"></xrextras-target-video-fade>
+      <a-entity
+        id="model-cardinal"
+        gltf-model="#cardinal-model"
+        scale="0.68 1 1" position="0 0 0" rotation="90 0 0"
+        shadow="receive: false" animation-mixer visible="false">
+      </a-entity>
+      <a-plane
+        material="src: #cardinal-1; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0" position="-0.2 0 -0.05" height="1.4" width="0.9"
+        animation="property: position; from: 0.5 -5.5 -10; to: -0.2 0 -0.05; dir: linear; delay: 2000; dur: 2000; loop: false"
+        animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
+      </a-plane>
+      <a-plane
+        material="src: #c-leaves; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0" position="0 0 0" height="1.8" width="1.3">
+      </a-plane>
+    </xrextras-named-image-target>
+
+    <xrextras-named-image-target name="puffin-target">
+      <xrextras-opaque-background remove="true">
+        <a-entity id="hider-walls-puffin">
+          <a-plane scale="0.5 2.2 0.5" position="-0.877 0.016 0.025" rotation="0 0 0" xrextras-hider-material></a-plane>
+          <a-plane scale="0.5 2.2 0.5" position="0.777 0.016 0.025"  rotation="0 0 0" xrextras-hider-material></a-plane>
+        </a-entity>
+      </xrextras-opaque-background>
+      <xrextras-target-video-fade video="#puffin-video" position="0 0 -0.1"></xrextras-target-video-fade>
+      <a-entity
+        id="model-puffin"
+        gltf-model="#puffin-model"
+        scale="0.68 1 1" position="0 0 0" rotation="90 0 0"
+        shadow="receive: false" animation-mixer visible="false">
+      </a-entity>
+      <a-plane
+        material="src: #puffin-1; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0" position="-0.2 0 -0.05" height="1.4" width="0.9"
+        animation="property: position; from: 0.5 -5.5 -10; to: -0.2 0 -0.05; dir: linear; delay: 2000; dur: 2000; loop: false"
+        animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
+      </a-plane>
+      <a-plane
+        material="src: #pf-leaves; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0" position="0 0 0" height="1.8" width="1.3">
+      </a-plane>
+    </xrextras-named-image-target>
+
+    <a-plane
+      id="ground"
+      rotation="-90 0 0"
+      width="1000" height="1000"
+      material="shader: shadow"
+      shadow>
+    </a-plane>
+  </a-scene>
+
+  <script>
+    const overlay = document.getElementById('scanning-overlay');
+
+    // 수정: 타겟별 model id 매핑 테이블로 관리 (단일 #model 조회 오류 해결)
+    const TARGET_MODEL_MAP = {
+      'macaw-target':    '#model-macaw',
+      'bluejay-target':  '#model-bluejay',
+      'cardinal-target': '#model-cardinal',
+      'puffin-target':   '#model-puffin',
+    };
+    const TARGET_NAMES = Object.keys(TARGET_MODEL_MAP);
+
+    // 수정: 현재 활성 타겟 수를 추적하여 overlay 표시 여부를 정확히 제어
+    let activeTargetCount = 0;
+
+    function easeInOutQuad(t) {
+      return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+    }
+
+    function fadeInModel(entity) {
+      entity.setAttribute('visible', true);
+      const mesh = entity.getObject3D('mesh');
+      if (!mesh) return;
+
+      mesh.traverse((node) => {
+        if (node.material) {
+          const mats = Array.isArray(node.material) ? node.material : [node.material];
+          mats.forEach(m => { m.transparent = true; m.opacity = 0; });
+        }
+      });
+
+      const duration = 1500;
+      const start = performance.now();
+
+      function fade(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeInOutQuad(progress);
+        mesh.traverse((node) => {
+          if (node.material) {
+            const mats = Array.isArray(node.material) ? node.material : [node.material];
+            mats.forEach(m => { m.opacity = eased; });
+          }
+        });
+        if (progress < 1) requestAnimationFrame(fade);
+      }
+      requestAnimationFrame(fade);
+    }
+
+    document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+      const name = event.detail.name;
+      if (!TARGET_NAMES.includes(name)) return;
+
+      // 수정: overlay 숨김 처리
+      activeTargetCount++;
+      if (overlay && activeTargetCount === 1) {
+        overlay.style.animation = 'fadeOut 0.5s forwards';
+        setTimeout(() => { overlay.style.display = 'none'; }, 500);
+      }
+
+      // 수정: 타겟별 고유 model 엔티티를 정확히 선택
+      const entity = document.querySelector(TARGET_MODEL_MAP[name]);
+      if (!entity) return;
+      fadeInModel(entity);
+    });
+
+    document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+      const name = event.detail.name;
+      if (!TARGET_NAMES.includes(name)) return;
+
+      // 수정: 활성 타겟이 모두 사라졌을 때만 overlay 복원
+      activeTargetCount = Math.max(0, activeTargetCount - 1);
+      if (overlay && activeTargetCount === 0) {
+        overlay.style.display = 'flex';
+        overlay.style.animation = 'none';
+        overlay.style.opacity = '1';
+      }
+    });
+  </script>
+</body>
+</html>
