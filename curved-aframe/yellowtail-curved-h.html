@@ -83,7 +83,7 @@
 
   <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
   <a-light type="ambient" intensity="1.5"></a-light>
-  <a-entity id="model" gltf-model="#bean-glb" position="0 0.5 0" rotation="45 45 45" scale="0.3 0.3 0.3" xrextras-spin></a-entity>
+
 <a-plane
     id="model-1" 
     smooth-follow="target: #anchor-1; speed: 0.05" 
@@ -121,7 +121,7 @@
   <!-- WINE LABEL (Cylindrical): video fades in on label -->
   <xrextras-named-image-target name="yellow-target">
     <xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade>
-    
+      <a-entity id="model" gltf-model="#bean-glb" position="0 0.5 0" rotation="45 45 45" scale="0.3 0.3 0.3" xrextras-spin></a-entity>
     <a-entity
       id="anchor-1"
       position="-0.5 0.5 -5"
