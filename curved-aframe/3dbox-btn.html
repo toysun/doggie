@@ -65,7 +65,7 @@
   <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
   <a-light type="ambient" intensity="0.7"></a-light>
   
-  <xrextras-named-image-target name="3dbox-target">
+  <xrextras-named-image-target name="macaw-target">
     <a-plane
       material="src: #macaw; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
@@ -118,7 +118,7 @@ const aniBtn = document.getElementById('ani-btn')
 const exPlane = document.getElementById('explain-img')
   
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === '3dbox-target') {
+  if (event.detail.name === 'macaw-target') {
     //수정
   if (overlay) {
       overlay.style.animation = 'fadeOut 0.5s forwards';
