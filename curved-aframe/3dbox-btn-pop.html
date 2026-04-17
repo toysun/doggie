@@ -119,8 +119,114 @@
     shadow>
   </a-plane>
 </a-scene>
-
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const scene = document.querySelector('a-scene')
+
+  const overlay = document.getElementById('scanning-overlay')
+  const soundBtn = document.getElementById('sound-btn')
+  const aniBtn = document.getElementById('ani-btn')
+  const exPlane = document.getElementById('explain-img')
+
+  let sound
+
+  // 🔵 사운드 초기화
+  sound = new Howl({
+    src: ['./assets/Media/birds-song.mp3'],
+    html5: true,
+    loop: true
+  })
+
+  // 🔵 공통 애니메이션 함수 수정
+  const setAnim = (el, name, props) => {
+    el.removeAttribute(name)
+    requestAnimationFrame(() => {
+      el.setAttribute(name, props)
+    })
+  }
+
+  // 🔵 XR 타겟 인식
+  scene.addEventListener('xrimagefound', (event) => {
+    if (event.detail.name === 'macaw-target') {
+
+      if (overlay) {
+        overlay.style.display = 'none'
+      }
+
+    }
+  })
+
+  // 🔵 XR 타겟 상실
+  scene.addEventListener('xrimagelost', (event) => {
+    if (event.detail.name === 'macaw-target') {
+
+      if (overlay) {
+        overlay.style.display = 'block'
+      }
+
+      if (sound.playing()) {
+        sound.pause()
+      }
+
+      exPlane.setAttribute('visible', false)
+    }
+  })
+
+  // 🔵 사운드 버튼
+  let isSoundPressed = false
+
+  soundBtn.addEventListener('click', () => {
+    if (isSoundPressed) return
+    isSoundPressed = true
+
+    if (sound.playing()) {
+      sound.pause()
+    } else {
+      sound.play()
+    }
+
+    soundBtn.object3D.scale.set(1.15, 0.65, 1.15)
+
+    setTimeout(() => {
+      setAnim(soundBtn, 'animation__unsquish', {
+        property: 'scale',
+        from: '1.15 0.65 1.15',
+        to: '1 1 1',
+        easing: 'easeOutElastic',
+        dur: 600,
+      })
+      isSoundPressed = false
+    }, 100)
+  })
+
+  // 🔵 설명 버튼
+  let isAniPressed = false
+
+  aniBtn.addEventListener('click', () => {
+    if (isAniPressed) return
+    isAniPressed = true
+
+    const isVisible = exPlane.getAttribute('visible')
+    exPlane.setAttribute('visible', !isVisible)
+
+    aniBtn.object3D.scale.set(1.15, 0.65, 1.15)
+
+    setTimeout(() => {
+      setAnim(aniBtn, 'animation__unsquish', {
+        property: 'scale',
+        from: '1.15 0.65 1.15',
+        to: '1 1 1',
+        easing: 'easeOutElastic',
+        dur: 600,
+      })
+      isAniPressed = false
+    }, 100)
+  })
+
+})
+</script>
+<!--script>
 const overlay = document.getElementById('scanning-overlay');  
 const soundBtn = document.getElementById('sound-btn')
 const aniBtn = document.getElementById('ani-btn')
@@ -305,7 +411,7 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
   document.querySelector('a-scene').addEventListener('loaded', () => {
     document.querySelector('a-scene').setAttribute('ar-controller', '')
   })
-</script>
+</script-->
 
 
 </body>
