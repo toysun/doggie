@@ -37,7 +37,7 @@
 </head>
 
 <body>
-  <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; opacity: 0,3">
+  <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none; opacity: 0.3">
   <img src="./assets/Media/macaw-vertical.png" alt="스마트폰을 흔들어 스캔하세요" />
 </div>
 <a-scene
@@ -110,8 +110,121 @@
     shadow>
   </a-plane>
 </a-scene>
-
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const scene = document.querySelector('a-scene')
+  const overlay = document.getElementById('scanning-overlay')
+
+  let soundBtn, aniBtn, exPlane
+
+  scene.addEventListener('loaded', () => {
+
+    soundBtn = document.getElementById('sound-btn')
+    aniBtn = document.getElementById('ani-btn')
+    exPlane = document.getElementById('explain-img')
+
+    init()
+  })
+
+  function init() {
+
+    let isSoundPressed = false
+    let isAniPressed = false
+
+    const imageList = ['#tropical', '#garden', '#rooftop']
+    let currentImgIdx = -1
+
+    const sound = new Howl({
+      src: ['./assets/Media/birds-song.mp3'],
+      html5: true,
+      loop: true
+    })
+
+    const setAnim = (el, name, props) => {
+      el.removeAttribute(name)
+      requestAnimationFrame(() => {
+        el.setAttribute(name, props)
+      })
+    }
+
+    // 🔵 XR 인식
+    scene.addEventListener('xrimagefound', (event) => {
+      if (event.detail.name === 'macaw-target') {
+        if (overlay) overlay.style.display = 'none'
+      }
+    })
+
+    // 🔵 XR 상실
+    scene.addEventListener('xrimagelost', (event) => {
+      if (event.detail.name === 'macaw-target') {
+
+        if (overlay) overlay.style.display = 'block'
+
+        sound.pause()
+        exPlane.setAttribute('visible', false)
+        currentImgIdx = -1
+      }
+    })
+
+    // 🔵 사운드 버튼
+    soundBtn.addEventListener('click', () => {
+      if (isSoundPressed) return
+      isSoundPressed = true
+
+      if (sound.playing()) {
+        sound.pause()
+      } else {
+        sound.play()
+      }
+
+      soundBtn.object3D.scale.set(1.15, 0.65, 1.15)
+
+      setTimeout(() => {
+        setAnim(soundBtn, 'animation__unsquish', {
+          property: 'scale',
+          from: '1.15 0.65 1.15',
+          to: '1 1 1',
+          easing: 'easeOutElastic',
+          dur: 600,
+        })
+        isSoundPressed = false
+      }, 150)
+    })
+
+    // 🔵 이미지 순환 버튼
+    aniBtn.addEventListener('click', () => {
+      if (isAniPressed) return
+      isAniPressed = true
+
+      currentImgIdx++
+
+      if (currentImgIdx >= imageList.length) {
+        exPlane.setAttribute('visible', false)
+        currentImgIdx = -1
+      } else {
+        exPlane.setAttribute('src', imageList[currentImgIdx])
+        exPlane.setAttribute('visible', true)
+      }
+
+      aniBtn.object3D.scale.set(1.15, 0.65, 1.15)
+
+      setTimeout(() => {
+        setAnim(aniBtn, 'animation__unsquish', {
+          property: 'scale',
+          from: '1.15 0.65 1.15',
+          to: '1 1 1',
+          easing: 'easeOutElastic',
+          dur: 600,
+        })
+        isAniPressed = false
+      }, 150)
+    })
+  }
+
+})
+</script>
+<!--script>
 const overlay = document.getElementById('scanning-overlay');  
 const soundBtn = document.getElementById('sound-btn')
 const aniBtn = document.getElementById('ani-btn')
@@ -296,7 +409,7 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
   document.querySelector('a-scene').addEventListener('loaded', () => {
     document.querySelector('a-scene').setAttribute('ar-controller', '')
   })
-</script>
+</script-->
 
 
 </body>
