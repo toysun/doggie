@@ -144,8 +144,130 @@
     shadow>
   </a-plane>
 </a-scene>
-
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const scene = document.querySelector('a-scene')
+
+  let overlay = document.getElementById('scanning-overlay')
+  let soundBtn, aniBtn, exPlane, VidEntity, video
+
+  scene.addEventListener('loaded', () => {
+
+    // 🔵 A-Frame DOM 안전 접근
+    soundBtn = document.getElementById('sound-btn')
+    aniBtn = document.getElementById('ani-btn')
+    exPlane = document.getElementById('explain-img')
+    VidEntity = document.getElementById('VidEntity')
+    video = document.getElementById('completeVid')
+
+    initController()
+  })
+
+  function initController() {
+
+    let isSoundPressed = false
+    let isAniPressed = false
+
+    // 🔵 video 초기화
+    video.pause()
+    video.currentTime = 0
+
+    const sound = new Howl({
+      src: ['./assets/Media/birds-song.mp3'],
+      html5: true,
+      loop: true
+    })
+
+    const setAnim = (el, name, props) => {
+      el.removeAttribute(name)
+      requestAnimationFrame(() => {
+        el.setAttribute(name, props)
+      })
+    }
+
+    // 🔵 XR 타겟 인식
+    scene.addEventListener('xrimagefound', (event) => {
+      if (event.detail.name === 'macaw-target') {
+
+        if (overlay) overlay.style.display = 'none'
+
+      }
+    })
+
+    // 🔵 XR 타겟 상실
+    scene.addEventListener('xrimagelost', (event) => {
+      if (event.detail.name === 'macaw-target') {
+
+        if (overlay) overlay.style.display = 'block'
+
+        sound.pause()
+        video.pause()
+        VidEntity.setAttribute('visible', false)
+        exPlane.setAttribute('visible', false)
+      }
+    })
+
+    // 🔵 사운드 + 비디오 버튼
+    soundBtn.addEventListener('click', () => {
+      if (isSoundPressed) return
+      isSoundPressed = true
+
+      if (sound.playing()) {
+        sound.pause()
+        video.pause()
+        VidEntity.setAttribute('visible', false)
+      } else {
+        sound.play()
+
+        // 🔵 사용자 인터랙션 기반 video 재생 (안정)
+        video.play().then(() => {
+          VidEntity.setAttribute('visible', true)
+        }).catch(() => {
+          console.warn('video autoplay blocked')
+        })
+      }
+
+      soundBtn.object3D.scale.set(1.15, 0.65, 1.15)
+
+      setTimeout(() => {
+        setAnim(soundBtn, 'animation__unsquish', {
+          property: 'scale',
+          from: '1.15 0.65 1.15',
+          to: '1 1 1',
+          easing: 'easeOutElastic',
+          dur: 600,
+        })
+        isSoundPressed = false
+      }, 150)
+    })
+
+    // 🔵 설명 이미지 버튼
+    aniBtn.addEventListener('click', () => {
+      if (isAniPressed) return
+      isAniPressed = true
+
+      const isVisible = exPlane.getAttribute('visible')
+      exPlane.setAttribute('visible', !isVisible)
+
+      aniBtn.object3D.scale.set(1.15, 0.65, 1.15)
+
+      setTimeout(() => {
+        setAnim(aniBtn, 'animation__unsquish', {
+          property: 'scale',
+          from: '1.15 0.65 1.15',
+          to: '1 1 1',
+          easing: 'easeOutElastic',
+          dur: 600,
+        })
+        isAniPressed = false
+      }, 150)
+    })
+  }
+
+})
+</script>
+<!--script>
 const overlay = document.getElementById('scanning-overlay');  
 const soundBtn = document.getElementById('sound-btn')
 const aniBtn = document.getElementById('ani-btn')
@@ -343,7 +465,9 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
   document.querySelector('a-scene').addEventListener('loaded', () => {
     document.querySelector('a-scene').setAttribute('ar-controller', '')
   })
-</script>
+</script-->
+</body>
+</html>
 
 
 </body>
