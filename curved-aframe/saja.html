@@ -82,11 +82,11 @@
         id="model" 
         gltf-model="#bean-glb" 
         scale="0.1 0.1 0.1" 
-        position="0 0 -10" 
+        position="0 0 -3" 
         rotation="0 0 0"  
         shadow="receive: false" 
         animation-mixer
-        animation="property: position; from: 0 -10 -10; to: 0 0 -10; dir: linear; delay: 10000; dur: 2000; loop: false"
+        animation="property: position; from: 0 -10 -10; to: 0 0 -1; dir: linear; delay: 10000; dur: 2000; loop: false"
     >
     </a-entity>
   <xrextras-named-image-target name="saja-target">
@@ -103,7 +103,7 @@
     <a-plane
       material="src: #ground; transparent: true; roughness: 0.8; metalness: 0"
       rotation="-90 0 0"
-      position="0 -0.6 -0.3"
+      position="0 -0.56 -0.3"
       height="2.8" 
       width="1.5">     
     </a-plane>
@@ -127,7 +127,7 @@
                 spill: 1.0;
                 opacity: 1"
       geometry="primitive: plane; height: 1.2; width: 1;"
-      position="0 0 0.05"
+      position="0 0 0.5"
       visible="false">
   </a-entity>
 
