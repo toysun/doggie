@@ -78,12 +78,10 @@
   
   <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
   <a-light type="ambient" intensity="0.7"></a-light>
-  
-  <xrextras-named-image-target name="saja-target">
-    <a-entity 
+      <a-entity 
         id="model" 
         gltf-model="#c-hall" 
-        scale="100 100 100" 
+        scale="1 1 1" 
         position="0 0 -0.5" 
         rotation="90 0 0"  
         shadow="receive: false" 
@@ -91,6 +89,8 @@
         animation="property: position; from: 0 -1 0; to: 0 0 -0.5; dir: linear; delay: 2000; dur: 2000; loop: false"
     >
     </a-entity>
+  <xrextras-named-image-target name="saja-target">
+
     <a-plane
       material="src: #flower; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
