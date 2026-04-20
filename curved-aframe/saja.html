@@ -50,14 +50,14 @@
   <a-assets>
     <a-asset-item id="c-hall" src="./assets/Models/chinese+hall.glb"></a-asset-item>
     <a-asset-item id="j-ferry" src="./assets/Models/japanese_ferry.glb"></a-asset-item>
-    <img id="huji" src="./assets/Media/ground-texture-bright.png">
-    <img id="tropical" src="./assets/Media/jangseung.png">
-    <img id="jvt" src="./assets/Media/flower-bush.png">
-    <img id="garden" src="./assets/Media/bg-wave-t.png">
-    <img id="rooftop" src="./assets/Media/garden_rock.png">
+    <img id="jangseung" src="./assets/Media/jangseung.png">
+    <img id="flower" src="./assets/Media/flower-bush.png">
+    <img id="ground" src="./assets/Media/ground-texture-bright.png">
+    <img id="fine" src="./assets/Media/fine_tree.png">
+    <img id="rock" src="./assets/Media/garden_rock.png">
     <img id="MacawD" src="./assets/Media/macaw_desc.jpg">
     <video
-      id="completeVid"
+      id="sajavid"
       src="./assets/Media/saja_video.mp4"
       muted
       playsinline
@@ -82,17 +82,18 @@
   <xrextras-named-image-target name="macaw-target">
     <a-entity 
         id="model" 
-        gltf-model="#bean-glb" 
+        gltf-model="#c-hall" 
         scale="0.15 0.15 0.15" 
         position="0 0 0" 
         rotation="90 0 0"  
         shadow="receive: false" 
         animation-mixer
+        animation="property: position; from: 0 -15.5 0; to: 0 0 0; dir: linear; delay: 2000; dur: 2000; loop: false"
         visible="false"
     >
     </a-entity>
     <a-plane
-      material="src: #macaw; transparent: true; roughness: 0.8; metalness: 0"
+      material="src: #flower; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
       position="-0.2 0 -0.05"
       height="1.4" 
@@ -101,7 +102,7 @@
       animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
     </a-plane>
     <a-plane
-      material="src: #tropical; transparent: true; roughness: 0.8; metalness: 0"
+      material="src: #ground; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
       position="0 0 0"
       height="1.8" 
@@ -120,7 +121,7 @@
     <a-entity
       id="VidEntity"
       material="shader: chromakey;
-                src: #completeVid;
+                src: #sajavid;
                 color: 0.1 0.9 0.2;
                 threshold: 0.35;
                 smoothness: 0.08;
