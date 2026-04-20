@@ -78,6 +78,8 @@
   
   <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
   <a-light type="ambient" intensity="0.7"></a-light>
+
+  <xrextras-named-image-target name="saja-target">
       <a-entity 
         id="model" 
         gltf-model="#bean-glb" 
@@ -89,8 +91,6 @@
         animation="property: position; from: 0 -10 -10; to: 0 0 -1; dir: linear; delay: 10000; dur: 2000; loop: false"
     >
     </a-entity>
-  <xrextras-named-image-target name="saja-target">
-
     <a-plane
       material="src: #flower; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
