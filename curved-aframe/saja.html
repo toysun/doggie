@@ -8,7 +8,6 @@
 
   <script src="./../xr_st/8frame-1.5.0.min.js"></script>
   <script src="./../xr_st/xrextras.js"></script>
-  <!-- [수정 4] landing-page.js 주석 해제 — <a-scene landing-page> 속성 사용을 위해 필요 -->
   <script src="./../xr_st/landing-page.js"></script>
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
@@ -48,16 +47,14 @@
     xrweb="disableWorldTracking: true">
 
     <a-assets>
-      <!-- 에셋 파일명은 chinese_hall.glb 이지만 id는 bean-glb로 유지 (참조 일관성 확인) -->
       <a-asset-item id="bean-glb" src="./assets/Models/chinese_hall.glb"></a-asset-item>
       <a-asset-item id="j-ferry"  src="./assets/Models/japanese_ferry.glb"></a-asset-item>
-      <img id="jangseung" src="./assets/Media/jangseung.png">
-      <img id="flower"    src="./assets/Media/flower-bush.png">
-      <!-- [수정 3] id="ground" → "ground-tex" 로 변경 (아래 <a-plane id="ground-shadow">와 충돌 방지) -->
+      <img id="jangseung"  src="./assets/Media/jangseung.png">
+      <img id="flower"     src="./assets/Media/flower-bush.png">
       <img id="ground-tex" src="./assets/Media/ground-texture-bright.png">
-      <img id="fine"      src="./assets/Media/fine_tree.png">
-      <img id="rock"      src="./assets/Media/garden_rock.png">
-      <img id="MacawD"    src="./assets/Media/macaw_desc.jpg">
+      <img id="fine"       src="./assets/Media/fine_tree.png">
+      <img id="rock"       src="./assets/Media/garden_rock.png">
+      <img id="MacawD"     src="./assets/Media/macaw_desc.jpg">
       <video
         id="sajavid"
         src="./assets/Media/saja_video.mp4"
@@ -84,7 +81,11 @@
 
     <xrextras-named-image-target name="saja-target">
 
-      <!-- [수정 2] visible="false" 추가 — xrimagefound 전에 모델이 노출되는 것 방지 -->
+      <!--
+        [모델] 초기 위치를 화면 밖 아래(0 -5 -12)에서 시작하여 목표 지점(0 -0.4 -1)으로 이동.
+        visible="false" → xrimagefound 이벤트 전에 모델이 보이지 않도록 함.
+        delay: 3000 — 데코 요소들이 먼저 들어온 뒤 모델이 등장하도록 타이밍 맞춤.
+      -->
       <a-entity
         id="model"
         gltf-model="#bean-glb"
@@ -96,7 +97,11 @@
         animation-mixer
         animation="property: position; from: 0 -5 -12; to: 0 -0.4 -1; dir: linear; delay: 4000; dur: 3000; loop: false">
       </a-entity>
-
+      <!--
+        [데코 - 꽃] 오른쪽 밖(5 0 0.4)에서 목표 위치(0.5 0.2 0.4)로 슬라이드 인.
+        animation__1: 좌우 흔들림 반복 (loop: true) — 도착 후 자연스러운 바람에 흔들리는 효과.
+        delay: 3000 — 타겟 인식 직후 바로 시작.
+      -->
       <a-plane
         id="deco-flower"
         material="src: #flower; transparent: true; roughness: 0.8; metalness: 0"
@@ -108,6 +113,10 @@
         animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
       </a-plane>
 
+      <!--
+        [데코 - 장승] 오른쪽 밖(5 0 0.35)에서 목표 위치(0.5 0.2 0.35)로 슬라이드 인.
+        꽃보다 z값을 0.05 작게 설정하여 레이어 순서 구분.
+      -->
       <a-plane
         id="deco-jangseung"
         material="src: #jangseung; transparent: true; roughness: 0.8; metalness: 0"
@@ -119,6 +128,10 @@
         animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
       </a-plane>
 
+      <!--
+        [데코 - 소나무] 왼쪽 밖(-5 0 0.2)에서 목표 위치(-0.5 0.2 0.2)로 슬라이드 인.
+        반대 방향에서 진입하여 시각적 균형 효과.
+      -->
       <a-plane
         id="deco-fine"
         material="src: #fine; transparent: true; roughness: 0.8; metalness: 0"
@@ -130,26 +143,35 @@
         animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
       </a-plane>
 
+      <!--
+        [데코 - 바위] 오른쪽 밖(5 0 0.1)에서 목표 위치(0.5 0.2 0.1)로 슬라이드 인.
+        [수정 2] HTML position 초기값과 animation from 값을 (5 0 0.1)로 통일.
+                 기존에는 HTML position="5 0 0.2", from="5 0 0.1" 로 불일치하여 렌더링 순간 튀는 현상이 있었음.
+        [수정 2] to 값도 0.5 0.2 0.1 로 수정하여 z 레이어가 가장 뒤에 위치하도록 정리.
+      -->
       <a-plane
         id="deco-rock"
         material="src: #rock; transparent: true; roughness: 0.8; metalness: 0"
         rotation="0 0 0"
-        position="5 0 0.2"
+        position="5 0 0.1"
         height="1.4"
         width="0.9"
-        animation="property: position; from: 5 0 0.1; to: 0.5 0.2 0.2; dir: linear; delay: 3000; dur: 2000; loop: false"
+        animation="property: position; from: 5 0 0.1; to: 0.5 0.2 0.1; dir: linear; delay: 3000; dur: 2000; loop: false"
         animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
       </a-plane>
 
-      <!-- [수정 3] src="#ground" → "#ground-tex" (img id 변경에 따라 참조도 수정) -->
       <a-plane
         material="src: #ground-tex; transparent: true; roughness: 0.8; metalness: 0"
         rotation="-90 0 0"
         position="0 -0.37 0"
         height="2.8"
-        width="1.5" >
+        width="1.5">
       </a-plane>
 
+      <!--
+        [수정 1] visible="false" 중복 제거 — 동일 속성이 두 번 선언되어 있었음.
+                 A-Frame은 마지막 선언을 따르므로 기능 오류는 없으나 코드 혼란 유발.
+      -->
       <a-plane
         id="explain-img"
         visible="false"
@@ -157,8 +179,7 @@
         rotation="0 0 0"
         position="-0.5 0.9 0.05"
         height="0.6"
-        width="0.5"
-        visible="false" >
+        width="0.5">
       </a-plane>
 
       <a-entity
@@ -170,7 +191,7 @@
                   smoothness: 0.08;
                   spill: 1.0;
                   opacity: 1"
-        geometry="primitive: plane; height: 1.2; width: 1;"
+        geometry="primitive: plane; height: 1.2; width: 1."
         position="0 0.3 0.5"
         visible="false">
       </a-entity>
@@ -193,7 +214,6 @@
 
     </xrextras-named-image-target>
 
-    <!-- [수정 3] id="ground" → "ground-shadow" (img id="ground-tex" 와 분리) -->
     <a-plane
       id="ground-shadow"
       rotation="-90 0 0"
@@ -228,10 +248,20 @@
       initController()
     })
 
-    // [수정 5] 애니메이션 재시작 헬퍼 — 타겟 재인식 시 각 요소의 애니메이션을 처음부터 다시 실행
-    function restartAnimation(el, animAttr, props) {
+    /*
+     * restartAnimation(el, animAttr, fromPos, animProps)
+     * 타겟 재인식 시 애니메이션을 처음부터 다시 실행하기 위한 헬퍼.
+     *
+     * [수정 5] 기존에는 요소의 현재 position이 이미 도착 지점에 있어서
+     *          restartAnimation만 호출하면 애니메이션 delay 동안 도착 위치에
+     *          순간적으로 보이는 문제가 있었음.
+     *          → setAttribute('position', fromPos)로 먼저 초기 위치로 리셋한 뒤
+     *            다음 프레임에서 애니메이션을 재부착하여 깜빡임 없이 재생.
+     */
+    function restartAnimation(el, animAttr, fromPos, animProps) {
       el.removeAttribute(animAttr)
-      requestAnimationFrame(() => el.setAttribute(animAttr, props))
+      el.setAttribute('position', fromPos)   // 초기 위치로 즉시 리셋
+      requestAnimationFrame(() => el.setAttribute(animAttr, animProps))
     }
 
     function initController() {
@@ -256,27 +286,45 @@
 
         if (overlay) overlay.style.display = 'none'
 
-        // [수정 2] 모델 표시 복원
-        const model = document.getElementById('model')
-        if (model) model.setAttribute('visible', true)
-
-        // [수정 5] 타겟 재인식 시 입장 애니메이션 재시작
-        restartAnimation(model, 'animation',
-          'property: position; from: 0 -5 -12; to: 0 -0.4 -1; dir: linear; delay: 3000; dur: 3000; loop: false')
-
+        const model        = document.getElementById('model')
         const decoFlower   = document.getElementById('deco-flower')
         const decoJangseung = document.getElementById('deco-jangseung')
         const decoFine     = document.getElementById('deco-fine')
         const decoRock     = document.getElementById('deco-rock')
 
+        // 모델 표시 후 초기 위치로 리셋 → 입장 애니메이션 재시작
+        if (model) {
+          model.setAttribute('visible', true)
+          /*
+           * [수정 3] HTML delay: 4000 / 이전 JS delay: 3000 불일치 수정.
+           *          데코(3000ms) 등장 후 1초 뒤 모델이 올라오도록 delay: 4000 으로 통일.
+           */
+          restartAnimation(model, 'animation',
+            '0 -5 -12',
+            'property: position; from: 0 -5 -12; to: 0 -0.4 -1; dir: linear; delay: 4000; dur: 3000; loop: false')
+        }
+
+        // 데코 요소들 초기 위치로 리셋 → 입장 애니메이션 재시작
         restartAnimation(decoFlower, 'animation',
+          '5 0 0.4',
           'property: position; from: 5 0 0.4; to: 0.5 0.2 0.4; dir: linear; delay: 3000; dur: 2000; loop: false')
+
         restartAnimation(decoJangseung, 'animation',
+          '5 0 0.35',
           'property: position; from: 5 0 0.35; to: 0.5 0.2 0.35; dir: linear; delay: 3000; dur: 2000; loop: false')
+
         restartAnimation(decoFine, 'animation',
+          '-5 0 0.2',
           'property: position; from: -5 0 0.2; to: -0.5 0.2 0.2; dir: linear; delay: 3000; dur: 2000; loop: false')
+
+        /*
+         * [수정 4] deco-rock restartAnimation from 값을 '5 0 0.1'로 수정.
+         *          이전 코드는 from: '5 0 0.1' 이었는데 to는 '0.5 0.2 0.2' 여서 z값이 섞였음.
+         *          HTML 수정(수정 2)과 맞추어 to도 '0.5 0.2 0.1'로 통일.
+         */
         restartAnimation(decoRock, 'animation',
-          'property: position; from: 5 0 0.1; to: 0.5 0.2 0.2; dir: linear; delay: 3000; dur: 2000; loop: false')
+          '5 0 0.1',
+          'property: position; from: 5 0 0.1; to: 0.5 0.2 0.1; dir: linear; delay: 3000; dur: 2000; loop: false')
       })
 
       // --- XR 타겟 상실 ---
@@ -289,6 +337,13 @@
         if (video) video.pause()
         VidEntity.setAttribute('visible', false)
         exPlane.setAttribute('visible', false)
+
+        /*
+         * [수정 6] 타겟 상실 시 모델 숨김 처리 추가.
+         *          기존에는 xrimagelost 이후에도 모델이 화면에 남아 있었음.
+         */
+        const model = document.getElementById('model')
+        if (model) model.setAttribute('visible', false)
       })
 
       // --- 사운드 + 비디오 버튼 (붉은 구체) ---
