@@ -8,7 +8,8 @@
 
   <script src="./../xr_st/8frame-1.5.0.min.js"></script>
   <script src="./../xr_st/xrextras.js"></script>
-  <!--script src="./../xr_st/landing-page.js"></script-->  
+  <!-- [수정 4] landing-page.js 주석 해제 — <a-scene landing-page> 속성 사용을 위해 필요 -->
+  <script src="./../xr_st/landing-page.js"></script>
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
   <script src="./howler.min.js"></script>
@@ -17,8 +18,8 @@
 
   <script>
      const onxrloaded = async () => {
-       const res = await fetch('./saja-target.json')
-       const json = await res.json()
+       const res  = await fetch('./saja-target.json')
+       const json  = await res.json()
        const res1 = await fetch('./costume.json')
        const json1 = await res1.json()
        const res2 = await fetch('./oregage.json')
@@ -32,233 +33,268 @@
      }
      window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
   </script>
-
-
 </head>
 
 <body>
   <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
-  <img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
-</div>
-<a-scene
-  landing-page
-  xrextras-loading
-  xrextras-runtime-error
-  renderer="colorManagement: true; physicallyBasedRendering: true;"
-  xrweb="disableWorldTracking: true">
-  
-  <a-assets>
-    <a-asset-item id="bean-glb" src="./assets/Models/chinese_hall.glb"></a-asset-item>
-    <a-asset-item id="j-ferry" src="./assets/Models/japanese_ferry.glb"></a-asset-item>
-    <img id="jangseung" src="./assets/Media/jangseung.png">
-    <img id="flower" src="./assets/Media/flower-bush.png">
-    <img id="ground" src="./assets/Media/ground-texture-bright.png">
-    <img id="fine" src="./assets/Media/fine_tree.png">
-    <img id="rock" src="./assets/Media/garden_rock.png">
-    <img id="MacawD" src="./assets/Media/macaw_desc.jpg">
-    <video
-      id="sajavid"
-      src="./assets/Media/saja_video.mp4"
-      muted
-      playsinline
-      webkit-playsinline
-      crossorigin="anonymous"
-      preload="auto"
-      loop=true>
-    </video>
+    <img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
+  </div>
 
-  </a-assets>
-  <xrextras-capture-button></xrextras-capture-button>
-  <xrextras-capture-preview></xrextras-capture-preview>
-  <a-camera
-    position="0 1 1"
-    raycaster="objects: .cantap"
-    cursor="fuse: false; rayOrigin: mouse;">
-  </a-camera>
-  
-  <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
-  <a-light type="ambient" intensity="0.7"></a-light>
+  <a-scene
+    landing-page
+    xrextras-loading
+    xrextras-runtime-error
+    renderer="colorManagement: true; physicallyBasedRendering: true;"
+    xrweb="disableWorldTracking: true">
 
-  <xrextras-named-image-target name="saja-target">
-      <a-entity 
-        id="model" 
-        gltf-model="#bean-glb" 
-        scale="0.2 0.2 0.2" 
+    <a-assets>
+      <!-- 에셋 파일명은 chinese_hall.glb 이지만 id는 bean-glb로 유지 (참조 일관성 확인) -->
+      <a-asset-item id="bean-glb" src="./assets/Models/chinese_hall.glb"></a-asset-item>
+      <a-asset-item id="j-ferry"  src="./assets/Models/japanese_ferry.glb"></a-asset-item>
+      <img id="jangseung" src="./assets/Media/jangseung.png">
+      <img id="flower"    src="./assets/Media/flower-bush.png">
+      <!-- [수정 3] id="ground" → "ground-tex" 로 변경 (아래 <a-plane id="ground-shadow">와 충돌 방지) -->
+      <img id="ground-tex" src="./assets/Media/ground-texture-bright.png">
+      <img id="fine"      src="./assets/Media/fine_tree.png">
+      <img id="rock"      src="./assets/Media/garden_rock.png">
+      <img id="MacawD"    src="./assets/Media/macaw_desc.jpg">
+      <video
+        id="sajavid"
+        src="./assets/Media/saja_video.mp4"
+        muted
+        playsinline
+        webkit-playsinline
+        crossorigin="anonymous"
+        preload="auto"
+        loop="true">
+      </video>
+    </a-assets>
+
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+
+    <a-camera
+      position="0 1 1"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+
+    <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+    <a-light type="ambient"     intensity="0.7"></a-light>
+
+    <xrextras-named-image-target name="saja-target">
+
+      <!-- [수정 2] visible="false" 추가 — xrimagefound 전에 모델이 노출되는 것 방지 -->
+      <a-entity
+        id="model"
+        gltf-model="#bean-glb"
+        scale="0.2 0.2 0.2"
         rotation="0 0 0"
-        position="0 -5 -10"  
-        shadow="receive: false" 
+        position="0 -5 -10"
+        visible="false"
+        shadow="receive: false"
         animation-mixer
-        animation="property: position; from: 0 -5 -10; to: 0 -0.4 -1; dir: linear; delay: 10000; dur: 3000; loop: false"
-    >
-    </a-entity>
-    <a-plane
-      material="src: #flower; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="5 0 0.3"  
-      height="1.4" 
-      width="0.9"
-      animation="property: position; from: 5 0 0.3; to: 0.5 0.2 0.3; dir: linear; delay: 11000; dur: 2000; loop: false"
-      animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
-    </a-plane>
-        <a-plane
-      material="src: #jangseung; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="5 0 0.2"  
-      height="1.4" 
-      width="0.9"
-      animation="property: position; from: 5 0 0.2; to: 0.5 0.2 0.2; dir: linear; delay: 12000; dur: 2000; loop: false"
-      animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
-    </a-plane>
-        <a-plane
-      material="src: #fine; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="-5 0 0.2"  
-      height="1.4" 
-      width="0.9"
-      animation="property: position; from: -5 0 0.2; to: -0.5 0.2 0.2; dir: linear; delay: 9000; dur: 2000; loop: false"
-      animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
-    </a-plane>
-            <a-plane
-      material="src: #rock; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="5 0 0.1"  
-      height="1.4" 
-      width="0.9"
-      animation="property: position; from: 5 0 0.1; to: 0.5 0.2 0.15; dir: linear; delay: 10000; dur: 2000; loop: false"
-      animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
-    </a-plane>
-    <a-plane
-      material="src: #ground; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="-90 0 0"
-      position="0 -0.37 0"
-      height="2.8" 
-      width="1.5">     
-    </a-plane>
+        animation="property: position; from: 0 -5 -10; to: 0 -0.4 -1; dir: linear; delay: 10000; dur: 3000; loop: false">
+      </a-entity>
 
-    <a-plane
-      id="explain-img"
-      visible="false"
-      material="src: #MacawD;"
-      rotation="0 0 0"
-      position="-0.5 0.9 0.05"
-      height="0.6" 
-      width="0.5">     
-    </a-plane>
-    <a-entity
-      id="VidEntity"
-      material="shader: chromakey;
-                src: #sajavid;
-                color: 0.1 0.9 0.2;
-                threshold: 0.35;
-                smoothness: 0.08;
-                spill: 1.0;
-                opacity: 1"
-      geometry="primitive: plane; height: 1.2; width: 1;"
-      position="0 0.3 0.5"
-      visible="false">
-  </a-entity>
+      <a-plane
+        id="deco-flower"
+        material="src: #flower; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0"
+        position="5 0 0.3"
+        height="1.4"
+        width="0.9"
+        animation="property: position; from: 5 0 0.3; to: 0.5 0.2 0.3; dir: linear; delay: 11000; dur: 2000; loop: false"
+        animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
+      </a-plane>
 
-    <a-sphere
+      <a-plane
+        id="deco-jangseung"
+        material="src: #jangseung; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0"
+        position="5 0 0.2"
+        height="1.4"
+        width="0.9"
+        animation="property: position; from: 5 0 0.2; to: 0.5 0.2 0.2; dir: linear; delay: 12000; dur: 2000; loop: false"
+        animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
+      </a-plane>
+
+      <a-plane
+        id="deco-fine"
+        material="src: #fine; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0"
+        position="-5 0 0.2"
+        height="1.4"
+        width="0.9"
+        animation="property: position; from: -5 0 0.2; to: -0.5 0.2 0.2; dir: linear; delay: 9000; dur: 2000; loop: false"
+        animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
+      </a-plane>
+
+      <a-plane
+        id="deco-rock"
+        material="src: #rock; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="0 0 0"
+        position="5 0 0.1"
+        height="1.4"
+        width="0.9"
+        animation="property: position; from: 5 0 0.1; to: 0.5 0.2 0.15; dir: linear; delay: 10000; dur: 2000; loop: false"
+        animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
+      </a-plane>
+
+      <!-- [수정 3] src="#ground" → "#ground-tex" (img id 변경에 따라 참조도 수정) -->
+      <a-plane
+        material="src: #ground-tex; transparent: true; roughness: 0.8; metalness: 0"
+        rotation="-90 0 0"
+        position="0 -0.37 0"
+        height="2.8"
+        width="1.5">
+      </a-plane>
+
+      <a-plane
+        id="explain-img"
+        visible="false"
+        material="src: #MacawD;"
+        rotation="0 0 0"
+        position="-0.5 0.9 0.05"
+        height="0.6"
+        width="0.5">
+      </a-plane>
+
+      <a-entity
+        id="VidEntity"
+        material="shader: chromakey;
+                  src: #sajavid;
+                  color: 0.1 0.9 0.2;
+                  threshold: 0.35;
+                  smoothness: 0.08;
+                  spill: 1.0;
+                  opacity: 1"
+        geometry="primitive: plane; height: 1.2; width: 1;"
+        position="0 0.3 0.5"
+        visible="false">
+      </a-entity>
+
+      <a-sphere
         id="sound-btn"
-        position="-0.3 -0.1 0.4" 
-        radius="0.05" 
+        position="-0.3 -0.1 0.4"
+        radius="0.05"
         color="#EF2D5E"
         class="cantap">
-    </a-sphere>
-    <a-sphere
+      </a-sphere>
+
+      <a-sphere
         id="ani-btn"
-        position="0.3 -0.1 0.4" 
-        radius="0.05" 
+        position="0.3 -0.1 0.4"
+        radius="0.05"
         color="#7BC8A4"
         class="cantap">
-    </a-sphere>
+      </a-sphere>
 
-  </xrextras-named-image-target>
+    </xrextras-named-image-target>
 
-  <a-plane
-    id="ground"
-    rotation="-90 0 0"
-    width="1000"
-    height="1000"
-    material="shader: shadow"
-    shadow>
-  </a-plane>
-</a-scene>
+    <!-- [수정 3] id="ground" → "ground-shadow" (img id="ground-tex" 와 분리) -->
+    <a-plane
+      id="ground-shadow"
+      rotation="-90 0 0"
+      width="1000"
+      height="1000"
+      material="shader: shadow"
+      shadow>
+    </a-plane>
+
+  </a-scene>
+
   <script>
   document.addEventListener('DOMContentLoaded', () => {
- 
-    const scene = document.querySelector('a-scene')
+
+    const scene   = document.querySelector('a-scene')
     const overlay = document.getElementById('scanning-overlay')
- 
-    // 변수 선언 (scene loaded 이후 할당)
+
     let soundBtn, aniBtn, exPlane, VidEntity, video
- 
+
     scene.addEventListener('loaded', () => {
- 
       soundBtn  = document.getElementById('sound-btn')
       aniBtn    = document.getElementById('ani-btn')
       exPlane   = document.getElementById('explain-img')
       VidEntity = document.getElementById('VidEntity')
-      // [수정 1] 'completeVid' → 'sajavid' (HTML <video> id와 일치)
       video     = document.getElementById('sajavid')
- 
-      // [수정 2] video가 null이 아님을 확인한 뒤 초기화
+
       if (video) {
         video.pause()
         video.currentTime = 0
       }
- 
+
       initController()
     })
- 
+
+    // [수정 5] 애니메이션 재시작 헬퍼 — 타겟 재인식 시 각 요소의 애니메이션을 처음부터 다시 실행
+    function restartAnimation(el, animAttr, props) {
+      el.removeAttribute(animAttr)
+      requestAnimationFrame(() => el.setAttribute(animAttr, props))
+    }
+
     function initController() {
- 
+
       let isSoundPressed = false
       let isAniPressed   = false
- 
+
       const sound = new Howl({
         src: ['./assets/Media/birds-song.mp3'],
         html5: true,
         loop: true
       })
- 
+
       const setAnim = (el, name, props) => {
         el.removeAttribute(name)
-        requestAnimationFrame(() => {
-          el.setAttribute(name, props)
-        })
+        requestAnimationFrame(() => el.setAttribute(name, props))
       }
- 
+
       // --- XR 타겟 인식 ---
       scene.addEventListener('xrimagefound', (event) => {
-        if (event.detail.name === 'saja-target') {
- 
-          if (overlay) overlay.style.display = 'none'
- 
-          // [수정 3] 타겟 인식 시 #model 표시 복원
-          const model = document.getElementById('model')
-          if (model) model.setAttribute('visible', true)
-        }
+        if (event.detail.name !== 'saja-target') return
+
+        if (overlay) overlay.style.display = 'none'
+
+        // [수정 2] 모델 표시 복원
+        const model = document.getElementById('model')
+        if (model) model.setAttribute('visible', true)
+
+        // [수정 5] 타겟 재인식 시 입장 애니메이션 재시작
+        restartAnimation(model, 'animation',
+          'property: position; from: 0 -5 -10; to: 0 -0.4 -1; dir: linear; delay: 10000; dur: 3000; loop: false')
+
+        const decoFlower   = document.getElementById('deco-flower')
+        const decoJangseung = document.getElementById('deco-jangseung')
+        const decoFine     = document.getElementById('deco-fine')
+        const decoRock     = document.getElementById('deco-rock')
+
+        restartAnimation(decoFlower, 'animation',
+          'property: position; from: 5 0 0.3; to: 0.5 0.2 0.3; dir: linear; delay: 11000; dur: 2000; loop: false')
+        restartAnimation(decoJangseung, 'animation',
+          'property: position; from: 5 0 0.2; to: 0.5 0.2 0.2; dir: linear; delay: 12000; dur: 2000; loop: false')
+        restartAnimation(decoFine, 'animation',
+          'property: position; from: -5 0 0.2; to: -0.5 0.2 0.2; dir: linear; delay: 9000; dur: 2000; loop: false')
+        restartAnimation(decoRock, 'animation',
+          'property: position; from: 5 0 0.1; to: 0.5 0.2 0.15; dir: linear; delay: 10000; dur: 2000; loop: false')
       })
- 
+
       // --- XR 타겟 상실 ---
       scene.addEventListener('xrimagelost', (event) => {
-        if (event.detail.name === 'saja-target') {
- 
-          if (overlay) overlay.style.display = 'block'
- 
-          sound.pause()
-          if (video) video.pause()
-          VidEntity.setAttribute('visible', false)
-          exPlane.setAttribute('visible', false)
-        }
+        if (event.detail.name !== 'saja-target') return
+
+        if (overlay) overlay.style.display = 'block'
+
+        sound.pause()
+        if (video) video.pause()
+        VidEntity.setAttribute('visible', false)
+        exPlane.setAttribute('visible', false)
       })
- 
+
       // --- 사운드 + 비디오 버튼 (붉은 구체) ---
       soundBtn.addEventListener('click', () => {
         if (isSoundPressed) return
         isSoundPressed = true
- 
+
         if (sound.playing()) {
           sound.pause()
           if (video) video.pause()
@@ -273,7 +309,7 @@
             })
           }
         }
- 
+
         soundBtn.object3D.scale.set(1.15, 0.65, 1.15)
         setTimeout(() => {
           setAnim(soundBtn, 'animation__unsquish', {
@@ -286,15 +322,15 @@
           isSoundPressed = false
         }, 150)
       })
- 
+
       // --- 설명 이미지 버튼 (녹색 구체) ---
       aniBtn.addEventListener('click', () => {
         if (isAniPressed) return
         isAniPressed = true
- 
+
         const isVisible = exPlane.getAttribute('visible')
         exPlane.setAttribute('visible', !isVisible)
- 
+
         aniBtn.object3D.scale.set(1.15, 0.65, 1.15)
         setTimeout(() => {
           setAnim(aniBtn, 'animation__unsquish', {
@@ -308,131 +344,9 @@
         }, 150)
       })
     }
- 
+
   })
   </script>
-<!--script>
-document.addEventListener('DOMContentLoaded', () => {
 
-  const scene = document.querySelector('a-scene')
-
-  let overlay = document.getElementById('scanning-overlay')
-  let soundBtn, aniBtn, exPlane, VidEntity, video
-
-  scene.addEventListener('loaded', () => {
-
-    // 🔵 A-Frame DOM 안전 접근
-    soundBtn = document.getElementById('sound-btn')
-    aniBtn = document.getElementById('ani-btn')
-    exPlane = document.getElementById('explain-img')
-    VidEntity = document.getElementById('VidEntity')
-    video = document.getElementById('sajavid')
-
-    initController()
-  })
-
-  function initController() {
-
-    let isSoundPressed = false
-    let isAniPressed = false
-
-    // 🔵 video 초기화
-    video.pause()
-    video.currentTime = 0
-
-    const sound = new Howl({
-      src: ['./assets/Media/birds-song.mp3'],
-      html5: true,
-      loop: true
-    })
-
-    const setAnim = (el, name, props) => {
-      el.removeAttribute(name)
-      requestAnimationFrame(() => {
-        el.setAttribute(name, props)
-      })
-    }
-
-    // 🔵 XR 타겟 인식
-    scene.addEventListener('xrimagefound', (event) => {
-      if (event.detail.name === 'saja-target') {
-
-        if (overlay) overlay.style.display = 'none'
-
-      }
-    })
-
-    // 🔵 XR 타겟 상실
-    scene.addEventListener('xrimagelost', (event) => {
-      if (event.detail.name === 'saja-target') {
-
-        if (overlay) overlay.style.display = 'block'
-
-        sound.pause()
-        video.pause()
-        VidEntity.setAttribute('visible', false)
-        exPlane.setAttribute('visible', false)
-      }
-    })
-
-    // 🔵 사운드 + 비디오 버튼
-    soundBtn.addEventListener('click', () => {
-      if (isSoundPressed) return
-      isSoundPressed = true
-
-      if (sound.playing()) {
-        sound.pause()
-        video.pause()
-        VidEntity.setAttribute('visible', false)
-      } else {
-        sound.play()
-
-        // 🔵 사용자 인터랙션 기반 video 재생 (안정)
-        video.play().then(() => {
-          VidEntity.setAttribute('visible', true)
-        }).catch(() => {
-          console.warn('video autoplay blocked')
-        })
-      }
-
-      soundBtn.object3D.scale.set(1.15, 0.65, 1.15)
-
-      setTimeout(() => {
-        setAnim(soundBtn, 'animation__unsquish', {
-          property: 'scale',
-          from: '1.15 0.65 1.15',
-          to: '1 1 1',
-          easing: 'easeOutElastic',
-          dur: 600,
-        })
-        isSoundPressed = false
-      }, 150)
-    })
-
-    // 🔵 설명 이미지 버튼
-    aniBtn.addEventListener('click', () => {
-      if (isAniPressed) return
-      isAniPressed = true
-
-      const isVisible = exPlane.getAttribute('visible')
-      exPlane.setAttribute('visible', !isVisible)
-
-      aniBtn.object3D.scale.set(1.15, 0.65, 1.15)
-
-      setTimeout(() => {
-        setAnim(aniBtn, 'animation__unsquish', {
-          property: 'scale',
-          from: '1.15 0.65 1.15',
-          to: '1 1 1',
-          easing: 'easeOutElastic',
-          dur: 600,
-        })
-        isAniPressed = false
-      }, 150)
-    })
-  }
-
-})
-</script-->
 </body>
 </html>
