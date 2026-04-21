@@ -109,7 +109,7 @@
         position="5 0 0.4"
         height="1.2"
         width="0.9"
-        animation="property: position; from: 5 0 0.4; to: 0.5 0.2 0.4; dir: linear; delay: 3000; dur: 2000; loop: false"
+        animation="property: position; from: 5 0 0.4; to: 0.5 0.2 0.4; dir: linear; delay: 1500; dur: 2000; loop: false"
         animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
       </a-plane>
 
@@ -124,7 +124,7 @@
         position="5 0 0.2"
         height="1.9"
         width="0.7"
-        animation="property: position; from: 5 0 0.2; to: 0.5 0.2 0.2; dir: linear; delay: 3000; dur: 2000; loop: false"
+        animation="property: position; from: 5 0 0.2; to: 0.5 0.3 0.2; dir: linear; delay: 1000; dur: 2000; loop: false"
         animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
       </a-plane>
 
@@ -139,7 +139,7 @@
         position="-5 0 0.2"
         height="1.4"
         width="0.9"
-        animation="property: position; from: -5 0 0.2; to: -0.5 0.2 0.2; dir: linear; delay: 3000; dur: 2000; loop: false"
+        animation="property: position; from: -5 0 0.2; to: -0.5 0.2 0.2; dir: linear; delay: 1000; dur: 2000; loop: false"
         animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
       </a-plane>
 
@@ -153,10 +153,10 @@
         id="deco-rock"
         material="src: #rock; transparent: true; roughness: 0.8; metalness: 0; alphaTest: 0.5; shader: flat"
         rotation="0 0 0"
-        position="5 0 0.2"
+        position="-5 0 0.2"
         height="2.4"
         width="1.9"
-        animation="property: position; from: 5 0 0.1; to: 0.5 0.2 0.2; dir: linear; delay: 1000; dur: 2000; loop: false"
+        animation="property: position; from: -5 0 0.1; to: -0.5 0.2 0.2; dir: linear; delay: 1000; dur: 2000; loop: false"
         animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">
       </a-plane>
 
@@ -190,7 +190,10 @@
                   threshold: 0.28;
                   smoothness: 0.20;
                   spill: 2.0;
-                  opacity: 1"
+                  opacity: 1
+                  transparent: true;
+                  alphaTest: 0.01;
+                  side: double"
         geometry="primitive: plane; height: 1.2; width: 1."
         position="0 0.3 0.5"
         visible="false">
@@ -301,21 +304,21 @@
            */
           restartAnimation(model, 'animation',
             '0 -5 -12',
-            'property: position; from: 0 -5 -12; to: 0 -0.4 -1; dir: linear; delay: 4000; dur: 3000; loop: false')
+            'property: position; from: 0 -5 -12; to: 0 -0.4 -1; dir: linear; delay: 1500; dur: 3000; loop: false')
         }
 
         // 데코 요소들 초기 위치로 리셋 → 입장 애니메이션 재시작
         restartAnimation(decoFlower, 'animation',
           '5 0 0.4',
-          'property: position; from: 5 0 0.4; to: 0.5 0.2 0.4; dir: linear; delay: 3000; dur: 2000; loop: false')
+          'property: position; from: 5 0 0.4; to: 0.5 0.2 0.4; dir: linear; delay: 1000; dur: 2000; loop: false')
 
         restartAnimation(decoJangseung, 'animation',
           '5 0 0.35',
-          'property: position; from: 5 0 0.35; to: 0.5 0.2 0.35; dir: linear; delay: 3000; dur: 2000; loop: false')
+          'property: position; from: 5 0 0.35; to: 0.5 0.2 0.35; dir: linear; delay: 1000; dur: 2000; loop: false')
 
         restartAnimation(decoFine, 'animation',
           '-5 0 0.2',
-          'property: position; from: -5 0 0.2; to: -0.5 0.2 0.2; dir: linear; delay: 3000; dur: 2000; loop: false')
+          'property: position; from: -5 0 0.2; to: -0.5 0.2 0.2; dir: linear; delay: 1000; dur: 2000; loop: false')
 
         /*
          * [수정 4] deco-rock restartAnimation from 값을 '5 0 0.1'로 수정.
@@ -323,8 +326,8 @@
          *          HTML 수정(수정 2)과 맞추어 to도 '0.5 0.2 0.1'로 통일.
          */
         restartAnimation(decoRock, 'animation',
-          '5 0 0.1',
-          'property: position; from: 5 0 0.1; to: 0.5 0.2 0.1; dir: linear; delay: 3000; dur: 2000; loop: false')
+          '-5 0 0.1',
+          'property: position; from: -5 0 0.1; to: -0.5 0.2 0.1; dir: linear; delay: 1000; dur: 2000; loop: false')
       })
 
       // --- XR 타겟 상실 ---
