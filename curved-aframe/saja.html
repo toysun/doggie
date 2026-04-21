@@ -83,12 +83,12 @@
       <a-entity 
         id="model" 
         gltf-model="#bean-glb" 
-        scale="0.15 0.15 0.15" 
-        position="0 -10 -10" 
+        scale="0.2 0.2 0.2" 
+        position="0 -5 -10" 
         rotation="0 0 0"  
         shadow="receive: false" 
         animation-mixer
-        animation="property: position; from: 0 -5 -10; to: 0 -0.4 -1; dir: linear; delay: 3000; dur: 3000; loop: false"
+        animation="property: position; from: 0 -5 -10; to: 0 -0.4 -1; dir: linear; delay: 2500; dur: 3000; loop: false"
     >
     </a-entity>
     <a-plane
@@ -97,7 +97,7 @@
       position="5 0 0.3"
       height="1.4" 
       width="0.9"
-      animation="property: position; from: 5 0 0.3; to: 0.5 0 0.3; dir: linear; delay: 2000; dur: 2000; loop: false"
+      animation="property: position; from: 5 0 0.3; to: 0.5 0.1 0.3; dir: linear; delay: 2000; dur: 2000; loop: false"
       animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
     </a-plane>
         <a-plane
@@ -106,7 +106,7 @@
       position="5 0 0.2"
       height="1.4" 
       width="0.9"
-      animation="property: position; from: 5 0 0.2; to: 0.5 0 0.2; dir: linear; delay: 1800; dur: 2000; loop: false"
+      animation="property: position; from: 5 0 0.2; to: 0.5 0.1 0.2; dir: linear; delay: 1800; dur: 2000; loop: false"
       //animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
     </a-plane>
         <a-plane
@@ -115,16 +115,16 @@
       position="-5 0 0.2"
       height="1.4" 
       width="0.9"
-      animation="property: position; from: -5 0 0.2; to: -0.5 0 0.2; dir: linear; delay: 1800; dur: 2000; loop: false"
+      animation="property: position; from: -5 0 0.2; to: -0.5 0.1 0.2; dir: linear; delay: 1800; dur: 2000; loop: false"
       animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
     </a-plane>
             <a-plane
       material="src: #rock; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
-      position="5 0 0.1"
+      position="5 0 0.15"
       height="1.4" 
       width="0.9"
-      animation="property: position; from: 5 0 0.1; to: 0.5 0 0.1; dir: linear; delay: 1700; dur: 2000; loop: false"
+      animation="property: position; from: 5 0 0.1; to: 0.5 0 0.15; dir: linear; delay: 1700; dur: 2000; loop: false"
       animation__1="property: rotation; from: 0 0 -5.5; to: 0 0 5.5; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
     </a-plane>
     <a-plane
@@ -154,20 +154,20 @@
                 spill: 1.0;
                 opacity: 1"
       geometry="primitive: plane; height: 1.2; width: 1;"
-      position="0 0.2 0.2"
+      position="0 0.3 0.5"
       visible="false">
   </a-entity>
 
     <a-sphere
         id="sound-btn"
-        position="-0.3 -0.2 0.2" 
+        position="-0.3 -0.1 0.4" 
         radius="0.05" 
         color="#EF2D5E"
         class="cantap">
     </a-sphere>
     <a-sphere
         id="ani-btn"
-        position="0.3 -0.2 0.2" 
+        position="0.3 -0.1 0.4" 
         radius="0.05" 
         color="#7BC8A4"
         class="cantap">
