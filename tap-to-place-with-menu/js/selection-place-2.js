@@ -5,9 +5,9 @@ const selectionPlaceComponent = {
     const scene     = document.querySelector('a-scene')
 
     const entries = [
-      {id: '#narcissusModel', img: './assets/icons/narcissus.jpg'},
-      {id: '#tulipModel',     img: './assets/icons/tulip.jpg'},
-      {id: '#margaritaModel', img: './assets/icons/chineserose.jpg'},
+      {id: '#narcissusModel', img: './assets/icons/confetti.jpg'},
+      {id: '#tulipModel',     img: './assets/icons/super-mario.jpg'},
+      {id: '#margaritaModel', img: './assets/icons/basketball.jpg'},
       {id: 'eraser',          img: './assets/icons/eraser.jpg'},
     ]
 
