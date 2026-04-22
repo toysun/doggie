@@ -5,82 +5,242 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta charset="UTF-8">
   <title>tap-to-place-with-menu</title>
+
+  <!-- 8th Wall & A-Frame 코어 -->
   <script src="./../xr_st/8frame-1.4.1.min.js"></script>
   <script src="./../xr_st/xrextras.js"></script>
   <script src="./../xr_st/landing-page.js"></script>
-  <!-- [수정 2] aframe-extras를 8thwall CDN 버전으로 교체 (8frame 1.4.x 호환) -->
+  <!--
+    [수정] aframe-extras를 8thwall CDN 버전으로 교체.
+           로컬 6.1.1은 8frame 1.4.x와 충돌하여 animation-mixer가 미작동.
+  -->
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
-  <script type="module" src="./app2.js" defer></script>
-  <link rel="stylesheet" href="./index.css">
-</head>
-<body>
-<div id="container"></div>
-<a-scene
-  responsive-immersive
-  landing-page
-  xrextras-gesture-detector
-  xrextras-loading
-  xrextras-runtime-error
-  renderer="colorManagement: true"
-  xrweb="
-    allowedDevices: any;
-    defaultEnvironmentFogIntensity: 0.5;
-    defaultEnvironmentFloorTexture: #groundTex;
-    defaultEnvironmentFloorColor: #FFF;
-    defaultEnvironmentSkyBottomColor: #B4C4CC;
-    defaultEnvironmentSkyTopColor: #5ac8fa;
-    defaultEnvironmentSkyGradientStrength: 0.5;">
-
-  <a-assets>
-    <a-asset-item id="narcissusModel" src="./assets/models/confetti_fbx.glb"></a-asset-item>
-    <a-asset-item id="tulipModel"     src="./assets/models/confetti.glb"></a-asset-item>
-    <a-asset-item id="margaritaModel" src="./assets/models/confettiv2.glb"></a-asset-item>
-  </a-assets>
-
-  <a-camera
-    id="camera"
-    position="0 4 4"
-    raycaster="objects: .cantap"
-    cursor="fuse: false; rayOrigin: mouse;">
-  </a-camera>
-
-  <a-entity
-    light="
-      type: directional;
-      intensity: 0.8;
-      castShadow: true;
-      shadowMapHeight: 2048;
-      shadowMapWidth: 2048;
-      shadowCameraTop: 40;
-      shadowCameraBottom: -40;
-      shadowCameraRight: 40;
-      shadowCameraLeft: -40;
-      target: #camera"
-    xrextras-attach="target: camera; offset: 8 15 4"
-    position="1 4.3 2.5"
-    shadow>
-  </a-entity>
-
-  <a-light type="ambient" intensity="0.5"></a-light>
 
   <!--
-    [수정 1] selection-place-1 컴포넌트가 app1.js에서 모델을 동적으로 관리한다면
-             HTML에서 animation-mixer를 직접 선언하지 않고
-             app1.js 안에서 model-loaded 이후에 설정하는 방식으로 변경.
-             (아래 app1.js 수정 코드 참고)
+    app1.js: selection-place-1 컴포넌트를 import하여 AFRAME에 등록.
+    type="module" defer로 DOM 및 A-Frame 초기화 완료 후 실행.
   -->
-  <a-entity id="model-container" selection-place-1></a-entity>
+  <script type="module" src="./app1.js" defer></script>
 
-  <a-box
-    id="ground"
-    class="cantap"
-    scale="1000 2 1000"
-    position="0 -0.99 0"
-    material="shader: shadow; transparent: true; opacity: 0.4"
-    shadow>
-  </a-box>
+  <style>
+    /* ── 전역 리셋 ─────────────────────────────────────────────────── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-</a-scene>
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      /* AR 화면에서 텍스트 선택 방지 */
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── UI 컨테이너 (하단 버튼 메뉴) ──────────────────────────────── */
+    /*
+      position: fixed로 AR 씬 위에 오버레이.
+      z-index를 높게 설정하여 a-scene 위에 표시.
+      pointer-events: none → 버튼 영역 외 AR 터치 이벤트 통과.
+    */
+    #container {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+      pointer-events: none;
+      /* 반투명 배경 바 */
+      background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.55) 0%,
+        rgba(0, 0, 0, 0.0) 100%
+      );
+    }
+
+    /* ── 개별 버튼 (모델 선택 카드) ────────────────────────────────── */
+    /*
+      pointer-events: auto → 버튼만 터치 이벤트 수신.
+      배경 이미지로 아이콘 표시, selection-place-1.js에서 동적 생성.
+    */
+    .carousel {
+      pointer-events: auto;
+      width: 64px;
+      height: 64px;
+      border-radius: 16px;
+      border: 2.5px solid rgba(255, 255, 255, 0.25);
+      background-size: cover;
+      background-position: center;
+      background-color: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      cursor: pointer;
+      outline: none;
+      /* 등장 애니메이션 */
+      opacity: 0;
+      transform: translateY(20px) scale(0.92);
+      animation: btnReveal 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      /* 버튼 누름 효과 */
+      transition:
+        transform 0.15s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+      /* 터치 하이라이트 제거 */
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 버튼 순서별 등장 딜레이 (stagger) */
+    .carousel:nth-child(1) { animation-delay: 0.05s; }
+    .carousel:nth-child(2) { animation-delay: 0.12s; }
+    .carousel:nth-child(3) { animation-delay: 0.19s; }
+    .carousel:nth-child(4) { animation-delay: 0.26s; }
+    .carousel:nth-child(5) { animation-delay: 0.33s; }
+
+    @keyframes btnReveal {
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* 터치/클릭 시 누름 효과 */
+    .carousel:active {
+      transform: scale(0.88);
+    }
+
+    /*
+      [focused 상태]
+      selection-place-1.js에서 setEntry() 호출 시 .focused 클래스 추가.
+      흰색 테두리 + 글로우로 선택된 모델 표시.
+    */
+    .carousel.focused {
+      border-color: rgba(255, 255, 255, 0.95);
+      box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.3),
+        0 4px 20px rgba(0, 0, 0, 0.4);
+      transform: scale(1.1);
+    }
+
+    .carousel.focused:active {
+      transform: scale(0.96);
+    }
+
+    /* ── A-Frame 씬: 전체 화면 고정 ────────────────────────────────── */
+    a-scene {
+      position: fixed !important;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!--
+    #container: selection-place-1.js에서 버튼(.carousel)을 동적으로 appendChild하는 대상.
+    A-Frame 씬 위에 fixed 오버레이로 표시됨.
+  -->
+  <div id="container"></div>
+
+  <a-scene
+    responsive-immersive
+    landing-page
+    xrextras-gesture-detector
+    xrextras-loading
+    xrextras-runtime-error
+    renderer="colorManagement: true"
+    xrweb="
+      allowedDevices: any;
+      defaultEnvironmentFogIntensity: 0.5;
+      defaultEnvironmentFloorTexture: #groundTex;
+      defaultEnvironmentFloorColor: #FFF;
+      defaultEnvironmentSkyBottomColor: #B4C4CC;
+      defaultEnvironmentSkyTopColor: #5ac8fa;
+      defaultEnvironmentSkyGradientStrength: 0.5;">
+
+    <a-assets>
+      <!--
+        3개 모델 에셋 등록.
+        selection-place-1.js의 entries 배열 id와 반드시 일치해야 함:
+          '#narcissusModel', '#tulipModel', '#margaritaModel'
+      -->
+      <a-asset-item id="narcissusModel" src="./assets/models/confetti_fbx.glb"></a-asset-item>
+      <a-asset-item id="tulipModel"     src="./assets/models/confetti.glb"></a-asset-item>
+      <a-asset-item id="margaritaModel" src="./assets/models/confettiv2.glb"></a-asset-item>
+    </a-assets>
+
+    <!--
+      카메라.
+      raycaster objects는 selection-place-1.js의 init() 마지막에서
+      getAttribute → setAttribute 패턴으로 '.cantap'을 안전하게 추가함.
+    -->
+    <a-camera
+      id="camera"
+      position="0 4 4"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+
+    <!--
+      방향광 (그림자 포함).
+      xrextras-attach으로 카메라를 따라다니며 조명 방향 유지.
+      [수정] 라이트 엔티티에는 animation-mixer 불필요 → 제거.
+    -->
+    <a-entity
+      light="
+        type: directional;
+        intensity: 0.8;
+        castShadow: true;
+        shadowMapHeight: 2048;
+        shadowMapWidth: 2048;
+        shadowCameraTop: 40;
+        shadowCameraBottom: -40;
+        shadowCameraRight: 40;
+        shadowCameraLeft: -40;
+        target: #camera"
+      xrextras-attach="target: camera; offset: 8 15 4"
+      position="1 4.3 2.5"
+      shadow>
+    </a-entity>
+
+    <!-- 환경광 -->
+    <a-light type="ambient" intensity="0.5"></a-light>
+
+    <!--
+      selection-place-1 컴포넌트 마운트 대상.
+      [수정] HTML에서 animation-mixer를 직접 선언하지 않음.
+             model-loaded → animationcomplete 순서로
+             selection-place-1.js 안에서 안전하게 설정.
+    -->
+    <a-entity id="model-container" selection-place-1></a-entity>
+
+    <!--
+      지면 그림자 평면.
+      id="ground" → selection-place-1.js에서 지우개 모드 예외 처리에 사용.
+      class="cantap" → raycaster 충돌 대상, 탭 위치(intersection.point) 감지용.
+    -->
+    <a-box
+      id="ground"
+      class="cantap"
+      scale="1000 2 1000"
+      position="0 -0.99 0"
+      material="shader: shadow; transparent: true; opacity: 0.4"
+      shadow>
+    </a-box>
+
+  </a-scene>
+
 </body>
 </html>
