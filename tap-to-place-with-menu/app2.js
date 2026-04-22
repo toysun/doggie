@@ -1,3 +1,5 @@
+import {selectionPlaceComponent} from './js/selection-place-1.js'
+AFRAME.registerComponent('selection-place-1', selectionPlaceComponent)
 // ✅ 모델을 동적으로 생성·교체할 때 animation-mixer 안전 적용 패턴
 
 /**
