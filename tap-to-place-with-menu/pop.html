@@ -149,7 +149,7 @@
 <body>
 
   <!--
-    #container: selection-place-1.js에서 버튼(.carousel)을 동적으로 appendChild하는 대상.
+    #container: selection-place-2.js에서 버튼(.carousel)을 동적으로 appendChild하는 대상.
     A-Frame 씬 위에 fixed 오버레이로 표시됨.
   -->
   <div id="container"></div>
@@ -177,8 +177,8 @@
           '#narcissusModel', '#tulipModel', '#margaritaModel'
       -->
       <a-asset-item id="narcissusModel" src="./assets/models/confetti_fbx.glb"></a-asset-item>
-      <a-asset-item id="tulipModel"     src="./assets/models/confetti.glb"></a-asset-item>
-      <a-asset-item id="margaritaModel" src="./assets/models/confettiv2.glb"></a-asset-item>
+      <a-asset-item id="tulipModel"     src="./assets/models/mario_jump.glb"></a-asset-item>
+      <a-asset-item id="margaritaModel" src="./assets/models/bouncing_basketball.glb"></a-asset-item>
     </a-assets>
 
     <!--
@@ -219,7 +219,7 @@
     <a-light type="ambient" intensity="0.5"></a-light>
 
     <!--
-      selection-place-1 컴포넌트 마운트 대상.
+      selection-place-2 컴포넌트 마운트 대상.
       [수정] HTML에서 animation-mixer를 직접 선언하지 않음.
              model-loaded → animationcomplete 순서로
              selection-place-1.js 안에서 안전하게 설정.
@@ -228,7 +228,7 @@
 
     <!--
       지면 그림자 평면.
-      id="ground" → selection-place-1.js에서 지우개 모드 예외 처리에 사용.
+      id="ground" → selection-place-2.js에서 지우개 모드 예외 처리에 사용.
       class="cantap" → raycaster 충돌 대상, 탭 위치(intersection.point) 감지용.
     -->
     <a-box
