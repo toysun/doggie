@@ -129,7 +129,12 @@
     xr-light="max: 0.5"
     type="ambient">
   </a-light>
+<!-- 인트로 애니메이션 컴포넌트 엔티티 -->
+  <a-entity intro-animation></a-entity>
 
+  <!-- 래퍼: 위치 애니메이션 담당 -->
+  <a-entity id="car-wrapper" position="0 -3 0">
+    <!-- 모델: 회전·드래그 인터랙션 담당 -->
   <a-entity
     id="car"
     gltf-model="#carModel"
