@@ -33,7 +33,8 @@
         <!-- Credit to Poly by Google for the model: https://poly.google.com/view/5ZMAz7_ucTn -->
         <a-asset-item id="sandCastleModel" src="./white_tiger_rigged_animated.glb"></a-asset-item>
       </a-assets>
-
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
       <!-- The raycaster will emit mouse events on scene objects specified with the cantap class -->
       <a-camera
         id="camera"
@@ -64,7 +65,7 @@
         xrextras-hold-drag
         xrextras-two-finger-rotate
         xrextras-pinch-scale
-        scale="3 3 3"
+        scale="1 1 1"
         shadow="receive: false"
         animation-mixer>
       </a-entity>
