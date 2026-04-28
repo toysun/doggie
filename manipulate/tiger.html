@@ -32,7 +32,8 @@
       <a-assets>
         <!-- Credit to Poly by Google for the model: https://poly.google.com/view/5ZMAz7_ucTn -->
         <a-asset-item id="sandCastleModel" src="./tiger_rebuilt.glb"></a-asset-item>
-        <audio id="howlSound" src="./howling-1.mp3" response-type="arraybuffer"></audio>
+        <audio id="HowlSound" src="./howling-1.mp3" response-type="arraybuffer"></audio>
+        <audio id="EatSound" src="./howling-2.mp3" response-type="arraybuffer"></audio>
       </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
@@ -84,14 +85,14 @@
     </a-scene>
   </body>
 <div style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10;">
-  <button onclick="changeAnim('Attack')">공격</button>
-  <button onclick="changeAnim('Eat')">먹기</button>
-  <button onclick="changeAnim('Run')">달리기</button>
-  <button onclick="changeAnim('Walk')">걷기</button>
-  <button onclick="changeAnim('Walk Fast')">속보</button>
-  <button onclick="changeAnim('Howl')">울부짖기</button>
+  <button onclick="changeAnimWithSound('Attack')">공격</button>
+  <button onclick="changeAnimWithSound('Eat')">먹기</button>
+  <button onclick="changeAnimWithSound('Run')">달리기</button>
+  <button onclick="changeAnimWithSound('Walk')">걷기</button>
+  <button onclick="changeAnimWithSound('Walk Fast')">속보</button>
+  <button onclick="changeAnimWithSound('Howl')">울부짖기</button>
 </div>
-  <script>
+  <!--script>
   // 특정 애니메이션을 호출하는 자바스크립트 함수
   function changeAnim(clipName) {
     const model = document.getElementById('model')
@@ -100,6 +101,37 @@
       clip: clipName,
       loop: 'repeat'
     })
+  }
+</script-->
+  <script>
+  function changeAnimWithSound(clipName) {
+    const model = document.getElementById('model');
+    const sound = model.components.sound;
+
+    // 1. 애니메이션 변경
+    model.setAttribute('animation-mixer', {
+      clip: clipName,
+      loop: 'repeat'
+    });
+
+    // 2. 기존 재생 중인 사운드 정지
+    sound.stopSound();
+
+    // 3. 애니메이션 이름에 따른 사운드 파일 교체 및 재생
+    if (clipName === 'Howl') {  // 'Howl' 애니메이션일 때
+      model.setAttribute('sound', 'src', '#HowlSound');
+      sound.playSound();
+    } 
+    else if (clipName === 'Eat') { // 'Eat' 애니메이션일 때
+      model.setAttribute('sound', 'src', '#EatSound');
+      // 걷기는 반복 재생이 필요할 수 있으므로 loop 설정 변경 가능
+      model.setAttribute('sound', 'loop', true);
+      sound.playSound();
+    }
+    else {
+      // 대기 상태(Idle) 등 사운드가 필요 없는 경우
+      model.setAttribute('sound', 'loop', false);
+    }
   }
 </script>
 </html>
