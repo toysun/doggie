@@ -32,6 +32,7 @@
       <a-assets>
         <!-- Credit to Poly by Google for the model: https://poly.google.com/view/5ZMAz7_ucTn -->
         <a-asset-item id="sandCastleModel" src="./tiger_rebuilt.glb"></a-asset-item>
+        <audio id="howlSound" src="./howl.mp3" response-type="arraybuffer"></audio>
       </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
@@ -68,7 +69,8 @@
         scale="5 5 5"
         rotation="0 70 0"
         shadow="receive: false"
-        animation-mixer="clip: Howl; loop: repeat; timeScale: 1">
+        animation-mixer="clip: Howl; loop: repeat; timeScale: 1"
+        sound="src: #howlSound; autoplay: false; loop: false">
       </a-entity>
 
       <a-plane
