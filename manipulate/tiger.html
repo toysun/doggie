@@ -34,6 +34,7 @@
         <a-asset-item id="sandCastleModel" src="./tiger_rebuilt.glb"></a-asset-item>
         <audio id="HowlSound" src="./howling-1.mp3" response-type="arraybuffer"></audio>
         <audio id="EatSound" src="./howling-2.mp3" response-type="arraybuffer"></audio>
+        <audio id="AttackSound" src="./tiger-howling.mp3" response-type="arraybuffer"></audio>
       </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
@@ -124,6 +125,12 @@
     } 
     else if (clipName === 'Eat') { // 'Eat' 애니메이션일 때
       model.setAttribute('sound', 'src', '#EatSound');
+      // 걷기는 반복 재생이 필요할 수 있으므로 loop 설정 변경 가능
+      model.setAttribute('sound', 'loop', true);
+      sound.playSound();
+    }
+    else if (clipName === 'Attack') { // 'Attack' 애니메이션일 때
+      model.setAttribute('sound', 'src', '#AttackSound');
       // 걷기는 반복 재생이 필요할 수 있으므로 loop 설정 변경 가능
       model.setAttribute('sound', 'loop', true);
       sound.playSound();
