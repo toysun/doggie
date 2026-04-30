@@ -47,7 +47,7 @@
 
   <a-camera
     id="camera"
-    position="0 1.75 0"
+    position="0 1.75 12"
     raycaster="objects: .cantap"
     cursor="fuse: false; rayOrigin: mouse;">
   </a-camera>
@@ -76,13 +76,13 @@
   <a-entity
     id="car"
     gltf-model="#carModel"
-    scale="1 1 1"
     rotation="0 70 0"
     xrextras-hold-drag="rise-height: 0"
     xrextras-two-finger-rotate
     absolute-pinch-scale
     proximity
     animation="property: position; from: 0 10 0; to: 0 -1.75 0; dir: linear; delay: 4000; dur: 8000; loop: false"
+    animation__1="property: scale; from: 0 0 0; to: 1 1 1; dir: linear; delay: 4000; dur: 8000; loop: false"
     animation-mixer
     shadow="receive: false">
   </a-entity>
