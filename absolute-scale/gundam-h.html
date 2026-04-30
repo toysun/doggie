@@ -15,6 +15,65 @@
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script type="module" src="./app1.js" defer></script>
   <link rel="stylesheet" href="./index.css">
+
+  <script>
+    // A-Frame 로드 후 컴포넌트 등록
+    window.addEventListener('load', () => {
+      AFRAME.registerComponent('intro-animation', {
+        init: function () {
+          const wrapper = document.querySelector('#car-wrapper');
+          const car = document.querySelector('#car');
+
+          function runAnimation() {
+            const duration = 2000;
+            const startY = -3;
+            const endY = 0;
+            const startRot = 70;
+            const endRot = 430;
+            let startTime = null;
+
+            function ease(t) {
+              return 1 - Math.pow(1 - t, 3);
+            }
+
+            function animate(timestamp) {
+              if (!startTime) startTime = timestamp;
+              const elapsed = timestamp - startTime;
+              const t = Math.min(elapsed / duration, 1);
+              const e = ease(t);
+
+              wrapper.object3D.position.y = startY + (endY - startY) * e;
+              car.object3D.rotation.y = THREE.MathUtils.degToRad(
+                startRot + (endRot - startRot) * e
+              );
+
+              if (t < 1) {
+                requestAnimationFrame(animate);
+              } else {
+                wrapper.object3D.position.y = endY;
+                car.object3D.rotation.y = THREE.MathUtils.degToRad(startRot);
+              }
+            }
+
+            requestAnimationFrame(animate);
+          }
+
+          // model-loaded 이벤트 우선, 타임아웃 폴백
+          car.addEventListener('model-loaded', () => {
+            setTimeout(runAnimation, 300); // 렌더링 안정화 대기
+          });
+
+          // 혹시 이벤트를 이미 놓쳤을 경우 폴백
+          setTimeout(() => {
+            if (wrapper.object3D.position.y === -3) {
+              runAnimation();
+            }
+          }, 3000);
+        }
+      });
+    });
+  </script>
+
   
 </head>
 
