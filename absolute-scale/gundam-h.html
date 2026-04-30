@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>car-absolute-scale</title>
+
+  <script src="./../xr_st/8frame-1.4.1.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>  
+  
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <script src="./../xr_st/coaching-overlay.js"></script>
+  <script src="./CSS2DRenderer.js"></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script type="module" src="./app1.js" defer></script>
+  <link rel="stylesheet" href="./index.css">
+  
+</head>
+
+<body>
+<div id="container"></div>
+
+<a-scene
+  responsive-immersive
+  coaching-overlay
+  landing-page
+  xrextras-gesture-detector
+  xrextras-loading
+  xrextras-runtime-error
+  gltf-model="dracoDecoderPath: https://cdn.8thwall.com/web/aframe/draco-decoder/"
+  renderer="colorManagement: true"
+  xrweb="allowedDevices: any;
+    defaultEnvironmentFogIntensity: 0.5; 
+    defaultEnvironmentFloorTexture: #groundTex; 
+    defaultEnvironmentFloorColor: #FFF;
+    defaultEnvironmentSkyBottomColor: #B4C4CC; 
+    defaultEnvironmentSkyTopColor: #5ac8fa;
+    defaultEnvironmentSkyGradientStrength: 0.5;
+    scale: absolute">
+
+  <a-assets>
+    <a-asset-item id="carModel" src="./assets/gundam_white.glb"></a-asset-item>
+    <!--a-asset-item id="carModel" src="https://guide3.ivyro.net/etc/wooyundang.glb"></a-asset-item-->
+    <img id="groundTex" src="assets/textures/concrete.jpg">
+  </a-assets>
+
+  <a-camera
+    id="camera"
+    position="0 1.74 12"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
+  
+  <a-entity
+    xr-light
+    light="type: directional;
+      castShadow: true;
+      shadowMapHeight:2048;
+      shadowMapWidth:2048;
+      shadowCameraTop: 20;
+      shadowCameraBottom: -20;
+      shadowCameraLeft: -20;
+      shadowCameraRight: 20;
+      target: #car;
+      shadowRadius: 3"
+    xrextras-attach="target: car; offset: 0 15 0;"
+    shadow>
+  </a-entity>
+  
+  <a-light
+    xr-light="max: 0.5"
+    type="ambient">
+  </a-light>
+
+  <a-entity
+    id="car"
+    gltf-model="#carModel"
+    scale="1 1 1"
+    rotation="0 70 0"
+    xrextras-hold-drag="rise-height: 0"
+    xrextras-two-finger-rotate
+    absolute-pinch-scale
+    proximity
+    animation="property: position; from: 0 -3 12; to: 0 1.74 12; dir: linear; delay: 4000; dur: 8000; loop: false"
+    animation-mixer
+    shadow="receive: false">
+  </a-entity>
+
+  <a-plane
+    id="ground"
+    rotation="-90 0 0"
+    width="100"
+    height="100"
+    material="shader: shadow; opacity: 0.5;"
+    shadow
+  ></a-plane>
+</a-scene>
+</body>
+</html>
