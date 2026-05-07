@@ -103,7 +103,8 @@
     <!--a-asset-item id="carModel" src="https://guide3.ivyro.net/etc/wooyundang.glb"></a-asset-item-->
     <img id="groundTex" src="assets/textures/concrete.jpg">
   </a-assets>
-
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
   <a-camera
     id="camera"
     position="0 1.74 12"
@@ -135,7 +136,6 @@
   <a-entity
     id="car"
     gltf-model="#carModel"
-    scale="1 1 1"
     rotation="0 70 0"
     xrextras-hold-drag="rise-height: 0"
     xrextras-two-finger-rotate
