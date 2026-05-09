@@ -161,5 +161,48 @@
         shadow>
       </a-plane>
 </a-scene>
+  <script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  const scene = document.querySelector('a-scene')
+
+  const overlay = document.getElementById('scanning-overlay')
+
+
+  // 🔵 공통 애니메이션 함수 수정
+  const setAnim = (el, name, props) => {
+    el.removeAttribute(name)
+    requestAnimationFrame(() => {
+      el.setAttribute(name, props)
+    })
+  }
+
+  // 🔵 XR 타겟 인식
+  scene.addEventListener('xrimagefound', (event) => {
+    if (event.detail.name === 'macaw-target') {
+
+      if (overlay) {
+        overlay.style.display = 'none'
+      }
+
+    }
+  })
+
+  // 🔵 XR 타겟 상실
+  scene.addEventListener('xrimagelost', (event) => {
+    if (event.detail.name === 'macaw-target') {
+
+      if (overlay) {
+        overlay.style.display = 'block'
+      }
+
+      if (sound.playing()) {
+        sound.pause()
+      }
+
+      exPlane.setAttribute('visible', false)
+    }
+  })
+</script>
 </body>
 </html>
