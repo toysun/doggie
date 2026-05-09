@@ -11,7 +11,6 @@
   <script src="./../xr_st/landing-page.js"></script>  
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
-  <!--script src="./aframe-hologram-shader.js"></script-->
   <script>
      const onxrloaded = async () => {
        const res = await fetch('./phoenix.json')
@@ -23,233 +22,297 @@
        const res3 = await fetch('./d1-engine.json')
        const json3 = await res3.json()
 
-
        XR8.XrController.configure({
          imageTargetData: [json, json1, json2, json3],
        })
      }
      window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
-
   </script>
-
 </head>
 
 <body>
-    <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
-  <img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
-</div>
-<a-scene
-  landing-page
-  xrextras-loading
-  xrextras-runtime-error
-  renderer="colorManagement: true; physicallyBasedRendering: true;"
-  xrweb="disableWorldTracking: true">
-  
-  <a-assets>
-    <a-asset-item id="bean-glb" src="./assets/Models/phoenix_on_fire_update.glb"></a-asset-item>
-    <a-asset-item id="blades-glb" src="./assets/Models/oscillating_cylinder_motor_for_lego_3d_print.glb"></a-asset-item>
-    <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
-    <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
-    <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item>
-    <!--img id="logo" src="./assets/Media/sleeve-logo.jpg"-->
-    <video
-      id="wine-label-video"
-       muted
-        autoplay
-        playsinline
-        webkit-playsinline
-      crossorigin="anonymous"
-      loop="true"
-      src="./assets/Media/phoenix_vid.mp4">
-    </video>
-        <video
-      id="wine-label-video1"
-       muted
-        autoplay
-        playsinline
-        webkit-playsinline
-      crossorigin="anonymous"
-      loop="true"
-      src="./assets/Media/dark-bg-engine-1.mp4">
-    </video>
-  </a-assets>
-  <xrextras-capture-button></xrextras-capture-button>
-  <xrextras-capture-preview></xrextras-capture-preview>
-  <a-camera
-    position="0 1 1"
-    raycaster="objects: .cantap"
-    cursor="fuse: false; rayOrigin: mouse;">
-  </a-camera>
-      <!--a-entity
-        light="
-          type: directional;
-          intensity: 0.8;
-          castShadow: true;
-          shadowMapHeight:2048;
-          shadowMapWidth:2048;
-          shadowCameraTop: 10;
-          target: #model;"
-        xrextras-attach="target: model; offset: 1 15 3;"
-        shadow>
-      </a-entity-->
-  <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+  <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
+    <img src="./assets/Media/scan-hand.svg" alt="스마트폰을 흔들어 스캔하세요" />
+  </div>
 
-  <a-light type="ambient" intensity="0.7"></a-light>
-  
-  <!-- WINE LABEL (Cylindrical): video fades in on label -->
-  <xrextras-named-image-target name="phoenix_target">
-    <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
-          <a-entity
+  <a-scene
+    landing-page
+    xrextras-loading
+    xrextras-runtime-error
+    renderer="colorManagement: true; physicallyBasedRendering: true;"
+    xrweb="disableWorldTracking: true">
+    
+    <a-assets>
+      <a-asset-item id="bean-glb" src="./assets/Models/phoenix_on_fire_update.glb"></a-asset-item>
+      <a-asset-item id="blades-glb" src="./assets/Models/oscillating_cylinder_motor_for_lego_3d_print.glb"></a-asset-item>
+      <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
+      <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
+      <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item>
+
+      <!-- loop 제거: 1회 재생 후 마지막 프레임 유지 -->
+      <video
+        id="wine-label-video"
+        muted
+        autoplay
+        playsinline
+        webkit-playsinline
+        crossorigin="anonymous"
+        src="./assets/Media/phoenix_vid.mp4">
+      </video>
+      <video
+        id="wine-label-video1"
+        muted
+        autoplay
+        playsinline
+        webkit-playsinline
+        crossorigin="anonymous"
+        src="./assets/Media/dark-bg-engine-1.mp4">
+      </video>
+    </a-assets>
+
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+
+    <a-camera
+      position="0 1 1"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+
+    <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
+    <a-light type="ambient" intensity="0.7"></a-light>
+
+    <!-- phoenix_target: 비디오 종료 후 3D 모델 등장 -->
+    <xrextras-named-image-target name="phoenix_target">
+      <a-entity
+        id="video-plane-phoenix"
         xrextras-play-video="video: #wine-label-video; canstop: true"
-        geometry="primitive: plane; height: 1.5; width: 1;"
-      ></a-entity>
-    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
-    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <a-entity 
-      id="model" 
-      gltf-model="#bean-glb" 
-      position="0 0 0.4" 
-      rotation="0 -90 0"
-      shadow="receive: false"
-      animation__1="property: scale; from: 0 0 0; to: 0.01 0.01 0.01; delay: 100000; dur: 50000; easing: linear; loop: true"
-      animation-mixer>
+        geometry="primitive: plane; height: 1.5; width: 1;">
       </a-entity>
-    <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
-    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
-  </xrextras-named-image-target>
+      <!-- 초기 visible: false로 대기 -->
+      <a-entity 
+        id="model-phoenix"
+        gltf-model="#bean-glb" 
+        position="0 0 0.4" 
+        rotation="0 -90 0"
+        visible="false"
+        shadow="receive: false"
+        animation-mixer>
+      </a-entity>
+    </xrextras-named-image-target>
 
+    <!-- w1-engine -->
     <xrextras-named-image-target name="w1-engine">
-    <!--xrextras-target-video-fade video="#wine-label-video"></xrextras-target-video-fade-->
-          <a-entity
+      <a-entity
+        id="video-plane-w1"
         xrextras-play-video="video: #wine-label-video; canstop: true"
-        geometry="primitive: plane; height: 1; width: 1;"
-      ></a-entity>
-    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
-    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <a-entity id="model" gltf-model="#bean-glb-1" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
-    <!--a-entity gltf-model="#bean-glb" position="0 0.5 0" scale="1 1 1" position="0 0 2" xrextras-spin="speed: 10000"></a-entity-->
-    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1.13 1.13 1.13" xrextras-spin="speed: 1000"></a-entity-->
-  </xrextras-named-image-target>
-  
+        geometry="primitive: plane; height: 1; width: 1;">
+      </a-entity>
+      <a-entity
+        id="model-w1"
+        gltf-model="#bean-glb-1"
+        scale="0.01 0.01 0.01"
+        position="0 0 1"
+        visible="false"
+        xrextras-spin="speed: 10000"
+        shadow="receive: false"
+        animation-mixer>
+      </a-entity>
+    </xrextras-named-image-target>
 
-  <!-- COFFEE SLEEVE (Conical): 3D models inside and outside container -->
-  <xrextras-named-image-target name="d-engine">
-    <!--xrextras-target-video-fade video="#wine-label-video1"></xrextras-target-video-fade-->
-          <a-entity
+    <!-- d-engine -->
+    <xrextras-named-image-target name="d-engine">
+      <a-entity
+        id="video-plane-d"
         xrextras-play-video="video: #wine-label-video1; canstop: true"
-        geometry="primitive: plane; height: 1; width: 1;"
-      ></a-entity>
-    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
-    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
-         <a-entity id="model" gltf-model="#blades-glb" scale="0.01 0.01 0.01" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
-    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
-    <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
-  </xrextras-named-image-target>
+        geometry="primitive: plane; height: 1; width: 1;">
+      </a-entity>
+      <a-entity
+        id="model-d"
+        gltf-model="#blades-glb"
+        scale="0.01 0.01 0.01"
+        position="0 0 1"
+        visible="false"
+        xrextras-spin="speed: 10000"
+        shadow="receive: false"
+        animation-mixer>
+      </a-entity>
+    </xrextras-named-image-target>
 
+    <!-- d1-engine -->
     <xrextras-named-image-target name="d1-engine">
-    <!--xrextras-target-video-fade video="#wine-label-video1"></xrextras-target-video-fade-->
-          <a-entity
+      <a-entity
+        id="video-plane-d1"
         xrextras-play-video="video: #wine-label-video1; canstop: true"
-        geometry="primitive: plane; height: 1; width: 1;"
-      ></a-entity>
-    <!--xrextras-curved-target-container color="#000"></xrextras-curved-target-container>
-    <!--xrextras-target-mesh width="0.8" material="src: #logo; transparent: true;"></xrextras-target-mesh-->
-    <!--a-entity gltf-model="#bean-glb" position="0 -0.5 0" scale="0.5 0.5 0.5" xrextras-spin></a-entity-->
-         <a-entity id="model" gltf-model="#blades-glb-1" scale="0.3 0.3 0.3" position="0 0 1" xrextras-spin="speed: 10000" shadow="receive: false" animation-mixer></a-entity>
-    <!--a-entity gltf-model="#blades-glb" position="0 -0.45 0" scale="1 1 1" xrextras-spin="speed: 10000"></a-entity-->
-    <!--a-entity gltf-model="#words-glb" position="0 -0.25 0" scale="0.2 0.2 0.2" xrextras-spin="speed: 5000; direction: reverse;"></a-entity-->
-  </xrextras-named-image-target>
-        <a-plane
-        id="ground"
-        rotation="-90 0 0"
-        width="1000"
-        height="1000"
-        material="shader: shadow"
-        shadow>
-      </a-plane>
-</a-scene>
+        geometry="primitive: plane; height: 1; width: 1;">
+      </a-entity>
+      <a-entity
+        id="model-d1"
+        gltf-model="#blades-glb-1"
+        scale="0.3 0.3 0.3"
+        position="0 0 1"
+        visible="false"
+        xrextras-spin="speed: 10000"
+        shadow="receive: false"
+        animation-mixer>
+      </a-entity>
+    </xrextras-named-image-target>
+
+    <a-plane
+      id="ground"
+      rotation="-90 0 0"
+      width="1000"
+      height="1000"
+      material="shader: shadow"
+      shadow>
+    </a-plane>
+  </a-scene>
+
 <script>
-const overlay = document.getElementById('scanning-overlay');  //수정
-  
-document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  if (event.detail.name === 'phoenix_target' || event.detail.name === 'bluejay-target' || event.detail.name === 'cardinal-target' || event.detail.name === 'puffin-target') {
-    //수정
-  if (overlay) {
-      overlay.style.animation = 'fadeOut 0.5s forwards';
-      setTimeout(() => {
-        overlay.style.display = 'none';
-      }, 500);
+  const overlay = document.getElementById('scanning-overlay');
+
+  // 타겟별 비디오/모델 매핑
+  const targetMap = {
+    'phoenix_target': {
+      video: document.getElementById('wine-label-video'),
+      modelId: 'model-phoenix'
+    },
+    'w1-engine': {
+      video: document.getElementById('wine-label-video'),
+      modelId: 'model-w1'
+    },
+    'd-engine': {
+      video: document.getElementById('wine-label-video1'),
+      modelId: 'model-d'
+    },
+    'd1-engine': {
+      video: document.getElementById('wine-label-video1'),
+      modelId: 'model-d1'
     }
+  };
 
-    const entity = document.querySelector('#model');
-    entity.setAttribute('visible', true);
+  // 모델 페이드인 함수
+  function fadeInModel(modelEntity) {
+    modelEntity.setAttribute('visible', true);
 
-    const mesh = entity.getObject3D('mesh');
-    if (!mesh) return;
+    // 모델 로드 완료 여부 확인 후 페이드인 실행
+    function startFade() {
+      const mesh = modelEntity.getObject3D('mesh');
+      if (!mesh) {
+        // mesh 아직 없으면 재시도
+        setTimeout(startFade, 100);
+        return;
+      }
 
-    // 모든 머티리얼을 투명하게 초기화
-    mesh.traverse((node) => {
-      if (node.material) {
-        if (Array.isArray(node.material)) {
-          node.material.forEach((mat) => {
+      // 머티리얼 투명도 0으로 초기화
+      mesh.traverse((node) => {
+        if (node.material) {
+          const mats = Array.isArray(node.material) ? node.material : [node.material];
+          mats.forEach((mat) => {
             mat.transparent = true;
             mat.opacity = 0;
           });
-        } else {
-          node.material.transparent = true;
-          node.material.opacity = 0;
-        }
-      }
-    });
-
-    // easeInOutQuad 함수 정의
-    function easeInOutQuad(t) {
-      return t < 0.5
-        ? 2 * t * t
-        : -1 + (4 - 2 * t) * t;
-    }
-
-    const duration = 1500; // 애니메이션 시간 (ms)
-    const start = performance.now();
-
-    function fade(now) {
-      const elapsed = now - start;
-      let progress = Math.min(elapsed / duration, 1); // 0 ~ 1
-      let eased = easeInOutQuad(progress);
-
-      mesh.traverse((node) => {
-        if (node.material) {
-          if (Array.isArray(node.material)) {
-            node.material.forEach((mat) => {
-              mat.opacity = eased;
-            });
-          } else {
-            node.material.opacity = eased;
-          }
         }
       });
 
-      if (progress < 1) {
-        requestAnimationFrame(fade);
+      function easeInOutQuad(t) {
+        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+      }
+
+      const duration = 1500;
+      const start = performance.now();
+
+      function fade(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeInOutQuad(progress);
+
+        mesh.traverse((node) => {
+          if (node.material) {
+            const mats = Array.isArray(node.material) ? node.material : [node.material];
+            mats.forEach((mat) => { mat.opacity = eased; });
+          }
+        });
+
+        if (progress < 1) requestAnimationFrame(fade);
+      }
+
+      requestAnimationFrame(fade);
+    }
+
+    startFade();
+  }
+
+  // 비디오에 ended 이벤트 연결 (타겟별)
+  function bindVideoEnded(targetName) {
+    const { video, modelId } = targetMap[targetName];
+
+    // 중복 바인딩 방지용 플래그
+    if (video._boundTargets) {
+      if (video._boundTargets.includes(targetName)) return;
+      video._boundTargets.push(targetName);
+    } else {
+      video._boundTargets = [targetName];
+    }
+
+    video.addEventListener('ended', () => {
+      // 현재 활성 타겟의 모델만 표시
+      const modelEntity = document.getElementById(modelId);
+      if (modelEntity) {
+        fadeInModel(modelEntity);
+      }
+    }, { once: false }); // 재스캔 대응을 위해 once: false 유지
+  }
+
+  // xrimagefound: 이미지 인식 시
+  document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+    const name = event.detail.name;
+    if (!targetMap[name]) return;
+
+    // 스캔 오버레이 숨김
+    if (overlay) {
+      overlay.style.animation = 'fadeOut 0.5s forwards';
+      setTimeout(() => { overlay.style.display = 'none'; }, 500);
+    }
+
+    const { video, modelId } = targetMap[name];
+    const modelEntity = document.getElementById(modelId);
+
+    // 비디오 처음부터 재생 (재스캔 시에도 초기화)
+    video.currentTime = 0;
+    video.play();
+
+    // 모델 숨김 상태로 초기화
+    if (modelEntity) {
+      modelEntity.setAttribute('visible', false);
+
+      // 머티리얼 opacity 초기화
+      const mesh = modelEntity.getObject3D('mesh');
+      if (mesh) {
+        mesh.traverse((node) => {
+          if (node.material) {
+            const mats = Array.isArray(node.material) ? node.material : [node.material];
+            mats.forEach((mat) => { mat.transparent = true; mat.opacity = 0; });
+          }
+        });
       }
     }
 
-    requestAnimationFrame(fade);
-  }
-});
+    // 비디오 종료 이벤트 바인딩
+    bindVideoEnded(name);
+  });
 
-  //수정
-// 이미지를 잃어버렸을 때 다시 표시
-document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
-  if (event.detail.name === 'Phoenix_target' || event.detail.name === 'bluejay-target' || event.detail.name === 'cardinal-target' || event.detail.name === 'puffin-target') {
+  // xrimagelost: 이미지 소실 시 오버레이 복구
+  document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+    const name = event.detail.name;
+    if (!targetMap[name]) return;
+
     if (overlay) {
       overlay.style.display = 'flex';
       overlay.style.animation = 'none';
       overlay.style.opacity = '1';
     }
-  }
-});
+  });
 </script>
 </body>
 </html>
