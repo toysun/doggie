@@ -1,0 +1,18 @@
+{
+  "imagePath": "assets/Media/phoenix_target.jpg",
+  "name": "phoenix_target",
+  "type": "PLANAR",
+  "properties": {
+    "top": 0,
+    "left": 0,
+    "width": 736,
+    "height": 1308,
+    "isRotated": false,
+    "originalWidth": 736,
+    "originalHeight": 1308
+  },
+  "userMetadataIsJson": true,
+  "loadAutomatically": true,
+  "created": 1646873156802,
+  "updated": 1646873156802
+}
