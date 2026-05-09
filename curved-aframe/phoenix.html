@@ -169,48 +169,87 @@
         shadow>
       </a-plane>
 </a-scene>
-  <!--script>
-document.addEventListener('DOMContentLoaded', () => {
+<script>
+const overlay = document.getElementById('scanning-overlay');  //수정
+  
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  if (event.detail.name === 'phoenix_target' || event.detail.name === 'bluejay-target' || event.detail.name === 'cardinal-target' || event.detail.name === 'puffin-target') {
+    //수정
+  if (overlay) {
+      overlay.style.animation = 'fadeOut 0.5s forwards';
+      setTimeout(() => {
+        overlay.style.display = 'none';
+      }, 500);
+    }
 
-  const scene = document.querySelector('a-scene')
+    const entity = document.querySelector('#model');
+    entity.setAttribute('visible', true);
 
-  const overlay = document.getElementById('scanning-overlay')
+    const mesh = entity.getObject3D('mesh');
+    if (!mesh) return;
 
+    // 모든 머티리얼을 투명하게 초기화
+    mesh.traverse((node) => {
+      if (node.material) {
+        if (Array.isArray(node.material)) {
+          node.material.forEach((mat) => {
+            mat.transparent = true;
+            mat.opacity = 0;
+          });
+        } else {
+          node.material.transparent = true;
+          node.material.opacity = 0;
+        }
+      }
+    });
 
-  // 🔵 공통 애니메이션 함수 수정
-  const setAnim = (el, name, props) => {
-    el.removeAttribute(name)
-    requestAnimationFrame(() => {
-      el.setAttribute(name, props)
-    })
+    // easeInOutQuad 함수 정의
+    function easeInOutQuad(t) {
+      return t < 0.5
+        ? 2 * t * t
+        : -1 + (4 - 2 * t) * t;
+    }
+
+    const duration = 1500; // 애니메이션 시간 (ms)
+    const start = performance.now();
+
+    function fade(now) {
+      const elapsed = now - start;
+      let progress = Math.min(elapsed / duration, 1); // 0 ~ 1
+      let eased = easeInOutQuad(progress);
+
+      mesh.traverse((node) => {
+        if (node.material) {
+          if (Array.isArray(node.material)) {
+            node.material.forEach((mat) => {
+              mat.opacity = eased;
+            });
+          } else {
+            node.material.opacity = eased;
+          }
+        }
+      });
+
+      if (progress < 1) {
+        requestAnimationFrame(fade);
+      }
+    }
+
+    requestAnimationFrame(fade);
   }
+});
 
-  // 🔵 XR 타겟 인식
-  scene.addEventListener('xrimagefound', (event) => {
-    if (event.detail.name === 'macaw-target') {
-
-      if (overlay) {
-        overlay.style.display = 'none'
-      }
-
+  //수정
+// 이미지를 잃어버렸을 때 다시 표시
+document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+  if (event.detail.name === 'Phoenix_target' || event.detail.name === 'bluejay-target' || event.detail.name === 'cardinal-target' || event.detail.name === 'puffin-target') {
+    if (overlay) {
+      overlay.style.display = 'flex';
+      overlay.style.animation = 'none';
+      overlay.style.opacity = '1';
     }
-  })
-
-  // 🔵 XR 타겟 상실
-  scene.addEventListener('xrimagelost', (event) => {
-    if (event.detail.name === 'macaw-target') {
-
-      if (overlay) {
-        overlay.style.display = 'block'
-      }
-
-      if (sound.playing()) {
-        sound.pause()
-      }
-
-      exPlane.setAttribute('visible', false)
-    }
-  })
-</script-->
+  }
+});
+</script>
 </body>
 </html>
