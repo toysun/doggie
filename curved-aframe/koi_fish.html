@@ -13,7 +13,7 @@
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
   <script>
      const onxrloaded = async () => {
-       const res = await fetch('./phoenix.json')
+       const res = await fetch('./koi_fish.json')
        const json = await res.json()
        const res1 = await fetch('./d-engine.json')
        const json1 = await res1.json()
@@ -43,7 +43,7 @@
     xrweb="disableWorldTracking: true">
     
     <a-assets>
-      <a-asset-item id="bean-glb" src="./assets/Models/phoenix.glb"></a-asset-item>
+      <a-asset-item id="bean-glb" src="./assets/Models/koi_fish.glb"></a-asset-item>
       <a-asset-item id="blades-glb" src="./assets/Models/oscillating_cylinder_motor_for_lego_3d_print.glb"></a-asset-item>
       <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
       <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
@@ -57,7 +57,7 @@
         playsinline
         webkit-playsinline
         crossorigin="anonymous"
-        src="./assets/Media/phoenix_vid.mp4">
+        src="./assets/Media/koi_fish_vid.mp4">
       </video>
       <video
         id="wine-label-video1"
@@ -82,16 +82,16 @@
     <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
     <a-light type="ambient" intensity="0.7"></a-light>
 
-    <!-- phoenix_target: 비디오 종료 후 3D 모델 등장 -->
-    <xrextras-named-image-target name="phoenix_target">
+    <!-- koifish_target: 비디오 종료 후 3D 모델 등장 -->
+    <xrextras-named-image-target name="koifish_target">
       <a-entity
-        id="video-plane-phoenix"
+        id="video-plane-koifish"
         xrextras-play-video="video: #wine-label-video; canstop: true"
         geometry="primitive: plane; height: 1.5; width: 1;">
       </a-entity>
       <!-- 초기 visible: false로 대기 -->
       <a-entity 
-        id="model-phoenix"
+        id="model-koifish"
         gltf-model="#bean-glb" 
         position="0 0 0.5" 
         rotation="0 0 40"
@@ -174,9 +174,9 @@
 
   // 타겟별 비디오/모델 매핑
   const targetMap = {
-    'phoenix_target': {
+    'koifish_target': {
       video: document.getElementById('wine-label-video'),
-      modelId: 'model-phoenix'
+      modelId: 'model-koifish'
     },
     'w1-engine': {
       video: document.getElementById('wine-label-video'),
