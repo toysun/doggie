@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AR 기술 소개 — 에이알도슨트</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Sans+KR:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ━━━━━ RESET & ROOT ━━━━━ */
+:root {
+  --accent: #FF4E00;
+  --accent-dark: #CC3D00;
+  --accent-light: #FF7A3D;
+  --bg: #0D0D0D;
+  --surface: #161616;
+  --surface2: #1E1E1E;
+  --surface3: #272727;
+  --border: rgba(255,255,255,0.09);
+  --border-strong: rgba(255,255,255,0.18);
+  --text-primary: #FFFFFF;
+  --text-secondary: #C8C8C8;
+  --text-muted: #888888;
+  --tab-w: 220px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  overflow-x: hidden;
+  cursor: none;
+  min-height: 100vh;
+}
+
+/* ━━━━━ CURSOR ━━━━━ */
+.cursor { width: 10px; height: 10px; background: var(--accent); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transform: translate(-50%,-50%); transition: width .2s, height .2s; }
+.cursor-ring { width: 32px; height: 32px; border: 2px solid rgba(255,78,0,.5); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9998; transform: translate(-50%,-50%); }
+.cursor.big { width: 18px; height: 18px; }
+
+/* ━━━━━ NAV ━━━━━ */
+.topnav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  height: 68px; padding: 0 48px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: rgba(13,13,13,.96);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.topnav-logo { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: #fff; text-decoration: none; }
+.topnav-logo span { color: var(--accent); }
+.topnav-back {
+  display: inline-flex; align-items: center; gap: 8px;
+  color: var(--text-secondary); text-decoration: none;
+  font-size: 14px; font-weight: 600; letter-spacing: .3px;
+  transition: color .2s; cursor: none;
+}
+.topnav-back:hover { color: var(--accent); }
+.topnav-back svg { width: 16px; height: 16px; }
+.topnav-title {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ━━━━━ PAGE HERO — VIDEO SLIDESHOW ━━━━━ */
+.page-hero {
+  position: relative;
+  height: 56vh;
+  min-height: 420px;
+  max-height: 640px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--border);
+}
+/* 비디오 슬라이드 컨테이너 */
+.hero-slides { position: absolute; inset: 0; z-index: 0; }
+.hero-slide  { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s ease-in-out; }
+.hero-slide.active { opacity: 1; }
+.hero-slide video  { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* 텍스트 가독성 오버레이 */
+.hero-overlay-tech {
+  position: absolute; inset: 0; z-index: 1;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.30) 0%,
+    rgba(0,0,0,0.10) 35%,
+    rgba(0,0,0,0.60) 70%,
+    rgba(0,0,0,0.92) 100%
+  );
+}
+
+/* 히어로 콘텐츠 (하단 좌측 정렬) */
+.hero-content-tech {
+  position: relative; z-index: 2;
+  padding: 0 48px 44px;
+}
+/* 슬라이드 뱃지 (우측 상단) */
+.hero-badge-tech {
+  position: absolute; top: 80px; right: 48px; z-index: 3;
+  background: rgba(204,61,0,0.92);
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+  padding: 7px 14px; border-radius: 3px;
+  opacity: 0; animation: techFadeIn 0.5s 0.8s forwards;
+  transition: opacity 0.3s;
+}
+@keyframes techFadeIn { from{opacity:0;} to{opacity:1;} }
+@keyframes techFadeUp  { from{opacity:0;transform:translateY(20px);} to{opacity:1;transform:translateY(0);} }
+
+.hero-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+  color: #FF8050; margin-bottom: 12px;
+  opacity: 0; animation: techFadeUp 0.6s 0.2s forwards;
+}
+.hero-h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(48px, 7vw, 90px);
+  line-height: .95; letter-spacing: -1px; color: #fff;
+  margin-bottom: 16px;
+  opacity: 0; animation: techFadeUp 0.6s 0.4s forwards;
+}
+.hero-h1 span { color: var(--accent); }
+.hero-desc {
+  font-size: 17px; line-height: 1.8;
+  color: rgba(255,255,255,0.82);
+  max-width: 600px; font-weight: 400;
+  opacity: 0; animation: techFadeUp 0.6s 0.6s forwards;
+}
+
+/* 슬라이드 컨트롤 (우측 하단) */
+.hero-controls-tech {
+  position: absolute; bottom: 44px; right: 48px; z-index: 3;
+  display: flex; align-items: center; gap: 12px;
+  opacity: 0; animation: techFadeIn 0.5s 1s forwards;
+}
+.tech-dots { display: flex; gap: 7px; }
+.tech-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: rgba(255,255,255,0.3);
+  border: none; cursor: none;
+  transition: background 0.3s, transform 0.3s;
+}
+.tech-dot.active { background: var(--accent); transform: scale(1.5); }
+.tech-arrows { display: flex; gap: 7px; }
+.tech-arrow {
+  width: 36px; height: 36px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 50%; background: transparent;
+  color: #fff; font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: none; transition: background 0.2s, border-color 0.2s;
+}
+.tech-arrow:hover { background: var(--accent); border-color: var(--accent); }
+
+/* 진행 바 */
+.hero-prog-tech {
+  position: absolute; bottom: 0; left: 0;
+  height: 3px; background: var(--accent); z-index: 4; width: 0;
+}
+
+/* ━━━━━ LAYOUT: sidebar tabs + content ━━━━━ */
+.page-body {
+  display: flex;
+  min-height: calc(100vh - 68px);
+  padding-top: 0;
+}
+
+/* ── Sidebar tab menu ── */
+.tab-sidebar {
+  width: var(--tab-w);
+  flex-shrink: 0;
+  position: sticky;
+  top: 68px;
+  height: calc(100vh - 68px);
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+  background: var(--surface);
+  padding: 32px 0 40px;
+  display: flex; flex-direction: column; gap: 4px;
+  scrollbar-width: none;
+}
+.tab-sidebar::-webkit-scrollbar { display: none; }
+.tab-sidebar-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text-muted); padding: 0 24px 16px;
+}
+
+.tab-btn {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 24px;
+  border: none; background: transparent;
+  text-align: left; cursor: none;
+  transition: background .2s;
+  position: relative;
+}
+.tab-btn::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--accent);
+  transform: scaleY(0); transform-origin: center;
+  transition: transform .25s ease;
+}
+.tab-btn:hover { background: rgba(255,255,255,.04); }
+.tab-btn.active { background: rgba(255,78,0,.08); }
+.tab-btn.active::before { transform: scaleY(1); }
+.tab-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  background: var(--surface3);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  transition: background .25s;
+}
+.tab-btn.active .tab-icon { background: var(--accent); }
+.tab-meta { flex: 1; min-width: 0; }
+.tab-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: var(--text-muted);
+  text-transform: uppercase; margin-bottom: 2px;
+}
+.tab-name { font-size: 14px; font-weight: 700; color: var(--text-secondary); line-height: 1.3; }
+.tab-btn.active .tab-name { color: #fff; }
+
+/* ── Content area ── */
+.tab-content-wrap { flex: 1; min-width: 0; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ━━━━━ PANEL INNER ━━━━━ */
+.panel-inner { padding: 56px 52px 100px; }
+
+/* Panel header */
+.panel-header { margin-bottom: 52px; padding-bottom: 36px; border-bottom: 1px solid var(--border); }
+.panel-tag { font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+.panel-title { font-family: 'Bebas Neue', sans-serif; font-size: clamp(42px, 5vw, 68px); line-height: .95; color: #fff; margin-bottom: 16px; }
+.panel-title span { color: var(--accent); }
+.panel-desc { font-size: 17px; line-height: 1.8; color: var(--text-secondary); max-width: 680px; font-weight: 400; }
+
+/* ━━━━━ VIDEO PLAYLIST ━━━━━ */
+.video-section-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: 24px;
+  display: flex; align-items: center; gap: 12px;
+}
+.video-section-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── 전체 래퍼: 플레이어(좌) + 정보패널(우) ── */
+.video-player-wrap {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 48px;
+  align-items: flex-start;
+}
+
+/* ── 좌: 세로형 메인 플레이어 (기존 대비 1.5배) ── */
+.main-player {
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  aspect-ratio: 9/16;
+  width: 300px;        /* 기존 ~200px → 1.5배 = 300px */
+  flex-shrink: 0;
+}
+.main-player video {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+}
+.main-player-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.75) 0%, transparent 45%);
+  pointer-events: none;
+}
+.main-player-info {
+  position: absolute; bottom: 20px; left: 20px; right: 20px; z-index: 2;
+}
+.playing-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-bottom: 4px;
+}
+.playing-title { font-size: 15px; font-weight: 700; color: #fff; line-height: 1.3; }
+
+.play-btn-overlay {
+  position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 68px; height: 68px;
+  background: rgba(255,78,0,.9); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: none; transition: transform .2s, background .2s; z-index: 3;
+}
+.play-btn-overlay:hover { transform: translate(-50%,-50%) scale(1.1); background: var(--accent); }
+.play-btn-overlay svg { width: 26px; height: 26px; fill: #fff; margin-left: 4px; }
+.main-player.playing .play-btn-overlay { opacity: 0; }
+.main-player:hover .play-btn-overlay { opacity: 1; }
+
+/* ── 우: 정보 패널 (플레이어와 같은 높이 = 300px * 16/9 = 533px) ── */
+.video-info-panel {
+  /* 플레이어 높이에 맞춤: width 300px, ratio 9:16 → height = 300 * 16/9 ≈ 533px */
+  height: calc(300px * 16 / 9);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* 캡처 이미지 3장 — 플레이어의 2/3 너비(200px)로 동일 비율 세로형 */
+.capture-grid {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.capture-slot {
+  /* 이미지 너비 = 플레이어 300px의 2/3 = 200px,
+     그러나 패널이 flex:1이므로 3등분으로 나누어 비율 유지 */
+  flex: 1;
+  aspect-ratio: 9/16;
+  max-width: 200px;        /* 플레이어의 2/3 */
+  background: var(--surface3);
+  border-radius: 8px;
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+  transition: border-color .25s, transform .25s;
+  cursor: none;
+}
+.capture-slot:hover {
+  border-color: rgba(255,78,0,.6);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255,78,0,.15);
+}
+.capture-slot img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform .35s;
+}
+.capture-slot:hover img { transform: scale(1.06); }
+
+/* 빈 슬롯 */
+.capture-slot.empty {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 8px;
+  border-style: dashed;
+  border-color: rgba(255,255,255,.12);
+}
+.capture-slot.empty .cs-icon { font-size: 22px; opacity: .25; }
+.capture-slot.empty .cs-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-muted); text-align: center; line-height: 1.5;
+  padding: 0 6px;
+}
+
+/* 슬롯 번호 뱃지 */
+.capture-slot .cs-num {
+  position: absolute; top: 8px; left: 8px;
+  font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 1px;
+  background: rgba(255,78,0,.88); color: #fff;
+  padding: 2px 7px; border-radius: 3px;
+  opacity: 0; transition: opacity .2s;
+}
+.capture-slot:hover .cs-num { opacity: 1; }
+
+/* 소개글 박스 — 남은 세로 공간을 채움 */
+.video-desc-box {
+  flex: 1;                  /* 이미지 아래 남은 공간 전부 사용 */
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 22px;
+  display: flex; flex-direction: column; gap: 10px;
+  overflow: hidden;
+}
+.video-desc-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent);
+  display: flex; align-items: center; gap: 10px;
+  flex-shrink: 0;
+}
+.video-desc-label::after { content: ''; flex: 1; height: 1px; background: rgba(255,78,0,.25); }
+.video-desc-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; color: #fff; letter-spacing: .5px; line-height: 1.1;
+  flex-shrink: 0;
+}
+.video-desc-text {
+  font-size: 14px; line-height: 1.78;
+  color: var(--text-secondary); font-weight: 400;
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--surface3) transparent;
+}
+.video-desc-text::-webkit-scrollbar { width: 3px; }
+.video-desc-text::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
+
+/* Playlist */
+.playlist {
+  display: flex; flex-direction: column; gap: 8px;
+  max-height: 600px; overflow-y: auto;
+  scrollbar-width: thin; scrollbar-color: var(--surface3) transparent;
+}
+.playlist::-webkit-scrollbar { width: 4px; }
+.playlist::-webkit-scrollbar-thumb { background: var(--surface3); border-radius: 2px; }
+
+.playlist-item {
+  display: flex; gap: 12px; align-items: center;
+  padding: 12px;
+  background: var(--surface2);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: none;
+  transition: all .2s;
+  position: relative; overflow: hidden;
+}
+.playlist-item::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; background: var(--accent);
+  transform: scaleY(0); transition: transform .2s;
+}
+.playlist-item:hover { background: var(--surface3); border-color: var(--border); }
+.playlist-item.active { background: rgba(255,78,0,.1); border-color: rgba(255,78,0,.35); }
+.playlist-item.active::before { transform: scaleY(1); }
+
+/* Placeholder thumbnail (9:16) */
+.playlist-thumb {
+  width: 54px; height: 96px; flex-shrink: 0;
+  background: var(--surface3);
+  border-radius: 4px;
+  overflow: hidden; position: relative;
+  display: flex; align-items: center; justify-content: center;
+}
+.playlist-thumb video {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.playlist-thumb-num {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px; color: rgba(255,255,255,.25);
+}
+.playlist-item.active .playlist-thumb-num { color: var(--accent); }
+.playlist-item-meta { flex: 1; min-width: 0; }
+.playlist-item-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px; letter-spacing: 2px; color: var(--text-muted);
+  text-transform: uppercase; margin-bottom: 3px;
+}
+.playlist-item-title { font-size: 13px; font-weight: 700; color: var(--text-secondary); line-height: 1.3; margin-bottom: 4px; }
+.playlist-item.active .playlist-item-title { color: #fff; }
+.playlist-item-sub { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+/* Now playing badge */
+.now-badge {
+  display: none;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: 1px; text-transform: uppercase;
+  background: var(--accent); color: #fff;
+  padding: 2px 6px; border-radius: 2px; margin-top: 4px;
+}
+.playlist-item.active .now-badge { display: inline-block; }
+
+/* ━━━━━ USE CASES ━━━━━ */
+.cases-section { margin-top: 64px; }
+.cases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.case-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 26px;
+  transition: border-color .3s, transform .3s;
+  cursor: none;
+}
+.case-card:hover { border-color: rgba(255,78,0,.4); transform: translateY(-4px); }
+.case-cat {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.case-cat-icon { font-size: 16px; }
+.case-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: #fff; margin-bottom: 10px; }
+.case-purpose {
+  font-size: 13px; color: #FF8050; font-weight: 700;
+  margin-bottom: 10px; font-family: 'Space Mono', monospace; font-size: 11px;
+}
+.case-desc { font-size: 14px; line-height: 1.72; color: var(--text-secondary); margin-bottom: 14px; }
+.case-examples { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.case-ex { font-size: 13px; color: #B0B0B0; display: flex; gap: 8px; align-items: flex-start; line-height: 1.6; }
+.case-ex::before { content: '→'; color: var(--accent); flex-shrink: 0; font-weight: 700; }
+
+/* ━━━━━ SECTION DIVIDER ━━━━━ */
+.sec-divider {
+  display: flex; align-items: center; gap: 16px;
+  margin: 56px 0 32px;
+}
+.sec-divider-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text-muted); white-space: nowrap;
+}
+.sec-divider-line { flex: 1; height: 1px; background: var(--border); }
+.sec-divider-accent { width: 32px; height: 3px; background: var(--accent); border-radius: 2px; }
+
+/* ━━━━━ BOTTOM NAV ━━━━━ */
+.bottom-nav {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  display: flex; gap: 8px;
+  background: rgba(22,22,22,.92);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-strong);
+  border-radius: 50px;
+  padding: 10px 16px;
+}
+.bnav-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px;
+  border: none; background: transparent;
+  border-radius: 40px; cursor: none;
+  color: var(--text-muted);
+  font-size: 13px; font-weight: 600;
+  transition: all .2s;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+.bnav-btn:hover { color: var(--text-secondary); background: rgba(255,255,255,.06); }
+.bnav-btn.active { background: var(--accent); color: #fff; }
+.bnav-icon { font-size: 15px; }
+
+/* ━━━━━ SCROLL REVEAL ━━━━━ */
+.reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.vis { opacity: 1; transform: translateY(0); }
+.rd1{transition-delay:.06s;} .rd2{transition-delay:.12s;} .rd3{transition-delay:.18s;} .rd4{transition-delay:.24s;} .rd5{transition-delay:.30s;} .rd6{transition-delay:.36s;}
+
+/* ━━━━━ RESPONSIVE ━━━━━ */
+@media (max-width: 1100px) {
+  :root { --tab-w: 72px; }
+  .tab-name, .tab-num, .tab-meta, .tab-sidebar-label { display: none; }
+  .tab-btn { justify-content: center; padding: 14px 0; }
+  .panel-inner { padding: 40px 28px 80px; }
+  /* 영상+패널 세로 스택 */
+  .video-player-wrap { flex-direction: column; }
+  .main-player { width: 240px; }
+  .video-info-panel { height: auto; width: 100%; }
+  .capture-slot { max-width: none; }
+  .playlist { flex-direction: row; overflow-x: auto; overflow-y: hidden; max-height: none; }
+  .playlist-item { flex-direction: column; min-width: 130px; align-items: flex-start; }
+  .playlist-thumb { width: 100%; height: 130px; }
+  .topnav { padding: 0 20px; }
+  .bottom-nav { left: 24px; right: 24px; transform: none; }
+}
+@media (max-width: 640px) {
+  .page-hero { min-height: 360px; }
+  .cases-grid { grid-template-columns: 1fr; }
+  .bnav-btn span { display: none; }
+  .bnav-btn { padding: 8px 12px; }
+  .main-player { width: 180px; }
+  .video-desc-box { padding: 14px 16px; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ── TOP NAV ── -->
+<nav class="topnav">
+  <a href="ardocent-main.html" class="topnav-back">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 12L6 8l4-4"/></svg>
+    메인으로 돌아가기
+  </a>
+  <span class="topnav-title">AR TECH PORTFOLIO</span>
+  <a href="ardocent-main.html" class="topnav-logo">AR<span>.</span>DOCENT</a>
+</nav>
+
+<!-- ── PAGE HERO — VIDEO SLIDESHOW (최대 6개) ── -->
+<header class="page-hero" id="techHero">
+
+  <!-- 배경 동영상 슬라이드 -->
+  <div class="hero-slides">
+    <div class="hero-slide active" id="tsl0">
+      <video autoplay muted playsinline preload="auto"><source src="vid1.mp4" type="video/mp4"></video>
+    </div>
+    <div class="hero-slide" id="tsl1">
+      <video muted playsinline preload="none"><source src="vid2.mp4" type="video/mp4"></video>
+    </div>
+    <div class="hero-slide" id="tsl2">
+      <video muted playsinline preload="none"><source src="vid3.mp4" type="video/mp4"></video>
+    </div>
+    <div class="hero-slide" id="tsl3">
+      <video muted playsinline preload="none"><source src="vid4.mp4" type="video/mp4"></video>
+    </div>
+    <div class="hero-slide" id="tsl4">
+      <video muted playsinline preload="none"><source src="vid5.mp4" type="video/mp4"></video>
+    </div>
+    <div class="hero-slide" id="tsl5">
+      <video muted playsinline preload="none"><source src="vid6.mp4" type="video/mp4"></video>
+    </div>
+  </div>
+
+  <div class="hero-overlay-tech"></div>
+
+  <!-- 슬라이드 뱃지 -->
+  <div class="hero-badge-tech" id="techBadge">공간 AR · 절대 스케일</div>
+
+  <!-- 텍스트 콘텐츠 -->
+  <div class="hero-content-tech">
+    <div class="hero-label">ARDOCENT — WEB AR 기술 포트폴리오</div>
+    <h1 class="hero-h1">6가지 핵심<br><span>AR 기술</span></h1>
+    <p class="hero-desc">이미지 인식부터 GPS 위치 추적까지, 에이알도슨트가 구현하는 6가지 Web AR 기술의 실제 적용 영상과 분야별 사례를 확인해 보세요.</p>
+  </div>
+
+  <!-- 슬라이드 컨트롤 -->
+  <div class="hero-controls-tech">
+    <div class="tech-arrows">
+      <button class="tech-arrow" id="techPrev">&#8592;</button>
+      <button class="tech-arrow" id="techNext">&#8594;</button>
+    </div>
+    <div class="tech-dots" id="techDots">
+      <!-- JS로 동적 생성 -->
+    </div>
+  </div>
+
+  <div class="hero-prog-tech" id="techProg"></div>
+</header>
+
+<!-- ── MAIN LAYOUT ── -->
+<div class="page-body">
+
+  <!-- ── SIDEBAR TAB MENU ── -->
+  <aside class="tab-sidebar" id="tabSidebar">
+    <div class="tab-sidebar-label">기술 선택</div>
+
+    <button class="tab-btn active" data-tab="img" onclick="switchTab('img')">
+      <div class="tab-icon">🖼️</div>
+      <div class="tab-meta">
+        <div class="tab-num">01</div>
+        <div class="tab-name">이미지 인식 AR</div>
+      </div>
+    </button>
+
+    <button class="tab-btn" data-tab="sky" onclick="switchTab('sky')">
+      <div class="tab-icon">☁️</div>
+      <div class="tab-meta">
+        <div class="tab-num">02</div>
+        <div class="tab-name">하늘 인식 AR</div>
+      </div>
+    </button>
+
+    <button class="tab-btn" data-tab="plane" onclick="switchTab('plane')">
+      <div class="tab-icon">🏗️</div>
+      <div class="tab-meta">
+        <div class="tab-num">03</div>
+        <div class="tab-name">평면 인식 AR</div>
+      </div>
+    </button>
+
+    <button class="tab-btn" data-tab="portal" onclick="switchTab('portal')">
+      <div class="tab-icon">🌀</div>
+      <div class="tab-meta">
+        <div class="tab-num">04</div>
+        <div class="tab-name">공간인식 포털 AR</div>
+      </div>
+    </button>
+
+    <button class="tab-btn" data-tab="stamp" onclick="switchTab('stamp')">
+      <div class="tab-icon">📍</div>
+      <div class="tab-meta">
+        <div class="tab-num">05</div>
+        <div class="tab-name">AR 스탬프투어</div>
+      </div>
+    </button>
+
+    <button class="tab-btn" data-tab="night" onclick="switchTab('night')">
+      <div class="tab-icon">✨</div>
+      <div class="tab-meta">
+        <div class="tab-num">06</div>
+        <div class="tab-name">야간 경관조명 AR</div>
+      </div>
+    </button>
+  </aside>
+
+  <!-- ── CONTENT PANELS ── -->
+  <div class="tab-content-wrap">
+
+    <!-- ════════════════════════════════
+         PANEL 1 : 이미지 인식 AR
+         ════════════════════════════════ -->
+    <div class="tab-panel active" id="panel-img">
+      <div class="panel-inner">
+
+        <div class="panel-header reveal">
+          <div class="panel-tag">01 — IMAGE TRACKING AR</div>
+          <h2 class="panel-title">이미지 인식<br><span>AR</span></h2>
+          <p class="panel-desc">포스터, 제품 패키징, 명함, 책 페이지 등 정적인 2D 이미지를 카메라가 인식할 수 있는 '마커'로 삼아, 그 위에 3D 그래픽·비디오·인터랙티브 UI 등을 겹쳐서 보여주는 기술입니다. 별도의 앱 설치 없이 오프라인 인쇄물과 온라인 디지털 콘텐츠를 매끄럽게 연결합니다.</p>
+        </div>
+
+        <!-- VIDEO PLAYLIST -->
+        <div class="video-section-label reveal">영상 포트폴리오</div>
+        <div class="video-player-wrap reveal">
+          <div class="main-player" id="player-img">
+            <video id="mainvid-img" muted playsinline></video>
+            <div class="main-player-overlay"></div>
+            <div class="play-btn-overlay" id="playbtn-img">
+              <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+            <div class="main-player-info">
+              <div class="playing-num" id="playnum-img">01 / 06</div>
+              <div class="playing-title" id="playtitle-img">패키지 스캔 AR — 제품 정보 팝업</div>
+            </div>
+          </div>
+
+          <div class="video-info-panel" id="infopanel-img">
+            <div class="capture-grid" id="capgrid-img">
+              <div class="capture-slot empty" id="cap-img-0">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 01</span>
+              </div>
+              <div class="capture-slot empty" id="cap-img-1">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 02</span>
+              </div>
+              <div class="capture-slot empty" id="cap-img-2">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 03</span>
+              </div>
+            </div>
+            <div class="video-desc-box">
+              <div class="video-desc-label">영상 소개</div>
+              <div class="video-desc-title" id="desctitle-img">패키지 스캔 AR</div>
+              <div class="video-desc-text" id="desctext-img">포스터·제품 패키징·명함 등 2D 이미지를 마커로 인식하여 그 위에 3D 그래픽과 인터랙티브 UI를 겹쳐 보여주는 이미지 인식 AR 데모입니다. QR 코드 하나로 브라우저에서 즉시 체험 가능합니다.</div>
+            </div>
+          </div>
+          <div class="playlist" id="playlist-img">
+            <div class="playlist-item active" data-idx="0" data-tab="img">
+              <div class="playlist-thumb"><div class="playlist-thumb-num">01</div></div>
+              <div class="playlist-item-meta">
+                <div class="playlist-item-num">영상 01</div>
+                <div class="playlist-item-title">패키지 스캔 AR</div>
+                <div class="playlist-item-sub">제품 정보 팝업 &amp; 브랜드 스토리</div>
+                <span class="now-badge">● NOW PLAYING</span>
+              </div>
+            </div>
+            <div class="playlist-item" data-idx="1" data-tab="img">
+              <div class="playlist-thumb"><div class="playlist-thumb-num">02</div></div>
+              <div class="playlist-item-meta">
+                <div class="playlist-item-num">영상 02</div>
+                <div class="playlist-item-title">Multi 이미지 추적</div>
+                <div class="playlist-item-sub">다중 마커 동시 인식</div>
+                <span class="now-badge">● NOW PLAYING</span>
+              </div>
+            </div>
+            <div class="playlist-item" data-idx="2" data-tab="img">
+              <div class="playlist-thumb"><div class="playlist-thumb-num">03</div></div>
+              <div class="playlist-item-meta">
+                <div class="playlist-item-num">영상 03</div>
+                <div class="playlist-item-title">Curved 이미지 추적</div>
+                <div class="playlist-item-sub">곡면 패키지 인식 AR</div>
+                <span class="now-badge">● NOW PLAYING</span>
+              </div>
+            </div>
+            <div class="playlist-item" data-idx="3" data-tab="img">
+              <div class="playlist-thumb"><div class="playlist-thumb-num">04</div></div>
+              <div class="playlist-item-meta">
+                <div class="playlist-item-num">영상 04</div>
+                <div class="playlist-item-title">포스터 이미지 인식 AR</div>
+                <div class="playlist-item-sub">OOH 광고 &amp; 영화 포스터</div>
+                <span class="now-badge">● NOW PLAYING</span>
+              </div>
+            </div>
+            <div class="playlist-item" data-idx="4" data-tab="img">
+              <div class="playlist-thumb"><div class="playlist-thumb-num">05</div></div>
+              <div class="playlist-item-meta">
+                <div class="playlist-item-num">영상 05</div>
+                <div class="playlist-item-title">AR 명함</div>
+                <div class="playlist-item-sub">B2B 인터랙티브 명함</div>
+                <span class="now-badge">● NOW PLAYING</span>
+              </div>
+            </div>
+            <div class="playlist-item" data-idx="5" data-tab="img">
+              <div class="playlist-thumb"><div class="playlist-thumb-num">06</div></div>
+              <div class="playlist-item-meta">
+                <div class="playlist-item-num">영상 06</div>
+                <div class="playlist-item-title">전시·도슨트 AR</div>
+                <div class="playlist-item-sub">미술관 작품 인식 해설</div>
+                <span class="now-badge">● NOW PLAYING</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- USE CASES -->
+        <div class="sec-divider reveal">
+          <div class="sec-divider-accent"></div>
+          <span class="sec-divider-label">분야별 사례 및 용도</span>
+          <div class="sec-divider-line"></div>
+        </div>
+        <div class="cases-grid">
+          <div class="case-card reveal rd1">
+            <div class="case-cat"><span class="case-cat-icon">🛒</span> 소비재 패키징 / F&amp;B</div>
+            <div class="case-title">브랜드 스토리텔링</div>
+            <div class="case-purpose">용도: 브랜드 스토리텔링, 레시피 제공, 숨겨진 쿠폰, 친환경 안내</div>
+            <p class="case-desc">포장지 면적의 물리적 한계를 극복하고 더 풍부한 브랜드 경험을 전달합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">와인 라벨 스캔 → 라벨 속 인물이 움직이며 와이너리 역사 설명 (19 Crimes 사례)</li>
+              <li class="case-ex">시리얼 박스 → 3D 캐릭터 팝업 &amp; 미니 게임 제공</li>
+              <li class="case-ex">밀키트 포장지 → 셰프의 요리 과정을 단계별 3D 애니메이션으로 안내</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd2">
+            <div class="case-cat"><span class="case-cat-icon">📚</span> 출판 / 에듀테크</div>
+            <div class="case-title">몰입형 학습 환경</div>
+            <div class="case-purpose">용도: 과학·의학 개념 3D 시각화, 어학 인터랙티브, 아동 도서</div>
+            <p class="case-desc">정적인 텍스트와 2D 삽화의 한계를 뛰어넘어 학습 몰입도를 높입니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">과학 교과서 해부도 스캔 → 심장이 뛰는 3D 모델 &amp; 행성 공전 입체 그래픽</li>
+              <li class="case-ex">아동 그림책 → 공룡·동물이 3D로 튀어나와 울음소리와 함께 스토리 낭독</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd3">
+            <div class="case-cat"><span class="case-cat-icon">📢</span> OOH 광고 / 엔터테인먼트</div>
+            <div class="case-title">소비자 참여율 극대화</div>
+            <div class="case-purpose">용도: 영화·공연 트레일러 재생, SNS 바이럴 캠페인, 티켓 예매 유도</div>
+            <p class="case-desc">지하철역·버스 정류장·옥외 광고판의 정적 이미지를 동적 경험으로 전환합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">영화 포스터 스캔 → 예고편 영상 재생 &amp; 주인공 팝업 이펙트 + '예매하기' 버튼</li>
+              <li class="case-ex">패션 잡지 화보 → 런웨이 영상 재생 &amp; 착용 아이템 구매 링크 연결</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd4">
+            <div class="case-cat"><span class="case-cat-icon">🎨</span> 전시 / 문화 예술</div>
+            <div class="case-title">깊이 있는 시각적 해설</div>
+            <div class="case-purpose">용도: 작품 숨겨진 레이어 시각화, 도슨트 기능, 인터랙티브 팸플릿</div>
+            <p class="case-desc">관람객에게 오디오 가이드 이상의 풍부하고 시각적인 해설을 제공합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">명화 스캔 → 화가의 밑그림(X-ray 뷰) 서서히 드러나기 &amp; 낮/밤 실시간 전환</li>
+              <li class="case-ex">박물관 팸플릿 → 3D 입체 지도 팝업으로 내비게이션 역할</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd5">
+            <div class="case-cat"><span class="case-cat-icon">💼</span> B2B 영업 / 인쇄물</div>
+            <div class="case-title">종이 명함을 디지털 허브로</div>
+            <div class="case-purpose">용도: 3D 제품 카탈로그, 인터랙티브 명함, 영업 프레젠테이션</div>
+            <p class="case-desc">종이 명함이나 카탈로그를 디지털 허브로 변환하여 비즈니스 효율을 높입니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">AR 명함 스캔 → 3D 아바타 인사 + 이메일·링크드인·포트폴리오 가상 버튼 펼침</li>
+              <li class="case-ex">산업용 브로슈어 → 1:1 스케일 3D 엔진 모델 &amp; 부품 결합 과정 애니메이션</li>
+            </ul>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /panel-img -->
+
+    <!-- ════════════════════════════════
+         PANEL 2 : 하늘 인식 AR
+         ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-sky">
+      <div class="panel-inner">
+        <div class="panel-header reveal">
+          <div class="panel-tag">02 — SKY TRACKING AR</div>
+          <h2 class="panel-title">하늘 인식<br><span>AR</span></h2>
+          <p class="panel-desc">별도의 마커 없이 실제 하늘을 비추면 실시간으로 AR 피사체를 구현하는 기술입니다. 불꽃놀이, 하늘을 나는 고래 등 대규모 이벤트를 다양한 위치에서 동시에 수행할 수 있으며, 앱 설치 없이 URL 접속만으로 이용 가능합니다.</p>
+        </div>
+
+        <div class="video-section-label reveal">영상 포트폴리오</div>
+        <div class="video-player-wrap reveal">
+          <div class="main-player" id="player-sky">
+            <video id="mainvid-sky" muted playsinline></video>
+            <div class="main-player-overlay"></div>
+            <div class="play-btn-overlay" id="playbtn-sky">
+              <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+            </div>
+            <div class="main-player-info">
+              <div class="playing-num" id="playnum-sky">01 / 06</div>
+              <div class="playing-title" id="playtitle-sky">하늘 배경 변경 모듈 — Sky Background</div>
+            </div>
+          </div>
+
+          <div class="video-info-panel" id="infopanel-sky">
+            <div class="capture-grid" id="capgrid-sky">
+              <div class="capture-slot empty" id="cap-sky-0">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 01</span>
+              </div>
+              <div class="capture-slot empty" id="cap-sky-1">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 02</span>
+              </div>
+              <div class="capture-slot empty" id="cap-sky-2">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 03</span>
+              </div>
+            </div>
+            <div class="video-desc-box">
+              <div class="video-desc-label">영상 소개</div>
+              <div class="video-desc-title" id="desctitle-sky">하늘 배경 변경 모듈</div>
+              <div class="video-desc-text" id="desctext-sky">하늘 영역을 실시간으로 인식하여 맑은 하늘·황혼·우주 등 다양한 배경으로 즉시 교체하는 Sky Background 모듈 데모입니다. 야외 이벤트 연출이나 영상 촬영 배경 변환에 폭넓게 활용됩니다.</div>
+            </div>
+          </div>
+          <div class="playlist" id="playlist-sky">
+            <div class="playlist-item active" data-idx="0" data-tab="sky"><div class="playlist-thumb"><div class="playlist-thumb-num">01</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 01</div><div class="playlist-item-title">하늘 배경 변경</div><div class="playlist-item-sub">Sky Background 모듈</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="1" data-tab="sky"><div class="playlist-thumb"><div class="playlist-thumb-num">02</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 02</div><div class="playlist-item-title">하늘 위 고래 소환</div><div class="playlist-item-sub">공중 생명체 AR 연출</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="2" data-tab="sky"><div class="playlist-thumb"><div class="playlist-thumb-num">03</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 03</div><div class="playlist-item-title">가상 불꽃놀이</div><div class="playlist-item-sub">어디서든 불꽃놀이 연출</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="3" data-tab="sky"><div class="playlist-thumb"><div class="playlist-thumb-num">04</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 04</div><div class="playlist-item-title">하늘 + 공간 인식 추적</div><div class="playlist-item-sub">Sky + World 복합 추적</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="4" data-tab="sky"><div class="playlist-thumb"><div class="playlist-thumb-num">05</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 05</div><div class="playlist-item-title">캐릭터 등장 캠페인</div><div class="playlist-item-sub">브랜드 캐릭터 하늘 소환</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="5" data-tab="sky"><div class="playlist-thumb"><div class="playlist-thumb-num">06</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 06</div><div class="playlist-item-title">별자리 / 천체 관측</div><div class="playlist-item-sub">교육용 천문 AR</div><span class="now-badge">● NOW PLAYING</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec-divider reveal"><div class="sec-divider-accent"></div><span class="sec-divider-label">분야별 사례 및 용도</span><div class="sec-divider-line"></div></div>
+        <div class="cases-grid">
+          <div class="case-card reveal rd1">
+            <div class="case-cat"><span class="case-cat-icon">📣</span> 마케팅 / 광고</div>
+            <div class="case-title">하늘을 캔버스로</div>
+            <div class="case-purpose">용도: 하늘 위 대형 광고, 캐릭터 등장 캠페인, 쿠폰·이벤트 참여</div>
+            <p class="case-desc">하늘 전체를 캔버스로 활용해 거대한 브랜드 로고와 캐릭터를 연출합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">특정 브랜드 캐릭터가 하늘에서 등장하거나 날아다니는 모습을 포착</li>
+              <li class="case-ex">하늘에 나타난 가상 객체를 클릭하여 쿠폰 수령 &amp; 이벤트 참여 유도</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd2">
+            <div class="case-cat"><span class="case-cat-icon">🎮</span> 엔터테인먼트 / 게임</div>
+            <div class="case-title">가상 생명체 소환</div>
+            <div class="case-purpose">용도: 드래곤·외계 생명체 소환, 불꽃놀이 시뮬레이션, AR 영화 체험</div>
+            <p class="case-desc">하늘을 배경으로 몰입형 게임과 이야기 체험을 구현합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">드래곤·영화 속 캐릭터를 하늘로 소환하여 상호작용하는 게임</li>
+              <li class="case-ex">원하는 시간과 장소에서 나만의 가상 불꽃놀이 연출</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd3">
+            <div class="case-cat"><span class="case-cat-icon">🔭</span> 교육 / 과학</div>
+            <div class="case-title">별자리 &amp; 기상 교육</div>
+            <div class="case-purpose">용도: 별자리·천체 관측, 기상 현상 시뮬레이션, 환경 데이터 시각화</div>
+            <p class="case-desc">스마트폰을 하늘에 대면 현재 위치의 별자리와 주요 천체 정보를 증강현실로 표시합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">구름·번개·오로라 등 기상 현상을 하늘에 시뮬레이션하여 직관적 교육</li>
+              <li class="case-ex">대기 오염 물질 분포를 하늘에 시각화한 환경 교육 콘텐츠</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd4">
+            <div class="case-cat"><span class="case-cat-icon">✈️</span> 여행 / 관광</div>
+            <div class="case-title">역사적 건물 하늘 복원</div>
+            <div class="case-purpose">용도: 역사 건물 복원, 가상 랜드마크, 날씨 시뮬레이션 관광</div>
+            <p class="case-desc">현재는 소실된 역사적 건축물을 원래 부지의 하늘에 증강하여 복원된 모습을 보여줍니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">특정 장소에 가상 랜드마크를 하늘에 세워 관광객에게 새로운 볼거리 제공</li>
+              <li class="case-ex">관광지의 과거 날씨(눈 내리는 풍경 등)를 하늘에 시뮬레이션 체험</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd5">
+            <div class="case-cat"><span class="case-cat-icon">🏗️</span> 부동산 / 건축</div>
+            <div class="case-title">건물 높이·규모 시뮬레이션</div>
+            <div class="case-purpose">용도: 가상 건물 시각화, 높이·규모 시뮬레이션</div>
+            <p class="case-desc">실제 건축 부지의 하늘에 완공 예정인 가상 건물을 세워 주변 경관과의 조화를 미리 확인합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">건물의 높이나 규모를 실제 하늘 공간에서 시각화하여 설계 이해도 향상</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-sky -->
+
+    <!-- ════════════════════════════════
+         PANEL 3 : 평면 인식 AR
+         ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-plane">
+      <div class="panel-inner">
+        <div class="panel-header reveal">
+          <div class="panel-tag">03 — PLANE DETECTION AR</div>
+          <h2 class="panel-title">평면 인식<br><span>AR</span></h2>
+          <p class="panel-desc">별도의 앱 설치 없이 스마트폰 웹 브라우저를 통해 바닥이나 테이블 같은 현실의 평면을 인식하고, 그 위에 3D 가상 객체를 자연스럽게 띄워주는 기술입니다. 스마트폰이 바닥의 질감과 형태를 파악하여 가상의 3D 물체를 실제 공간에 고정하며, 회전·크기 조절이 가능합니다.</p>
+        </div>
+
+        <div class="video-section-label reveal">영상 포트폴리오</div>
+        <div class="video-player-wrap reveal">
+          <div class="main-player" id="player-plane">
+            <video id="mainvid-plane" muted playsinline></video>
+            <div class="main-player-overlay"></div>
+            <div class="play-btn-overlay" id="playbtn-plane"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+            <div class="main-player-info"><div class="playing-num" id="playnum-plane">01 / 06</div><div class="playing-title" id="playtitle-plane">가상 가구 배치 AR — 리테일 커머스</div></div>
+          </div>
+
+          <div class="video-info-panel" id="infopanel-plane">
+            <div class="capture-grid" id="capgrid-plane">
+              <div class="capture-slot empty" id="cap-plane-0">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 01</span>
+              </div>
+              <div class="capture-slot empty" id="cap-plane-1">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 02</span>
+              </div>
+              <div class="capture-slot empty" id="cap-plane-2">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 03</span>
+              </div>
+            </div>
+            <div class="video-desc-box">
+              <div class="video-desc-label">영상 소개</div>
+              <div class="video-desc-title" id="desctitle-plane">가상 가구 배치 AR</div>
+              <div class="video-desc-text" id="desctext-plane">스마트폰으로 방 바닥을 스캔하면 소파·침대·식탁 등을 실제 크기와 비율로 원하는 위치에 배치해 볼 수 있는 리테일 AR 데모입니다. 구매 전 시뮬레이션으로 반품률을 낮추고 고객 만족도를 높입니다.</div>
+            </div>
+          </div>
+          <div class="playlist" id="playlist-plane">
+            <div class="playlist-item active" data-idx="0" data-tab="plane"><div class="playlist-thumb"><div class="playlist-thumb-num">01</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 01</div><div class="playlist-item-title">가상 가구 배치</div><div class="playlist-item-sub">리테일 &amp; 이커머스 AR</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="1" data-tab="plane"><div class="playlist-thumb"><div class="playlist-thumb-num">02</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 02</div><div class="playlist-item-title">바닥인식 캐릭터 포토존</div><div class="playlist-item-sub">AR 포토존 &amp; 마스코트</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="2" data-tab="plane"><div class="playlist-thumb"><div class="playlist-thumb-num">03</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 03</div><div class="playlist-item-title">인터랙티브 캐릭터</div><div class="playlist-item-sub">바닥 소환 캐릭터 상호작용</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="3" data-tab="plane"><div class="playlist-thumb"><div class="playlist-thumb-num">04</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 04</div><div class="playlist-item-title">가상 도슨트</div><div class="playlist-item-sub">전시물 앞 3D 해설 캐릭터</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="4" data-tab="plane"><div class="playlist-thumb"><div class="playlist-thumb-num">05</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 05</div><div class="playlist-item-title">역사적 건물 복원</div><div class="playlist-item-sub">유적지 평면 AR 복원</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="5" data-tab="plane"><div class="playlist-thumb"><div class="playlist-thumb-num">06</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 06</div><div class="playlist-item-title">기계 구조 교육</div><div class="playlist-item-sub">테이블 위 3D 엔진 분해</div><span class="now-badge">● NOW PLAYING</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec-divider reveal"><div class="sec-divider-accent"></div><span class="sec-divider-label">분야별 사례 및 용도</span><div class="sec-divider-line"></div></div>
+        <div class="cases-grid">
+          <div class="case-card reveal rd1">
+            <div class="case-cat"><span class="case-cat-icon">🛍️</span> 유통 / 커머스</div>
+            <div class="case-title">가상 가구·가전 배치</div>
+            <div class="case-purpose">용도: 가상 가구 배치, 가전 체험, 제품 착용·시착 체험</div>
+            <p class="case-desc">가장 활발하게 활용되는 분야. 실제 크기와 비율로 증강되어 구매 결정에 큰 도움을 줍니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">방 바닥 스캔 → 소파·침대·식탁을 원하는 위치에 실제 크기로 배치 (이케아·웨이페어)</li>
+              <li class="case-ex">냉장고·TV·세탁기를 집에 미리 배치하여 공간 적합성 확인</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd2">
+            <div class="case-cat"><span class="case-cat-icon">🎲</span> 엔터테인먼트 / 게임</div>
+            <div class="case-title">테이블톱 AR 게임</div>
+            <div class="case-purpose">용도: 테이블톱 게임, 인터랙티브 캐릭터, 콘텐츠 체험</div>
+            <p class="case-desc">실제 테이블 위에 가상의 보드게임·카드게임·퍼즐 등을 증강하여 플레이합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">가상 캐릭터를 방 바닥에 소환 → 주변 환경과 상호작용 &amp; 사용자 움직임에 반응</li>
+              <li class="case-ex">방 바닥에 나타난 가상의 드래곤과 콘텐츠 체험</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd3">
+            <div class="case-cat"><span class="case-cat-icon">🎓</span> 교육 / 훈련</div>
+            <div class="case-title">직관적 학습 체험</div>
+            <div class="case-purpose">용도: 기계 구조 학습, 실험 시뮬레이션, 역사·지리 체험</div>
+            <p class="case-desc">테이블 위에 가상의 엔진·로봇 팔·신체 기관 등을 증강하여 작동 원리를 시각적으로 학습합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">위험하거나 고비용인 과학 실험을 실제 공간에서 가상으로 수행</li>
+              <li class="case-ex">교실 바닥에 고대 도시 유적이나 지형도를 증강하여 탐험</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd4">
+            <div class="case-cat"><span class="case-cat-icon">🗺️</span> 여행 / 문화</div>
+            <div class="case-title">가상 도슨트 &amp; 유적 복원</div>
+            <div class="case-purpose">용도: 가상 도슨트, 역사 건물 복원, 가상 랜드마크</div>
+            <p class="case-desc">박물관·미술관 전시물 앞에 가상의 도슨트를 소환하여 설명을 제공합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">소실된 역사 건축물을 원래 부지 평면에 증강하여 복원 모습 시각화</li>
+              <li class="case-ex">특정 장소에 가상 랜드마크를 소환하여 관광객에게 색다른 재미 제공</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd5">
+            <div class="case-cat"><span class="case-cat-icon">🏢</span> 부동산 / 건축</div>
+            <div class="case-title">가상 모델하우스</div>
+            <div class="case-purpose">용도: 완공 전 건물 시각화, 가상 모델하우스</div>
+            <p class="case-desc">빈 방의 평면에 가구와 인테리어가 완성된 모습을 증강하여 모델하우스를 방문하지 않고도 체험합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">실제 건축 부지 평면에 완공 예정 건물의 3D 모델 증강 → 경관 조화 미리 확인</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-plane -->
+
+    <!-- ════════════════════════════════
+         PANEL 4 : 공간인식 포털 AR
+         ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-portal">
+      <div class="panel-inner">
+        <div class="panel-header reveal">
+          <div class="panel-tag">04 — SPATIAL PORTAL AR</div>
+          <h2 class="panel-title">공간인식<br><span>포털 AR</span></h2>
+          <p class="panel-desc">현실 공간에 가상의 문(포털)을 생성하고, 그 문을 통해 완전히 다른 3D 공간으로 '순간 이동'하는 체험을 제공합니다. 부동산·관광·브랜드 마케팅·엔터테인먼트 등에서 오프라인의 물리적 한계를 극복하는 강력한 도구입니다.</p>
+        </div>
+
+        <div class="video-section-label reveal">영상 포트폴리오</div>
+        <div class="video-player-wrap reveal">
+          <div class="main-player" id="player-portal">
+            <video id="mainvid-portal" muted playsinline></video>
+            <div class="main-player-overlay"></div>
+            <div class="play-btn-overlay" id="playbtn-portal"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+            <div class="main-player-info"><div class="playing-num" id="playnum-portal">01 / 06</div><div class="playing-title" id="playtitle-portal">공간인식 포털 — 역사 Portal 체험</div></div>
+          </div>
+
+          <div class="video-info-panel" id="infopanel-portal">
+            <div class="capture-grid" id="capgrid-portal">
+              <div class="capture-slot empty" id="cap-portal-0">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 01</span>
+              </div>
+              <div class="capture-slot empty" id="cap-portal-1">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 02</span>
+              </div>
+              <div class="capture-slot empty" id="cap-portal-2">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 03</span>
+              </div>
+            </div>
+            <div class="video-desc-box">
+              <div class="video-desc-label">영상 소개</div>
+              <div class="video-desc-title" id="desctitle-portal">역사 타임슬립 포털</div>
+              <div class="video-desc-text" id="desctext-portal">특정 유적지 현장에서 포털을 생성하고 들어가면 수백 년 전 화려했던 과거 유적 한가운데로 타임슬립하는 체험을 제공하는 공간인식 포털 AR 데모입니다.</div>
+            </div>
+          </div>
+          <div class="playlist" id="playlist-portal">
+            <div class="playlist-item active" data-idx="0" data-tab="portal"><div class="playlist-thumb"><div class="playlist-thumb-num">01</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 01</div><div class="playlist-item-title">역사 타임슬립 포털</div><div class="playlist-item-sub">유적지 과거 모습 체험</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="1" data-tab="portal"><div class="playlist-thumb"><div class="playlist-thumb-num">02</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 02</div><div class="playlist-item-title">가상 모델하우스</div><div class="playlist-item-sub">부동산 완공 전 체험</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="2" data-tab="portal"><div class="playlist-thumb"><div class="playlist-thumb-num">03</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 03</div><div class="playlist-item-title">가상 팝업 스토어</div><div class="playlist-item-sub">브랜드 세계관 체험</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="3" data-tab="portal"><div class="playlist-thumb"><div class="playlist-thumb-num">04</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 04</div><div class="playlist-item-title">가상 여행지 티저 투어</div><div class="playlist-item-sub">항공·여행사 프로모션</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="4" data-tab="portal"><div class="playlist-thumb"><div class="playlist-thumb-num">05</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 05</div><div class="playlist-item-title">영화·드라마 세계관 진입</div><div class="playlist-item-sub">OTT 팬 체험 프로모션</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="5" data-tab="portal"><div class="playlist-thumb"><div class="playlist-thumb-num">06</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 06</div><div class="playlist-item-title">가상 현장 체험 학습</div><div class="playlist-item-sub">교실에서 화성·심해 탐험</div><span class="now-badge">● NOW PLAYING</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec-divider reveal"><div class="sec-divider-accent"></div><span class="sec-divider-label">분야별 사례 및 용도</span><div class="sec-divider-line"></div></div>
+        <div class="cases-grid">
+          <div class="case-card reveal rd1">
+            <div class="case-cat"><span class="case-cat-icon">🏠</span> 부동산 / 건축</div>
+            <div class="case-title">가상 모델하우스 &amp; 원격 투어</div>
+            <div class="case-purpose">용도: 가상 쇼룸, 해외 매물 투어, 비포&애프터 공간 체험</div>
+            <p class="case-desc">물리적 거리와 공간의 제약을 없애주어, 오프라인 방문을 대체하는 강력한 도구입니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">거실 포털 생성 → 미완공 아파트 내부나 펜트하우스를 360도 관람</li>
+              <li class="case-ex">해외 리조트·타지역 부동산을 현장 방문 없이 실제 스케일로 체험</li>
+              <li class="case-ex">리모델링 예정인 방에서 포털 → 완공 후 모습을 미리 걷고 체험</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd2">
+            <div class="case-cat"><span class="case-cat-icon">✈️</span> 여행 / 관광</div>
+            <div class="case-title">순간 이동 관광</div>
+            <div class="case-purpose">용도: 가상 여행지 티저, 시공간 초월 관광, 호텔 사전 투어</div>
+            <p class="case-desc">'순간 이동'이라는 포털의 특성을 가장 직관적으로 살릴 수 있는 분야입니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">집·지하철역에 하와이 해변이나 에펠탑으로 통하는 포털 생성 → 여행 예약 유도</li>
+              <li class="case-ex">유적지 현장에서 포털 생성 → 수백 년 전 화려했던 과거로 타임슬립</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd3">
+            <div class="case-cat"><span class="case-cat-icon">🛍️</span> 유통 / 브랜드 마케팅</div>
+            <div class="case-title">가상 팝업 스토어</div>
+            <div class="case-purpose">용도: 가상 팝업 스토어, 브랜드 세계관 체험</div>
+            <p class="case-desc">브랜드만의 독창적인 세계관을 구축하고 오프라인 팝업스토어의 한계를 극복합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">포털로 입장한 사용자가 판타지 공간 속 3D 제품 구경 &amp; 구매 링크 이동</li>
+              <li class="case-ex">겨울 아웃도어 브랜드 → '눈 덮인 설산'으로 가는 포털로 방한 기능 극적 체감</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd4">
+            <div class="case-cat"><span class="case-cat-icon">🎬</span> 엔터테인먼트 / 미디어</div>
+            <div class="case-title">영화·드라마 세계관 진입</div>
+            <div class="case-purpose">용도: 영화·드라마 세계관 진입, 가상 전시·콘서트장</div>
+            <p class="case-desc">영화·드라마·게임 속 세계로 팬들을 직접 초대하여 강렬한 경험을 선사합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">OTT 기업이 극중 주인공의 방이나 외계 행성으로 이어지는 포털 생성</li>
+              <li class="case-ex">아티스트 뮤직비디오 세트장·가상 콘서트장 포털로 프라이빗 엔터테인먼트 제공</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd5">
+            <div class="case-cat"><span class="case-cat-icon">🔬</span> 교육 / 과학</div>
+            <div class="case-title">가상 현장 체험 학습</div>
+            <div class="case-purpose">용도: 가상 현장 체험, 역사적 사건 재현</div>
+            <p class="case-desc">교실이라는 좁은 공간을 무한한 학습의 장으로 확장합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">교실에서 포털 → 화성 표면·심해 바닥·태양계·인체 혈관 속 360도 탐험</li>
+              <li class="case-ex">독립운동 현장·고대 올림픽 경기장으로 이어지는 포털 → 생생한 몰입형 역사 교육</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-portal -->
+
+    <!-- ════════════════════════════════
+         PANEL 5 : AR 스탬프투어
+         ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-stamp">
+      <div class="panel-inner">
+        <div class="panel-header reveal">
+          <div class="panel-tag">05 — AR STAMP TOUR</div>
+          <h2 class="panel-title">AR<br><span>스탬프투어</span></h2>
+          <p class="panel-desc">앱 다운로드의 장벽이 없어 남녀노소 누구나 쉽게 참여할 수 있는 Web AR 스탬프투어입니다. GPS, 이미지 인식, 평면 인식 등 다양한 AR 기술과 결합하여 무궁무진한 형태의 미션을 기획할 수 있습니다.</p>
+        </div>
+
+        <div class="video-section-label reveal">영상 포트폴리오</div>
+        <div class="video-player-wrap reveal">
+          <div class="main-player" id="player-stamp">
+            <video id="mainvid-stamp" muted playsinline></video>
+            <div class="main-player-overlay"></div>
+            <div class="play-btn-overlay" id="playbtn-stamp"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+            <div class="main-player-info"><div class="playing-num" id="playnum-stamp">01 / 06</div><div class="playing-title" id="playtitle-stamp">GPS/QR AR 스탬프투어 — 용인시청 사례</div></div>
+          </div>
+
+          <div class="video-info-panel" id="infopanel-stamp">
+            <div class="capture-grid" id="capgrid-stamp">
+              <div class="capture-slot empty" id="cap-stamp-0">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 01</span>
+              </div>
+              <div class="capture-slot empty" id="cap-stamp-1">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 02</span>
+              </div>
+              <div class="capture-slot empty" id="cap-stamp-2">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 03</span>
+              </div>
+            </div>
+            <div class="video-desc-box">
+              <div class="video-desc-label">영상 소개</div>
+              <div class="video-desc-title" id="desctitle-stamp">GPS/QR AR 스탬프투어</div>
+              <div class="video-desc-text" id="desctext-stamp">용인시청 조아용 과학축제에 적용된 GPS·QR 기반 AR 모바일 스탬프투어 데모입니다. 특정 위치에 도달하면 AR 캐릭터가 등장하고 퀴즈·게임을 완료하면 스탬프를 획득하는 방식으로 방문객 체류 시간을 효과적으로 늘립니다.</div>
+            </div>
+          </div>
+          <div class="playlist" id="playlist-stamp">
+            <div class="playlist-item active" data-idx="0" data-tab="stamp"><div class="playlist-thumb"><div class="playlist-thumb-num">01</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 01</div><div class="playlist-item-title">GPS/QR AR 스탬프투어</div><div class="playlist-item-sub">용인시청 조아용 과학축제</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="1" data-tab="stamp"><div class="playlist-thumb"><div class="playlist-thumb-num">02</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 02</div><div class="playlist-item-title">역사·문화 스탬프 투어</div><div class="playlist-item-sub">서울 한양도성·경주 유적지</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="2" data-tab="stamp"><div class="playlist-thumb"><div class="playlist-thumb-num">03</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 03</div><div class="playlist-item-title">골목 상권 활성화 투어</div><div class="playlist-item-sub">AR 퀴즈 &amp; 지역 상품권 교환</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="3" data-tab="stamp"><div class="playlist-thumb"><div class="playlist-thumb-num">04</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 04</div><div class="playlist-item-title">박물관 도슨트 투어</div><div class="playlist-item-sub">전시물 스탬프 수집 게임</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="4" data-tab="stamp"><div class="playlist-thumb"><div class="playlist-thumb-num">05</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 05</div><div class="playlist-item-title">브랜드 팝업 미션 스탬프</div><div class="playlist-item-sub">O2O 마케팅 &amp; 한정판 굿즈</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="5" data-tab="stamp"><div class="playlist-thumb"><div class="playlist-thumb-num">06</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 06</div><div class="playlist-item-title">신입생 오리엔테이션</div><div class="playlist-item-sub">캠퍼스·사옥 투어 게임</div><span class="now-badge">● NOW PLAYING</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec-divider reveal"><div class="sec-divider-accent"></div><span class="sec-divider-label">분야별 사례 및 용도</span><div class="sec-divider-line"></div></div>
+        <div class="cases-grid">
+          <div class="case-card reveal rd1">
+            <div class="case-cat"><span class="case-cat-icon">🏛️</span> 지자체 관광 / 지역 상권</div>
+            <div class="case-title">역사·문화 스탬프 투어</div>
+            <div class="case-purpose">용도: 역사 유적 투어, 골목 상권 활성화, 지역 축제 연계</div>
+            <p class="case-desc">지역 내 명소나 골목 상권으로 관광객을 유도하고 체류 시간을 늘리는 데 효과적입니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">서울 한양도성·경주 유적지 → AR로 복원된 옛 모습·역사 인물 만나고 스탬프 획득</li>
+              <li class="case-ex">골목 상권 지정 가게 방문 → AR 퀴즈·게임 완료 시 지역 상품권·할인 쿠폰 교환</li>
+              <li class="case-ex">축제 현장 곳곳 숨겨진 AR 캐릭터·포토존 인증 → 경품 응모</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd2">
+            <div class="case-cat"><span class="case-cat-icon">🏪</span> 브랜드 마케팅 / 프로모션</div>
+            <div class="case-title">O2O 팝업 미션 스탬프</div>
+            <div class="case-purpose">용도: 팝업·플래그십 미션, 신제품 런칭 프로모션, 다점포 방문 유도</div>
+            <p class="case-desc">오프라인 매장 방문을 유도하고 브랜드 경험을 확대하는 O2O 마케팅에 활용됩니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">매장 내 특정 구역·제품 패키지 인식 → AR 미니 게임 체험 후 한정판 굿즈·샘플 증정</li>
+              <li class="case-ex">전국 여러 매장·거점 숨겨진 AR 단서 → 스탬프 완성 시 신제품 교환권 제공</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd3">
+            <div class="case-cat"><span class="case-cat-icon">🏛️</span> 전시 / 박물관 / 테마파크</div>
+            <div class="case-title">관람객 동선 유도</div>
+            <div class="case-purpose">용도: 도슨트 투어, 테마파크 미션, 야외 조각공원 탐험</div>
+            <p class="case-desc">넓은 공간에서 관람객의 이동 동선을 유도하고 전시물에 대한 이해도와 흥미를 높입니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">전시물 앞 AR 큐레이터 설명·애니메이션 감상 → 스탬프 획득</li>
+              <li class="case-ex">파크 내 놀이기구·랜드마크 순회 → AR 미니 게임 완료 후 기념품·패스트트랙 획득</li>
+              <li class="case-ex">숨겨진 AR 요정·가상 식물 정보 찾기 → 가족 친화적 에듀테인먼트</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd4">
+            <div class="case-cat"><span class="case-cat-icon">🏢</span> 사내 행사 / 캠퍼스 투어</div>
+            <div class="case-title">오리엔테이션 &amp; 팀빌딩</div>
+            <div class="case-purpose">용도: 신입생·신입사원 오리엔테이션, 기업 체육대회·워크숍, 안전 교육</div>
+            <p class="case-desc">신입 사원·신입생 교육 등 특정 집단의 결속력 강화 및 정보 제공에 활용됩니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">캠퍼스·사옥 주요 시설 방문 → AR 미션 수행 &amp; 정보 획득 후 스탬프 수집</li>
+              <li class="case-ex">사옥 내 안전 시설물(소화기 위치·대피로) AR 확인 → 스탬프로 교육 이수 확인</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd5">
+            <div class="case-cat"><span class="case-cat-icon">🌿</span> 환경 / 캠페인</div>
+            <div class="case-title">환경 정화 &amp; 생태 탐험</div>
+            <div class="case-purpose">용도: 플로깅 투어, 생태 공원 탐조·관찰 투어</div>
+            <p class="case-desc">공익적 목적이나 환경 보호 활동에 대한 시민들의 자발적 참여를 독려합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">환경 정화 활동 지점에서 AR 인증 사진 → 봉사활동 시간·리워드 획득</li>
+              <li class="case-ex">동식물 서식지 방문 → AR 생태 정보 학습 후 스탬프북 완성</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-stamp -->
+
+    <!-- ════════════════════════════════
+         PANEL 6 : 야간 경관조명 AR
+         ════════════════════════════════ -->
+    <div class="tab-panel" id="panel-night">
+      <div class="panel-inner">
+        <div class="panel-header reveal">
+          <div class="panel-tag">06 — NIGHT LIGHTING AR</div>
+          <h2 class="panel-title">야간 경관조명<br><span>AR</span></h2>
+          <p class="panel-desc">앱 설치 없이 웹 브라우저를 통해 야간 경관 조명과 미디어파사드 같은 빛 연출을 증강현실로 체험하는 기술입니다. 실제 도심 야경이나 건축물 조명을 배경으로 가상의 빛 효과·불꽃놀이·3D 캐릭터를 겹쳐 보이게 하며, 터치나 움직임을 통해 양방향 체험이 가능합니다.</p>
+        </div>
+
+        <div class="video-section-label reveal">영상 포트폴리오</div>
+        <div class="video-player-wrap reveal">
+          <div class="main-player" id="player-night">
+            <video id="mainvid-night" muted playsinline></video>
+            <div class="main-player-overlay"></div>
+            <div class="play-btn-overlay" id="playbtn-night"><svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg></div>
+            <div class="main-player-info"><div class="playing-num" id="playnum-night">01 / 06</div><div class="playing-title" id="playtitle-night">나이트 글로우 AR 포토존 — Bloom 효과</div></div>
+          </div>
+
+          <div class="video-info-panel" id="infopanel-night">
+            <div class="capture-grid" id="capgrid-night">
+              <div class="capture-slot empty" id="cap-night-0">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 01</span>
+              </div>
+              <div class="capture-slot empty" id="cap-night-1">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 02</span>
+              </div>
+              <div class="capture-slot empty" id="cap-night-2">
+                <span class="cs-icon">📷</span>
+                <span class="cs-label">캡처<br>이미지 03</span>
+              </div>
+            </div>
+            <div class="video-desc-box">
+              <div class="video-desc-label">영상 소개</div>
+              <div class="video-desc-title" id="desctitle-night">나이트 글로우 AR 포토존</div>
+              <div class="video-desc-text" id="desctext-night">Bloom 효과가 적용된 네온사인 AR 포토존 데모입니다. 어두운 환경을 역이용하여 화려한 빛 효과를 극대화하고, 방문객의 자발적인 SNS 인증샷 생성을 유도합니다.</div>
+            </div>
+          </div>
+          <div class="playlist" id="playlist-night">
+            <div class="playlist-item active" data-idx="0" data-tab="night"><div class="playlist-thumb"><div class="playlist-thumb-num">01</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 01</div><div class="playlist-item-title">나이트 글로우 포토존</div><div class="playlist-item-sub">Bloom 효과 네온사인 AR</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="1" data-tab="night"><div class="playlist-thumb"><div class="playlist-thumb-num">02</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 02</div><div class="playlist-item-title">3D 풍등 / 가상 불꽃놀이</div><div class="playlist-item-sub">야간 축제 VFX 연출</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="2" data-tab="night"><div class="playlist-thumb"><div class="playlist-thumb-num">03</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 03</div><div class="playlist-item-title">야광 바닥 인터랙션</div><div class="playlist-item-sub">Additive Blending 발광 렌더링</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="3" data-tab="night"><div class="playlist-thumb"><div class="playlist-thumb-num">04</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 04</div><div class="playlist-item-title">빛의 고래 — 심해 AR</div><div class="playlist-item-sub">자체발광 해양생물 연출</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="4" data-tab="night"><div class="playlist-thumb"><div class="playlist-thumb-num">05</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 05</div><div class="playlist-item-title">야간 문화재 AR 복원</div><div class="playlist-item-sub">궁궐 야간 행사 경관 조명</div><span class="now-badge">● NOW PLAYING</span></div></div>
+            <div class="playlist-item" data-idx="5" data-tab="night"><div class="playlist-thumb"><div class="playlist-thumb-num">06</div></div><div class="playlist-item-meta"><div class="playlist-item-num">영상 06</div><div class="playlist-item-title">주류 브랜드 마케팅</div><div class="playlist-item-sub">바 테이블 코스터 AR 팝업</div><span class="now-badge">● NOW PLAYING</span></div></div>
+          </div>
+        </div>
+
+        <div class="sec-divider reveal"><div class="sec-divider-accent"></div><span class="sec-divider-label">분야별 사례 및 용도</span><div class="sec-divider-line"></div></div>
+        <div class="cases-grid">
+          <div class="case-card reveal rd1">
+            <div class="case-cat"><span class="case-cat-icon">🎪</span> 엔터테인먼트 / 테마파크</div>
+            <div class="case-title">나이트 워크 &amp; 야간 축제</div>
+            <div class="case-purpose">용도: 야간 나이트 워크, 홀로그램 콘서트 연출, AR 방탈출·공포 체험</div>
+            <p class="case-desc">어두운 야외나 실내 테마파크는 조명 효과를 활용하기 가장 완벽한 환경입니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">어두운 숲길·공원 산책로 → 가상의 빛나는 요정·네온 안내판·형광 반딧불이로 길 안내</li>
+              <li class="case-ex">야간 EDM 페스티벌·콘서트 → 무대 위 네온 AR 아바타 &amp; 가상 폭죽으로 현장감 극대화</li>
+              <li class="case-ex">완전 어두운 방 → AR 화면 속에서만 보이는 빛나는 단서 찾는 스릴 넘치는 방탈출</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd2">
+            <div class="case-cat"><span class="case-cat-icon">🎭</span> 문화 전시 / 관광</div>
+            <div class="case-title">심해·우주 테마 전시</div>
+            <div class="case-purpose">용도: 심해·우주 테마 전시관, 야간 문화재 투어</div>
+            <p class="case-desc">신비로운 자연 현상이나 과거의 모습을 아름답게 연출할 때 유용합니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">아쿠아리움 → 자체 발광 심해 해파리·아귀가 블룸 효과와 함께 헤엄치는 전시</li>
+              <li class="case-ex">궁궐 야간 개장 → 과거 청사초롱·연회 장면을 빛과 함께 복원 / 도심 빌딩숲에 빛의 고래 소환</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd3">
+            <div class="case-cat"><span class="case-cat-icon">🛒</span> 리테일 / 브랜드 마케팅</div>
+            <div class="case-title">나이트라이프 브랜드 AR</div>
+            <div class="case-purpose">용도: 게이밍 기기 체험, 나이트라이프 주류 마케팅, 야광 패션 피팅</div>
+            <p class="case-desc">제품의 특정 기능이나 힙(Hip)한 브랜드 이미지를 각인시키는 데 매우 효과적입니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">어두운 팝업스토어 → 게이밍 키보드·마우스에서 블룸 LED 빛이 주변에 번지는 듯한 AR 체험</li>
+              <li class="case-ex">바 테이블 코스터 스캔 → 빛나는 가상 네온 칵테일·브랜드 로고 팝업 &amp; 인스타 인증샷 유도</li>
+              <li class="case-ex">클럽 웨어 야광 패턴을 AR로 미리 착용해보며 어둠 속 효과 확인</li>
+            </ul>
+          </div>
+          <div class="case-card reveal rd4">
+            <div class="case-cat"><span class="case-cat-icon">⚡</span> 교육 / 과학 시뮬레이션</div>
+            <div class="case-title">에너지 &amp; 광학 시각화</div>
+            <div class="case-purpose">용도: 에너지 흐름·화학 반응 시각화, 광학·레이저 실험 시뮬레이션</div>
+            <p class="case-desc">눈에 보이지 않는 에너지나 빛의 원리를 직관적으로 이해하도록 돕습니다.</p>
+            <ul class="case-examples">
+              <li class="case-ex">어두운 실험실 → 전선 전류 흐름·광합성·화학 반응을 블룸 입자(Particle) 효과로 시각화</li>
+              <li class="case-ex">렌즈·프리즘 통과하며 굴절·분산되는 빛의 궤적을 네온/블룸 그래픽으로 물리 법칙 교육</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div><!-- /panel-night -->
+
+  </div><!-- /tab-content-wrap -->
+</div><!-- /page-body -->
+
+<!-- ── BOTTOM NAV ── -->
+<nav class="bottom-nav" id="bottomNav">
+  <button class="bnav-btn active" onclick="switchTab('img')"><span class="bnav-icon">🖼️</span><span>이미지</span></button>
+  <button class="bnav-btn" onclick="switchTab('sky')"><span class="bnav-icon">☁️</span><span>하늘</span></button>
+  <button class="bnav-btn" onclick="switchTab('plane')"><span class="bnav-icon">🏗️</span><span>평면</span></button>
+  <button class="bnav-btn" onclick="switchTab('portal')"><span class="bnav-icon">🌀</span><span>포털</span></button>
+  <button class="bnav-btn" onclick="switchTab('stamp')"><span class="bnav-icon">📍</span><span>스탬프</span></button>
+  <button class="bnav-btn" onclick="switchTab('night')"><span class="bnav-icon">✨</span><span>야간</span></button>
+</nav>
+
+<script>
+/* ── TECH HERO SLIDESHOW (최대 6개 슬롯 — 스마트 폴백) ── */
+(function() {
+  const TECH_LABELS = [
+    '공간 AR · 절대 스케일',
+    '이미지 AR · 꽃과 나비',
+    '월드 타겟 · 마리오 데모',
+    'GPS AR · 위치 기반 서비스',
+    'AI AR · 생성형 콘텐츠',
+    '야간 AR · 빛의 페스티벌'
+  ];
+  const TECH_FALLBACK_BG = [
+    'radial-gradient(ellipse at 70% 30%, #3d1000, #0D0D0D)',
+    'radial-gradient(ellipse at 30% 60%, #001030, #050508)',
+    'radial-gradient(ellipse at 60% 40%, #002010, #060c06)',
+    'radial-gradient(ellipse at 40% 50%, #180028, #080008)',
+    'radial-gradient(ellipse at 65% 35%, #180820, #080008)',
+    'radial-gradient(ellipse at 30% 70%, #101830, #050508)'
+  ];
+  const TECH_FALLBACK_DUR = 7000;
+
+  const tSlides  = Array.from(document.querySelectorAll('#techHero .hero-slide'));
+  const tProg    = document.getElementById('techProg');
+  const tBadge   = document.getElementById('techBadge');
+  const tDotWrap = document.getElementById('techDots');
+
+  // 폴백 배경 적용
+  tSlides.forEach((s, i) => { s.style.background = TECH_FALLBACK_BG[i] || TECH_FALLBACK_BG[0]; });
+
+  // 도트 생성
+  tDotWrap.innerHTML = '';
+  tSlides.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'tech-dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => tGoTo(i));
+    tDotWrap.appendChild(d);
+  });
+
+  let tCur = 0, tTimer = null, tProgStart = null, tProgDur = TECH_FALLBACK_DUR;
+
+  function tStartProg(dur) {
+    tProg.style.transition = 'none';
+    tProg.style.width = '0%';
+    tProgDur   = dur;
+    tProgStart = performance.now();
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      tProg.style.transition = `width ${dur}ms linear`;
+      tProg.style.width = '100%';
+    }));
+  }
+  function tPauseProg() {
+    const el = performance.now() - (tProgStart || 0);
+    tProg.style.transition = 'none';
+    tProg.style.width = Math.min(100, (el / tProgDur) * 100) + '%';
+  }
+
+  function tOnEnd() { tGoTo(tCur + 1); }
+
+  function tGoTo(n) {
+    const total = tSlides.length;
+    const prev  = tSlides[tCur];
+    const pVid  = prev?.querySelector('video');
+    if (pVid) { pVid.pause(); pVid.removeEventListener('ended', tOnEnd); }
+    prev?.classList.remove('active');
+    clearTimeout(tTimer);
+
+    tCur = ((n % total) + total) % total;
+    const slide = tSlides[tCur];
+    slide.classList.add('active');
+
+    // 도트
+    tDotWrap.querySelectorAll('.tech-dot').forEach((d, i) =>
+      d.classList.toggle('active', i === tCur)
+    );
+
+    // 뱃지
+    tBadge.style.opacity = '0';
+    setTimeout(() => { tBadge.textContent = TECH_LABELS[tCur] || TECH_LABELS[0]; tBadge.style.opacity = '1'; }, 280);
+
+    // 영상
+    const vid = slide.querySelector('video');
+    if (vid) {
+      vid.currentTime = 0; vid.muted = true;
+      const pp = vid.play();
+      if (pp) pp.catch(() => { tStartProg(TECH_FALLBACK_DUR); tTimer = setTimeout(() => tGoTo(tCur + 1), TECH_FALLBACK_DUR); });
+
+      const setD = () => {
+        if (!vid.duration || isNaN(vid.duration)) {
+          tStartProg(TECH_FALLBACK_DUR); tTimer = setTimeout(() => tGoTo(tCur + 1), TECH_FALLBACK_DUR); return;
+        }
+        const dur = vid.duration * 1000;
+        tStartProg(dur);
+        vid.addEventListener('ended', tOnEnd, { once: true });
+        clearTimeout(tTimer);
+        tTimer = setTimeout(() => tGoTo(tCur + 1), dur + 600);
+      };
+
+      if (vid.readyState >= 1 && vid.duration) { setD(); }
+      else {
+        tStartProg(TECH_FALLBACK_DUR);
+        tTimer = setTimeout(() => tGoTo(tCur + 1), TECH_FALLBACK_DUR);
+        vid.addEventListener('loadedmetadata', () => { clearTimeout(tTimer); setD(); }, { once: true });
+        vid.addEventListener('error', () => { clearTimeout(tTimer); tStartProg(TECH_FALLBACK_DUR); tTimer = setTimeout(() => tGoTo(tCur + 1), TECH_FALLBACK_DUR); }, { once: true });
+      }
+    } else {
+      tStartProg(TECH_FALLBACK_DUR);
+      tTimer = setTimeout(() => tGoTo(tCur + 1), TECH_FALLBACK_DUR);
+    }
+  }
+
+  document.getElementById('techPrev').addEventListener('click', () => tGoTo(tCur - 1));
+  document.getElementById('techNext').addEventListener('click', () => tGoTo(tCur + 1));
+
+  const heroEl = document.getElementById('techHero');
+  heroEl.addEventListener('mouseenter', () => { tPauseProg(); clearTimeout(tTimer); });
+  heroEl.addEventListener('mouseleave', () => {
+    const vid = tSlides[tCur]?.querySelector('video');
+    if (vid && !vid.paused && !vid.ended && vid.duration) {
+      const rem = (vid.duration - vid.currentTime) * 1000;
+      tStartProg(rem); clearTimeout(tTimer); tTimer = setTimeout(() => tGoTo(tCur + 1), rem + 600);
+    } else { tGoTo(tCur + 1); }
+  });
+
+  let tx2 = 0;
+  heroEl.addEventListener('touchstart', e => { tx2 = e.touches[0].clientX; }, { passive: true });
+  heroEl.addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - tx2;
+    if (Math.abs(dx) > 48) tGoTo(dx < 0 ? tCur + 1 : tCur - 1);
+  }, { passive: true });
+
+  tGoTo(0);
+})();
+</script>
+
+<script>
+/* ── CURSOR ── */
+const cur = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cur.style.left=mx+'px'; cur.style.top=my+'px';
+});
+(function raf(){ rx+=(mx-rx)*.13; ry+=(my-ry)*.13; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(raf); })();
+document.querySelectorAll('a,button,.case-card,.playlist-item,.tab-btn').forEach(el=>{
+  el.addEventListener('mouseenter',()=>cur.classList.add('big'));
+  el.addEventListener('mouseleave',()=>cur.classList.remove('big'));
+});
+
+/* ── TAB SWITCHING ── */
+const TAB_IDS = ['img','sky','plane','portal','stamp','night'];
+
+function switchTab(id) {
+  // sidebar
+  document.querySelectorAll('.tab-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.tab === id);
+  });
+  // panels
+  document.querySelectorAll('.tab-panel').forEach(p=>{
+    p.classList.toggle('active', p.id === 'panel-'+id);
+  });
+  // bottom nav
+  document.querySelectorAll('.bnav-btn').forEach((b,i)=>{
+    b.classList.toggle('active', TAB_IDS[i] === id);
+  });
+  // scroll to top of content
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  // trigger reveals
+  setTimeout(triggerReveal, 100);
+}
+
+/* ── PLAYLIST INTERACTION ── */
+// Playlist data (title & subtitle per tab)
+const PLAYLIST_DATA = {
+  img:    [
+    ['패키지 스캔 AR','제품 정보 팝업 & 브랜드 스토리'],
+    ['Multi 이미지 추적','다중 마커 동시 인식'],
+    ['Curved 이미지 추적','곡면 패키지 인식 AR'],
+    ['포스터 이미지 인식 AR','OOH 광고 & 영화 포스터'],
+    ['AR 명함','B2B 인터랙티브 명함'],
+    ['전시·도슨트 AR','미술관 작품 인식 해설']
+  ],
+  sky:    [
+    ['하늘 배경 변경','Sky Background 모듈'],
+    ['하늘 위 고래 소환','공중 생명체 AR 연출'],
+    ['가상 불꽃놀이','어디서든 불꽃놀이 연출'],
+    ['하늘 + 공간 인식 추적','Sky + World 복합 추적'],
+    ['캐릭터 등장 캠페인','브랜드 캐릭터 하늘 소환'],
+    ['별자리 / 천체 관측','교육용 천문 AR']
+  ],
+  plane:  [
+    ['가상 가구 배치','리테일 & 이커머스 AR'],
+    ['바닥인식 캐릭터 포토존','AR 포토존 & 마스코트'],
+    ['인터랙티브 캐릭터','바닥 소환 캐릭터 상호작용'],
+    ['가상 도슨트','전시물 앞 3D 해설 캐릭터'],
+    ['역사적 건물 복원','유적지 평면 AR 복원'],
+    ['기계 구조 교육','테이블 위 3D 엔진 분해']
+  ],
+  portal: [
+    ['역사 타임슬립 포털','유적지 과거 모습 체험'],
+    ['가상 모델하우스','부동산 완공 전 체험'],
+    ['가상 팝업 스토어','브랜드 세계관 체험'],
+    ['가상 여행지 티저 투어','항공·여행사 프로모션'],
+    ['영화·드라마 세계관 진입','OTT 팬 체험 프로모션'],
+    ['가상 현장 체험 학습','교실에서 화성·심해 탐험']
+  ],
+  stamp:  [
+    ['GPS/QR AR 스탬프투어','용인시청 조아용 과학축제'],
+    ['역사·문화 스탬프 투어','서울 한양도성·경주 유적지'],
+    ['골목 상권 활성화 투어','AR 퀴즈 & 지역 상품권 교환'],
+    ['박물관 도슨트 투어','전시물 스탬프 수집 게임'],
+    ['브랜드 팝업 미션 스탬프','O2O 마케팅 & 한정판 굿즈'],
+    ['신입생 오리엔테이션','캠퍼스·사옥 투어 게임']
+  ],
+  night:  [
+    ['나이트 글로우 포토존','Bloom 효과 네온사인 AR'],
+    ['3D 풍등 / 가상 불꽃놀이','야간 축제 VFX 연출'],
+    ['야광 바닥 인터랙션','Additive Blending 발광 렌더링'],
+    ['빛의 고래 — 심해 AR','자체발광 해양생물 연출'],
+    ['야간 문화재 AR 복원','궁궐 야간 행사 경관 조명'],
+    ['주류 브랜드 마케팅','바 테이블 코스터 AR 팝업']
+  ]
+};
+
+// ── 영상별 소개글 데이터 ──
+const VIDEO_DESC = {
+  img: [
+    { title:'패키지 스캔 AR', text:'포스터·제품 패키징·명함 등 2D 이미지를 마커로 인식하여 그 위에 3D 그래픽과 인터랙티브 UI를 겹쳐 보여주는 이미지 인식 AR 데모입니다. QR 코드 하나로 브라우저에서 즉시 체험 가능합니다.' },
+    { title:'Multi 이미지 추적', text:'여러 개의 이미지 마커를 동시에 인식하여 각각 다른 AR 콘텐츠를 독립적으로 표시하는 멀티 이미지 추적 데모입니다. 전시 공간이나 제품 카탈로그에서 복수의 인터랙션을 한 번에 운영할 수 있습니다.' },
+    { title:'Curved 이미지 추적', text:'음료캔·와인 병 등 곡면 표면의 이미지를 정확히 인식하는 Curved 이미지 추적 데모입니다. 제품 패키징의 모든 면을 AR 콘텐츠 캔버스로 활용할 수 있어 F&B·소비재 마케팅에 특히 효과적입니다.' },
+    { title:'포스터 이미지 인식 AR', text:'지하철역·버스 정류장·옥외 광고판 등에 부착된 포스터를 스캔하면 예고편 영상이 재생되거나 주인공이 팝업되는 OOH 광고 AR 데모입니다. 정적인 광고를 참여형 경험으로 전환합니다.' },
+    { title:'AR 명함', text:'종이 명함을 스캔하면 3D 아바타가 등장해 인사를 건네고, 이메일·링크드인·포트폴리오 가상 버튼이 명함 주변에 펼쳐지는 인터랙티브 AR 명함 데모입니다. B2B 영업 현장에서 강렬한 첫인상을 남깁니다.' },
+    { title:'전시·도슨트 AR', text:'미술관·박물관 전시물을 스캔하면 작품의 숨겨진 밑그림이 드러나거나 화가의 음성 해설과 함께 관련 스토리가 펼쳐지는 AR 도슨트 데모입니다. 관람 경험의 깊이와 흥미를 동시에 높입니다.' },
+  ],
+  sky: [
+    { title:'하늘 배경 변경 모듈', text:'하늘 영역을 실시간으로 인식하여 맑은 하늘·황혼·우주 등 다양한 배경으로 즉시 교체하는 Sky Background 모듈 데모입니다. 야외 이벤트 연출이나 영상 촬영 배경 변환에 폭넓게 활용됩니다.' },
+    { title:'하늘 위 고래 소환', text:'하늘 전체를 캔버스로 활용해 거대한 고래나 드래곤 같은 공중 생명체가 실제 하늘을 유영하는 모습을 연출하는 데모입니다. 다수의 사용자가 동시에 같은 AR 장면을 체험할 수 있습니다.' },
+    { title:'가상 불꽃놀이', text:'원하는 장소·시간에 스마트폰만으로 자신만의 가상 불꽃놀이를 하늘에 연출하는 데모입니다. 물리적 불꽃놀이 대비 안전하고 저비용으로 대규모 야간 이벤트 효과를 구현할 수 있습니다.' },
+    { title:'하늘 + 공간 인식 추적', text:'하늘 인식과 바닥·건물 등 공간 인식을 동시에 활용하는 복합 추적 데모입니다. 지상에서 발사된 로켓이 실제 하늘로 날아오르는 등 입체적인 AR 연출이 가능합니다.' },
+    { title:'캐릭터 등장 캠페인', text:'브랜드 캐릭터가 하늘에서 등장하거나 날아다니며 쿠폰·이벤트 참여를 유도하는 마케팅 캠페인 AR 데모입니다. SNS 인증샷 바이럴을 자연스럽게 유도하여 브랜드 인지도 확산에 효과적입니다.' },
+    { title:'별자리 / 천체 관측', text:'스마트폰을 하늘에 향하면 현재 위치의 별자리·행성·은하 정보를 실시간으로 표시하는 천문 교육 AR 데모입니다. 오로라·유성우 등 기상 천문 현상을 시뮬레이션하여 과학 교육에 활용합니다.' },
+  ],
+  plane: [
+    { title:'가상 가구 배치 AR', text:'스마트폰으로 방 바닥을 스캔하면 소파·침대·식탁 등을 실제 크기와 비율로 원하는 위치에 배치해 볼 수 있는 리테일 AR 데모입니다. 구매 전 시뮬레이션으로 반품률을 낮추고 고객 만족도를 높입니다.' },
+    { title:'바닥인식 캐릭터 포토존', text:'바닥 평면을 인식하여 브랜드 마스코트나 캐릭터를 현실 공간에 소환하는 AR 포토존 데모입니다. 축제·행사·팝업스토어에서 방문객의 인증샷 촬영을 유도하는 강력한 바이럴 마케팅 수단입니다.' },
+    { title:'인터랙티브 캐릭터', text:'바닥에 소환된 3D 캐릭터가 사용자의 움직임에 반응하거나 주변 환경과 자연스럽게 상호작용하는 AR 데모입니다. 게임·교육용 에이전트·안내 캐릭터 등 다양한 방식으로 활용 가능합니다.' },
+    { title:'가상 도슨트', text:'박물관·미술관 전시물 앞에 3D 가상 도슨트를 소환하여 작품 설명과 인터랙티브 퀴즈를 제공하는 AR 도슨트 데모입니다. 실제 도슨트 인력을 보완하거나 무인 관람 환경을 지원합니다.' },
+    { title:'역사적 건물 복원', text:'현재는 소실되거나 훼손된 역사 건축물을 원래 부지 평면에 증강하여 복원 모습을 실제 크기로 시각화하는 문화재 AR 데모입니다. 역사 교육 현장과 관광지에서 몰입형 스토리텔링을 구현합니다.' },
+    { title:'기계 구조 교육', text:'테이블 위에 가상의 엔진·로봇 팔·신체 기관 등을 증강하여 각 부품의 작동 원리를 단계별로 분해하고 조립하는 과정을 시각화하는 교육 AR 데모입니다.' },
+  ],
+  portal: [
+    { title:'역사 타임슬립 포털', text:'특정 유적지 현장에서 포털을 생성하고 들어가면 수백 년 전 화려했던 과거 유적 한가운데로 타임슬립하는 체험을 제공하는 공간인식 포털 AR 데모입니다.' },
+    { title:'가상 모델하우스', text:'거실 한가운데 포털을 생성하고 들어가면 아직 완공되지 않은 아파트 내부나 인테리어가 완성된 펜트하우스를 360도로 걷고 둘러볼 수 있는 부동산 AR 데모입니다.' },
+    { title:'가상 팝업 스토어', text:'패션·뷰티 브랜드가 신제품 런칭 시 현실에는 없는 판타지 가상 팝업 스토어를 구축하는 AR 데모입니다. 포털로 입장한 사용자가 그 안에서 3D 제품을 구경하고 구매 링크로 즉시 이동합니다.' },
+    { title:'가상 여행지 티저 투어', text:'집이나 지하철역에서 하와이 해변이나 에펠탑으로 통하는 포털을 열어 여행의 기대감을 극대화하는 여행사·항공사 프로모션 AR 데모입니다. 여행 예약 전환율을 높이는 강력한 마케팅 도구입니다.' },
+    { title:'영화·드라마 세계관 진입', text:'OTT 기업이나 영화사가 프로모션을 위해 극 중 주인공의 방이나 미지의 외계 행성으로 이어지는 포털을 생성하는 엔터테인먼트 AR 데모입니다. 팬들이 직접 콘텐츠 세계관을 탐험하는 강렬한 몰입 경험을 제공합니다.' },
+    { title:'가상 현장 체험 학습', text:'교실에서 포털을 열고 들어가면 화성의 표면·심해 바닥·태양계·인체 혈관 속으로 들어가 360도로 관찰하며 학습할 수 있는 교육 AR 데모입니다. 교실을 무한한 학습의 장으로 확장합니다.' },
+  ],
+  stamp: [
+    { title:'GPS/QR AR 스탬프투어', text:'용인시청 조아용 과학축제에 적용된 GPS·QR 기반 AR 모바일 스탬프투어 데모입니다. 특정 위치에 도달하면 AR 캐릭터가 등장하고 퀴즈·게임을 완료하면 스탬프를 획득하여 방문객 체류 시간을 늘립니다.' },
+    { title:'역사·문화 스탬프 투어', text:'서울 한양도성·경주 유적지 등 역사적 장소를 방문하면 AR로 복원된 옛 모습이나 역사적 인물을 만나고 스탬프를 획득하는 문화 관광 AR 데모입니다.' },
+    { title:'골목 상권 활성화 투어', text:'특정 골목 상권 내 지정 가게를 방문하여 AR 퀴즈나 게임을 풀고 스탬프를 모아 지역 상품권이나 할인 쿠폰으로 교환하는 O2O 상권 활성화 AR 데모입니다.' },
+    { title:'박물관 도슨트 투어', text:'박물관·미술관에서 특정 전시물 앞에서 AR로 큐레이터의 설명이나 관련 애니메이션을 감상하고 스탬프를 획득하는 도슨트 투어 AR 데모입니다.' },
+    { title:'브랜드 팝업 미션 스탬프', text:'팝업·플래그십 스토어 매장 내 특정 구역이나 제품 패키지를 인식하여 AR 콘텐츠를 체험하고 스탬프를 모아 한정판 굿즈나 샘플을 증정받는 브랜드 O2O 마케팅 AR 데모입니다.' },
+    { title:'신입생 오리엔테이션', text:'캠퍼스나 사옥 내 주요 시설을 방문하여 AR로 미션을 수행하고 정보를 얻으며 스탬프를 수집하는 신입생·신입사원 오리엔테이션 AR 데모입니다. 게임형 학습으로 정보 습득 효율을 높입니다.' },
+  ],
+  night: [
+    { title:'나이트 글로우 AR 포토존', text:'Bloom 효과가 적용된 네온사인 AR 포토존 데모입니다. 어두운 환경을 역이용하여 화려한 빛 효과를 극대화하고, 방문객의 자발적인 SNS 인증샷 생성을 유도합니다. 야간 축제·공원·궁궐 행사에 최적화된 솔루션입니다.' },
+    { title:'3D 풍등 / 가상 불꽃놀이', text:'이용자가 직접 3D 풍등을 하늘로 띄우거나 가상 불꽃놀이를 연출하는 야간 축제 VFX AR 데모입니다. 고비용의 물리적 경관 조명 없이도 인터랙티브 경관 효과를 제공하여 축제 현장감을 극대화합니다.' },
+    { title:'야광 바닥 인터랙션', text:'Additive Blending 기법을 활용한 자체 발광 바닥 인터랙션 AR 데모입니다. 사용자가 걸어다니는 동선에 반응하는 야광 패턴이나 빛의 파장이 퍼지는 효과를 구현하여 야간 공간의 예술적 가치를 높입니다.' },
+    { title:'빛의 고래 — 심해 AR', text:'조명이 제한된 아쿠아리움이나 야간 전시 공간에서 자체 발광하는 심해 고래나 해파리가 빛을 뿜으며 헤엄치는 몰입형 AR 데모입니다. 블룸 효과와 함께 전시 공간을 가득 채웁니다.' },
+    { title:'야간 문화재 AR 복원', text:'어두운 궁궐 야간 개장 행사에서 과거의 화려한 청사초롱이나 연회 장면을 빛과 함께 AR로 복원하거나, 도심 빌딩 숲 사이를 헤엄치는 거대한 빛의 고래를 소환하는 야간 문화재 AR 데모입니다.' },
+    { title:'주류 브랜드 마케팅', text:'어두운 클럽이나 바(Bar) 테이블의 코스터를 스캔하면 테이블 위로 화려하게 빛나는 가상 네온 칵테일이나 브랜드 로고가 팝업되어 인스타그램 인증샷을 유도하는 나이트라이프 브랜드 AR 데모입니다.' },
+  ],
+};
+
+// ── 영상 파일 경로 데이터 ──
+// 형식: { tabId: [ '영상0경로', '영상1경로', ... ] }
+// 경로가 없으면 null → 영상 없이 포스터만 표시
+const VIDEO_SRC = {
+  img:    [ 'videos/img_01.mp4',   // 플레이리스트 01번
+             'videos/img_02.mp4',   // 플레이리스트 02번
+             'videos/img_03.mp4',   // 플레이리스트 01번
+             'videos/img_04.mp4',   // 플레이리스트 02번
+             'videos/img_05.mp4',   // 플레이리스트 01번
+             'videos/img_06.mp4',   // 플레이리스트 02번
+   ],
+  sky:    [ 'videos/sky_01.mp4',   // 플레이리스트 01번
+             'videos/sky_02.mp4',   // 플레이리스트 02번
+             'videos/sky_03.mp4',   // 플레이리스트 01번
+             'videos/sky_04.mp4',   // 플레이리스트 02번
+             'videos/sky_05.mp4',   // 플레이리스트 01번
+             'videos/sky_06.mp4',   // 플레이리스트 02번
+  ],
+  plane:  [ 'videos/plane_01.mp4',   // 플레이리스트 01번
+             'videos/plane_02.mp4',   // 플레이리스트 02번
+             'videos/plane_03.mp4',   // 플레이리스트 01번
+             'videos/plane_04.mp4',   // 플레이리스트 02번
+             'videos/plane_05.mp4',   // 플레이리스트 01번
+             'videos/plane_06.mp4',   // 플레이리스트 02번 
+  ],
+  portal: [ 'videos/portal_01.mp4',   // 플레이리스트 01번
+             'videos/portal_02.mp4',   // 플레이리스트 02번
+             'videos/portal_03.mp4',   // 플레이리스트 01번
+             'videos/portal_04.mp4',   // 플레이리스트 02번
+             'videos/portal_05.mp4',   // 플레이리스트 01번
+             'videos/portal_06.mp4',   // 플레이리스트 02번 
+  ],
+  stamp:  [ 'videos/stamp_01.mp4',   // 플레이리스트 01번
+             'videos/stamp_02.mp4',   // 플레이리스트 02번
+             'videos/stamp_03.mp4',   // 플레이리스트 01번
+             'videos/stamp_04.mp4',   // 플레이리스트 02번
+             'videos/stamp_05.mp4',   // 플레이리스트 01번
+             'videos/stamp_06.mp4',   // 플레이리스트 02번 
+  ],
+  night:  [ 'videos/night_01.mp4',   // 플레이리스트 01번
+             'videos/night_02.mp4',   // 플레이리스트 02번
+             'videos/night_03.mp4',   // 플레이리스트 01번
+             'videos/night_04.mp4',   // 플레이리스트 02번
+             'videos/night_05.mp4',   // 플레이리스트 01번
+             'videos/night_06.mp4',   // 플레이리스트 02번 
+  ],
+};
+
+// ── 캡처 이미지 경로 데이터 ──
+// 형식: { tabId: [ [img1,img2,img3], [img1,img2,img3], ... ] }  (6개 영상 × 3장)
+// 경로가 없으면 null → 빈 슬롯 표시
+const CAPTURE_DATA = {
+  img:    [   ['cap/img_01_a.jpg', 'cap/img_01_b.jpg', 'cap/img_01_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/img_02_b.jpg', 'cap/img_02_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/img_03_b.jpg', 'cap/img_03_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/img_04_b.jpg', 'cap/img_04_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/img_05_b.jpg', 'cap/img_05_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/img_06_b.jpg', 'cap/img_06_c.jpg'],  // 02번 영상
+  ],
+  sky:    [    ['cap/img_01_a.jpg', 'cap/sky_01_b.jpg', 'cap/sky_01_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/sky_02_b.jpg', 'cap/sky_02_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/sky_03_b.jpg', 'cap/sky_03_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/sky_04_b.jpg', 'cap/sky_04_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/sky_05_b.jpg', 'cap/sky_05_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/sky_06_b.jpg', 'cap/sky_06_c.jpg'],  // 02번 영상
+  ],
+  plane:  [   ['cap/img_01_a.jpg', 'cap/plane_01_b.jpg', 'cap/plane_01_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/plane_02_b.jpg', 'cap/plane_02_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/plane_03_b.jpg', 'cap/plane_03_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/plane_04_b.jpg', 'cap/plane_04_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/plane_05_b.jpg', 'cap/plane_05_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/plane_06_b.jpg', 'cap/plane_06_c.jpg'],  // 02번 영상
+  ],
+  portal: [   ['cap/img_01_a.jpg', 'cap/portal_01_b.jpg', 'cap/portal_01_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/portal_02_b.jpg', 'cap/portal_02_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/portal_03_b.jpg', 'cap/portal_03_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/portal_04_b.jpg', 'cap/portal_04_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/portal_05_b.jpg', 'cap/portal_05_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/portal_06_b.jpg', 'cap/portal_06_c.jpg'],  // 02번 영상
+  ],
+  stamp:  [  ['cap/img_01_a.jpg', 'cap/stamp_01_b.jpg', 'cap/stamp_01_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/stamp_02_b.jpg', 'cap/stamp_02_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/stamp_03_b.jpg', 'cap/stamp_03_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/stamp_04_b.jpg', 'cap/stamp_04_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/stamp_05_b.jpg', 'cap/stamp_05_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/stamp_06_b.jpg', 'cap/stamp_06_c.jpg'],  // 02번 영상
+  ],
+  night:  [   ['cap/img_01_a.jpg', 'cap/night_01_b.jpg', 'cap/night_01_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/night_02_b.jpg', 'cap/night_02_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/night_03_b.jpg', 'cap/night_03_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/night_04_b.jpg', 'cap/night_04_c.jpg'],  // 02번 영상
+               ['cap/img_01_a.jpg', 'cap/night_05_b.jpg', 'cap/night_05_c.jpg'],  // 01번 영상
+               ['cap/img_02_a.jpg', 'cap/night_06_b.jpg', 'cap/night_06_c.jpg'],  // 02번 영상
+   ],
+};
+
+// Set active playlist item & update player src + player info + desc + capture images
+function setPlaylistItem(tabId, idx) {
+  // ① 플레이리스트 활성 상태
+  const playlist = document.getElementById('playlist-'+tabId);
+  if (!playlist) return;
+  playlist.querySelectorAll('.playlist-item').forEach((item, i) =>
+    item.classList.toggle('active', i === idx)
+  );
+
+  // ② 영상 소스 교체 (같은 video 태그의 src를 인덱스에 맞게 변경)
+  const vid    = document.getElementById('mainvid-'+tabId);
+  const player = document.getElementById('player-'+tabId);
+  const vsrc   = VIDEO_SRC[tabId]?.[idx];
+  if (vid) {
+    const wasPlaying = !vid.paused;
+    vid.pause();
+    player?.classList.remove('playing');
+    if (vsrc) {
+      vid.src = vsrc;
+      vid.load();
+      if (wasPlaying) vid.play().catch(() => {});
+    } else {
+      vid.removeAttribute('src');
+      vid.load();
+    }
+  }
+
+  // ③ 플레이어 하단 정보 업데이트
+  const data   = PLAYLIST_DATA[tabId]?.[idx];
+  const numEl  = document.getElementById('playnum-'+tabId);
+  const titEl  = document.getElementById('playtitle-'+tabId);
+  if (numEl) numEl.textContent = String(idx+1).padStart(2,'0') + ' / 06';
+  if (titEl && data) titEl.textContent = data[0] + ' — ' + data[1];
+
+  // ④ 소개글 업데이트
+  const desc = VIDEO_DESC[tabId]?.[idx];
+  if (desc) {
+    const dt = document.getElementById('desctitle-'+tabId);
+    const dx = document.getElementById('desctext-'+tabId);
+    if (dt) dt.textContent = desc.title;
+    if (dx) dx.textContent = desc.text;
+  }
+
+  // ⑤ 캡처 이미지 슬롯 업데이트 (영상 인덱스별 3장)
+  const srcs = CAPTURE_DATA[tabId]?.[idx] || [null, null, null];
+  [0, 1, 2].forEach(si => {
+    const slot = document.getElementById(`cap-${tabId}-${si}`);
+    if (!slot) return;
+    const src = srcs[si];
+    slot.innerHTML = '';
+    if (src) {
+      slot.className = 'capture-slot';
+      slot.innerHTML = `<img src="${src}" alt="캡처 이미지 ${si+1}" loading="lazy"><span class="cs-num">0${si+1}</span>`;
+    } else {
+      slot.className = 'capture-slot empty';
+      slot.innerHTML = `<span class="cs-icon">📷</span><span class="cs-label">캡처<br>이미지 0${si+1}</span>`;
+    }
+  });
+}
+
+// Attach click handlers to all playlist items
+document.querySelectorAll('.playlist-item').forEach(item => {
+  item.addEventListener('click', () => {
+    const tabId = item.dataset.tab;
+    const idx   = parseInt(item.dataset.idx);
+    setPlaylistItem(tabId, idx);
+  });
+});
+
+// Play button toggle
+TAB_IDS.forEach(id => {
+  const btn    = document.getElementById('playbtn-'+id);
+  const vid    = document.getElementById('mainvid-'+id);
+  const player = document.getElementById('player-'+id);
+  if (!btn || !vid) return;
+  btn.addEventListener('click', () => {
+    if (!vid.src && !vid.currentSrc) return; // 소스 없으면 무시
+    if (vid.paused) {
+      vid.play().catch(() => {});
+      player?.classList.add('playing');
+    } else {
+      vid.pause();
+      player?.classList.remove('playing');
+    }
+  });
+  // 영상 끝나면 재생 아이콘 복원
+  vid.addEventListener('ended', () => player?.classList.remove('playing'));
+});
+
+/* ── SCROLL REVEAL ── */
+function triggerReveal() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('vis'); });
+  }, { threshold: 0.08, rootMargin: '0px 0px -24px 0px' });
+  document.querySelectorAll('.reveal:not(.vis)').forEach(el => obs.observe(el));
+}
+triggerReveal();
+
+// ▼▼▼ 여기에 아래 3줄을 추가해 주세요! ▼▼▼
+TAB_IDS.forEach(id => {
+  setPlaylistItem(id, 0); 
+});
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+</script>
+</body>
+</html>
