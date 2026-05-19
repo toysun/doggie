@@ -85,10 +85,9 @@
     shadow
     data-bloom="bloom">
   </a-box>
-
   <a-box
     xrextras-one-finger-rotate
-    position="-0.5 0.5 -2.5"
+    position="0 0.5 -1.0"
     material="
       color: #AD50FF; shader: flat; 
       src: ./cube-texture.png"
@@ -102,18 +101,8 @@
     rotation="0 0 0"
     scale="0.6 0.6 0.6"
     shadow="receive: false"
-    //xrextras-spin="speed: 10000"
     animation-mixer
      >
-          <a-entity
-    gltf-model="#show"
-    position="0 -1.5 -1"
-    rotation="0 0 0"
-    scale="1 1 1"
-    shadow="receive: false"
-    animation-mixer
-     >
-  </a-entity>
   </a-entity>
 
      <a-entity
@@ -122,9 +111,9 @@
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
-    //xrextras-spin="speed: 10000"
     animation-mixer
      >
+  </a-entity>
               <a-entity
     gltf-model="#show"
     position="-10 -1.5 -5"
@@ -134,17 +123,15 @@
     animation-mixer
      >
   </a-entity>
-  </a-entity>
-
   <a-entity
     gltf-model="#flower"
     position="-15 0.5 -7"
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
-    //xrextras-spin="speed: 10000"
     animation-mixer
      >
+     </a-entity>
              <a-entity
     gltf-model="#show"
     position="-15 -1.5 -7"
@@ -154,17 +141,16 @@
     animation-mixer
      >
   </a-entity>
-     </a-entity>
-
   <a-entity
     gltf-model="#flower"
     position="10 0.5 -10"
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
-    //xrextras-spin="speed: 10000"
     animation-mixer
-     >         <a-entity
+     >     
+  </a-entity>
+    <a-entity
     gltf-model="#show"
     position="10 -1.5 -10"
     rotation="0 0 0"
@@ -173,17 +159,16 @@
     animation-mixer
      >
   </a-entity>
-  </a-entity>
-
     <a-entity
     gltf-model="#flower"
     position="15 0.5 -15"
     rotation="0 0 0"
     scale="1 1 1"
     shadow="receive: false"
-    //xrextras-spin="speed: 10000"
     animation-mixer
-     >           <a-entity
+     >          
+  </a-entity>
+ <a-entity
     gltf-model="#show"
     position="15 -1.5 -15"
     rotation="0 0 0"
@@ -192,8 +177,6 @@
     animation-mixer
      >
   </a-entity>
-  </a-entity>
-
   <a-plane
     height="2000"
     width="2000"
