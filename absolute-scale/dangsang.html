@@ -41,7 +41,7 @@
 
   <a-assets>
     <a-asset-item id="carModel" src="./assets/official_dangsangwan_texture.glb"></a-asset-item>
-    <!--a-asset-item id="carModel" src="https://guide3.ivyro.net/etc/k9a3-vidar__thunder_polish_version.glb"></a-asset-item-->
+    <a-asset-item id="humanModel" src="./assets/dangsangwan-pink-stand.glb"></a-asset-item>
     <img id="groundTex" src="assets/textures/concrete.jpg">
   </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
@@ -77,6 +77,18 @@
   <a-entity
     id="car"
     gltf-model="#carModel"
+    rotation="0 30 0"
+    xrextras-hold-drag="rise-height: 0"
+    xrextras-two-finger-rotate
+    absolute-pinch-scale
+    proximity
+    animation-mixer
+    shadow="receive: false">
+  </a-entity>
+    <a-entity
+    id="car"
+    gltf-model="#humanModel"
+    position="-2 0 0"
     rotation="0 30 0"
     xrextras-hold-drag="rise-height: 0"
     xrextras-two-finger-rotate
