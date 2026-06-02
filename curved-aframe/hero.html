@@ -85,13 +85,13 @@
     <!-- hero_target: 비디오 종료 후 3D 모델 등장 -->
     <xrextras-named-image-target name="hero_target">
       <a-entity
-        id="video-plane-koifish"
+        id="video-plane-hero"
         xrextras-play-video="video: #wine-label-video; canstop: true"
         geometry="primitive: plane; height: 1.5; width: 1;">
       </a-entity>
       <!-- 초기 visible: false로 대기 -->
       <a-entity 
-        id="model-koifish"
+        id="model-hero"
         gltf-model="#bean-glb" 
         position="0 0 1" 
         rotation="0 -50 -40"
@@ -174,9 +174,9 @@
 
   // 타겟별 비디오/모델 매핑
   const targetMap = {
-    'koifish_target': {
+    'hero_target': {
       video: document.getElementById('wine-label-video'),
-      modelId: 'model-koifish'
+      modelId: 'model-hero'
     },
     'w1-engine': {
       video: document.getElementById('wine-label-video'),
