@@ -47,6 +47,9 @@
   <a-assets>
     <a-asset-item id="doty" src="./assets/models/lego_man.glb"></a-asset-item>
     <img id="skyTexture" src="./assets/textures/gogh-sky-1.png" />
+    <img id="moon" src="./assets/textures/gogh-moon.png">
+    <img id="star1" src="./assets/textures/gogh-star-1.png">
+    <img id="star2" src="./assets/textures/gogh-star-2.png">
   </a-assets>
 
   <a-camera wasd-controls-enabled="false" near="0.1" position="0 0 0"></a-camera>
@@ -71,7 +74,30 @@
         sky-arrows>
       </a-entity>
     </a-entity>
-
+    <a-plane
+      material="src: #moon; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="-0.2 0 0.5"
+      height="1" 
+      width="1"
+      animation="property: rotation; from: 0 0 0; to: 360 0 0; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
+        <a-plane
+      material="src: #star1; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="-0.5 0 1"
+      height="1" 
+      width="1"
+      animation="property: rotation; from: 0 0 0; to: 360 0 0; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
+        <a-plane
+      material="src: #star2; transparent: true; roughness: 0.8; metalness: 0"
+      rotation="0 0 0"
+      position="0.5 0 2"
+      height="1" 
+      width="1"
+      animation="property: rotation; from: 0 0 0; to: 360 0 0; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true">     
+    </a-plane>
     <a-entity
       light="
         type: directional; 
