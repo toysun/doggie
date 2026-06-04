@@ -42,7 +42,8 @@
          <a-asset-item id="moon" src="./gogh-moon.glb"></a-asset-item>
          <a-asset-item id="star" src="./gogh-star.glb"></a-asset-item>
       </a-assets>
-
+  <xrextras-capture-button></xrextras-capture-button>
+  <xrextras-capture-preview></xrextras-capture-preview>
         <a-camera position="0 3 0"></a-camera>
         
         <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
@@ -55,16 +56,16 @@
                id="model"
                gltf-model="#lumi"
                position="1 5 -10"
-               scale="1.5 1.5 1.5"
+               scale="2 2 2"
                rotate="0 0 0"
                shadow="receive: false"
-               animation="property: position; from: 1 5 -10; to: 1 5.2 -10; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true"
+               animation="property: position; from: 1 5 -10; to: 1 5.3 -10; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true"
                animation-mixer>
             </a-entity>
                      <a-entity
                id="model1"
                gltf-model="#moon"
-               position="1.2 3 -1"
+               position="1.5 3 -1"
                scale="15 15 15"
                rotate="0 0 0"
                shadow="receive: false"
@@ -74,7 +75,7 @@
                      <a-entity
                id="model2"
                gltf-model="#star"
-               position="-1 2 -1"
+               position="-1.5 2 -1"
                scale="15 15 15"
                rotate="0 0 0"
                shadow="receive: false"
@@ -84,7 +85,7 @@
                                <a-entity
                id="model3"
                gltf-model="#star"
-               position="-2 5 -2"
+               position="-2 7 -3"
                scale="15 15 15"
                rotate="0 0 0"
                shadow="receive: false"
@@ -94,7 +95,7 @@
                                          <a-entity
                id="model4"
                gltf-model="#star"
-               position="2 5 -2"
+               position="2 1 -5"
                scale="15 15 15"
                rotate="0 0 0"
                shadow="receive: false"
