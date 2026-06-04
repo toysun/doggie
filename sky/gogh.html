@@ -41,10 +41,6 @@
         <a-asset-item id="lumi" src="./lumi.glb"></a-asset-item>
          <a-asset-item id="moon" src="./gogh-moon.glb"></a-asset-item>
          <a-asset-item id="star" src="./gogh-star.glb"></a-asset-item>
-        <img id="skyTexture" src='./gogh-sky-3.png'>
-        <img id="moon" src="./gogh-moon.png">
-        <img id="star1" src="./gogh-star-1.png">
-        <img id="star2" src="./gogh-stars-2.png">
       </a-assets>
 
         <a-camera position="0 3 0"></a-camera>
@@ -59,7 +55,7 @@
                id="model"
                gltf-model="#lumi"
                position="1 5 -10"
-               scale="1 1 1"
+               scale="1.5 1.5 1.5"
                rotate="0 0 0"
                shadow="receive: false"
                animation="property: position; from: 1 5 -10; to: 1 5.2 -10; dir: alternate; dur: 1000; easing: easeInOutCubic; loop: true"
@@ -79,6 +75,26 @@
                id="model2"
                gltf-model="#star"
                position="-1 2 -1"
+               scale="15 15 15"
+               rotate="0 0 0"
+               shadow="receive: false"
+               animation="property: rotation; from: 0 0 0; to: 0 0 360; dur: 50000; easing: linear; loop: true"
+               animation-mixer>
+            </a-entity>
+                               <a-entity
+               id="model3"
+               gltf-model="#star"
+               position="-2 5 -2"
+               scale="15 15 15"
+               rotate="0 0 0"
+               shadow="receive: false"
+               animation="property: rotation; from: 0 0 0; to: 0 0 360; dur: 50000; easing: linear; loop: true"
+               animation-mixer>
+            </a-entity>
+                                         <a-entity
+               id="model4"
+               gltf-model="#star"
+               position="2 5 -2"
                scale="15 15 15"
                rotate="0 0 0"
                shadow="receive: false"
