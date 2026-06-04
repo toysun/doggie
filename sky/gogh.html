@@ -53,44 +53,12 @@
             <a-entity
                id="model"
                gltf-model="#legoModel"
-               position="1 2 -10"
+               position="1 5 -10"
                scale="1 1 1"
                rotate="0 0 0"
                shadow="receive: false"
                animation-mixer>
             </a-entity>
-             <a-plane
-      material="src: #moon; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="0 10 -10"
-      height="0.5" 
-      width="0.5"
-      animation="property: rotation; from: 0 0 0; to: 0 0 360; dur: 50000; easing: linear; loop: true">     
-    </a-plane>
-        <a-plane
-      material="src: #star1; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="1 15 -10"
-      height="0.5" 
-      width="0.5"
-      animation="property: rotation; from: 0 0 0; to: 0 0 360; dur: 50000; easing: linear; loop: true">     
-    </a-plane>
-        <a-plane
-      material="src: #star2; transparent: true; roughness: 0.8; metalness: 0"
-      rotation="0 0 0"
-      position="2 12 -10"
-      height="0.5" 
-      width="0.5"
-      animation="property: rotation; from: 0 0 0; to: 0 0 360; dur: 50000; easing: linear; loop: true">     
-    </a-plane>
-            <a-box 
-                position="0 10 -10"
-                scale="5 5 5"
-                material="
-                color: #AD50FF; shader: flat; 
-                src: #moon"
-                shadow>
-            </a-box>
             <a-entity light="type: ambient; intensity: 1;"></a-entity>
     <a-entity
       id="skyLight"
