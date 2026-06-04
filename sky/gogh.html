@@ -40,9 +40,9 @@
       <a-assets>
         <a-asset-item id="legoModel" src="./lumi.glb"></a-asset-item>
         <img id="skyTexture" src='./gogh-sky-3.png'>
-        <img id="moon" src="./assets/textures/gogh-moon.png">
-        <img id="star1" src="./assets/textures/gogh-star-1.png">
-        <img id="star2" src="./assets/textures/gogh-stars-2.png">
+        <img id="moon" src="./gogh-moon.png">
+        <img id="star1" src="./gogh-star-1.png">
+        <img id="star2" src="./gogh-stars-2.png">
       </a-assets>
 
         <a-camera position="0 3 0"></a-camera>
@@ -59,7 +59,7 @@
                shadow="receive: false"
                animation-mixer>
             </a-entity>
-             <!--a-plane
+             <a-plane
       material="src: #moon; transparent: true; roughness: 0.8; metalness: 0"
       rotation="0 0 0"
       position="0 10 -10"
@@ -82,7 +82,7 @@
       height="0.5" 
       width="0.5"
       animation="property: rotation; from: 0 0 0; to: 0 0 360; dur: 50000; easing: linear; loop: true">     
-    </a-plane-->
+    </a-plane>
             <a-box 
                 position="0 10 -10"
                 scale="5 5 5"
