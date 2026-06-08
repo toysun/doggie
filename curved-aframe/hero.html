@@ -102,7 +102,7 @@
         scale="0.7 0.7 0.7"
         visible="false"
         shadow="receive: false"
-        animation="property: postion; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
+        animation="property: position; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
         animation__1="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; delay: 10000; dur: 10000"
         animation-mixer>
       </a-entity>
@@ -111,9 +111,9 @@
     <!-- w1-engine -->
     <xrextras-named-image-target name="hero-target1">
       <a-entity
-        id="video-plane-w1"
+        id="video-plane-hero1"
         xrextras-play-video="video: #wine-label-video1; canstop: true"
-        material="shader: chromakey; src: #wine-label-video; color: 0 0 0; blending: additive; side: front"
+        material="shader: chromakey; src: #wine-label-video1; color: 0 0 0; blending: additive; side: front"
         geometry="primitive: plane; height: 1; width: 1;">
       </a-entity>
       <a-entity
@@ -124,7 +124,7 @@
         visible="false"
         xrextras-spin="speed: 10000"
         shadow="receive: false"
-        animation="property: postion; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
+        animation="property: position; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
         animation__1="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; delay: 10000; dur: 10000"
         animation-mixer>
       </a-entity>
