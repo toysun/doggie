@@ -100,7 +100,7 @@
         scale="0.7 0.7 0.7"
         visible="false"
         shadow="receive: false"
-        animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"
+        animation="property: rotation; from: 90 0 0; to: 90 360 0; loop: true; dur: 10000"
         animation-mixer>
       </a-entity>
     </xrextras-named-image-target>
@@ -259,14 +259,21 @@
       video._boundTargets = [targetName];
     }
 
-    video.addEventListener('ended', () => {
-      // 현재 활성 타겟의 모델만 표시
-      const modelEntity = document.getElementById(modelId);
-      if (modelEntity) {
-        fadeInModel(modelEntity);
-      }
-    }, { once: false }); // 재스캔 대응을 위해 once: false 유지
-  }
+// 수정: 활성 타겟을 추적하는 변수로 현재 타겟만 처리
+let activeTarget = null; // 상단에 선언
+
+// xrimagefound에서 activeTarget 갱신
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  const name = event.detail.name;
+  activeTarget = name;
+  ...
+});
+// ended 핸들러에서 activeTarget 비교
+video.addEventListener('ended', () => {
+  if (activeTarget !== targetName) return; // 현재 활성 타겟만 처리
+  const modelEntity = document.getElementById(modelId);
+  if (modelEntity) fadeInModel(modelEntity);
+}, { once: false });
 
   // xrimagefound: 이미지 인식 시
   document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
