@@ -45,8 +45,8 @@
     
     <a-assets>
       <a-asset-item id="bean-glb" src="./assets/Models/compass-blue.glb"></a-asset-item>
-      <!--a-asset-item id="blades-glb" src="./assets/Models/oscillating_cylinder_motor_for_lego_3d_print.glb"></a-asset-item>
-      <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
+      <a-asset-item id="blades-glb" src="./assets/Models/blue-achor.glb"></a-asset-item>
+      <!--a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
       <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
       <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item-->
 
@@ -61,7 +61,7 @@
         crossorigin="anonymous"
         src="./assets/Media/water-portal.mp4">
       </video>
-      <!--video
+      <video
         id="wine-label-video1"
         muted
         autoplay
@@ -69,8 +69,8 @@
         playsinline
         webkit-playsinline
         crossorigin="anonymous"
-        src="./assets/Media/dark-bg-engine-1.mp4">
-    </video-->
+        src="./assets/Media/portal-video.mp4">
+    </video>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -109,10 +109,11 @@
     </xrextras-named-image-target>
 
     <!-- w1-engine -->
-    <!--xrextras-named-image-target name="w1-engine">
+    <xrextras-named-image-target name="w1-engine">
       <a-entity
         id="video-plane-w1"
-        xrextras-play-video="video: #wine-label-video; canstop: true"
+        xrextras-play-video="video: #wine-label-video1; canstop: true"
+        material="shader: chromakey; src: #wine-label-video; color: 0 0 0; blending: additive; side: front"
         geometry="primitive: plane; height: 1; width: 1;">
       </a-entity>
       <a-entity
@@ -123,6 +124,8 @@
         visible="false"
         xrextras-spin="speed: 10000"
         shadow="receive: false"
+        animation="property: postion; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
+        animation__1="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; delay: 10000; dur: 10000"
         animation-mixer>
       </a-entity>
     </xrextras-named-image-target>
