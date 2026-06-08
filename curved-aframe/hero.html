@@ -54,7 +54,7 @@
       <video
         id="wine-label-video"
         muted
-        auto-play-video="video: #wine-label-video"
+        autoplay
         playsinline
         webkit-playsinline
         crossorigin="anonymous"
@@ -175,23 +175,14 @@
 <script>
   const overlay = document.getElementById('scanning-overlay');
 
+  // 활성 타겟 추적
+  let activeTarget = null;
+
   // 타겟별 비디오/모델 매핑
   const targetMap = {
     'hero_target': {
       video: document.getElementById('wine-label-video'),
       modelId: 'model-hero'
-    },
-    'w1-engine': {
-      video: document.getElementById('wine-label-video'),
-      modelId: 'model-w1'
-    },
-    'd-engine': {
-      video: document.getElementById('wine-label-video1'),
-      modelId: 'model-d'
-    },
-    'd1-engine': {
-      video: document.getElementById('wine-label-video1'),
-      modelId: 'model-d1'
     }
   };
 
@@ -199,16 +190,13 @@
   function fadeInModel(modelEntity) {
     modelEntity.setAttribute('visible', true);
 
-    // 모델 로드 완료 여부 확인 후 페이드인 실행
     function startFade() {
       const mesh = modelEntity.getObject3D('mesh');
       if (!mesh) {
-        // mesh 아직 없으면 재시도
         setTimeout(startFade, 100);
         return;
       }
 
-      // 머티리얼 투명도 0으로 초기화
       mesh.traverse((node) => {
         if (node.material) {
           const mats = Array.isArray(node.material) ? node.material : [node.material];
@@ -247,38 +235,37 @@
     startFade();
   }
 
-  // 비디오에 ended 이벤트 연결 (타겟별)
+  // 비디오 ended 이벤트 바인딩 (최초 1회만)
   function bindVideoEnded(targetName) {
     const { video, modelId } = targetMap[targetName];
 
-    // 중복 바인딩 방지용 플래그
-    if (video._boundTargets) {
-      if (video._boundTargets.includes(targetName)) return;
-      video._boundTargets.push(targetName);
-    } else {
-      video._boundTargets = [targetName];
-    }
+    if (video._boundTargets && video._boundTargets.includes(targetName)) return;
 
-// 수정: 활성 타겟을 추적하는 변수로 현재 타겟만 처리
-let activeTarget = null; // 상단에 선언
+    if (!video._boundTargets) video._boundTargets = [];
+    video._boundTargets.push(targetName);
 
-// xrimagefound에서 activeTarget 갱신
-document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  const name = event.detail.name;
-  activeTarget = name;
-  
-});
-// ended 핸들러에서 activeTarget 비교
-video.addEventListener('ended', () => {
-  if (activeTarget !== targetName) return; // 현재 활성 타겟만 처리
-  const modelEntity = document.getElementById(modelId);
-  if (modelEntity) fadeInModel(modelEntity);
-}, { once: false });
+    video.addEventListener('ended', () => {
+      // 현재 활성 타겟과 일치할 때만 처리
+      if (activeTarget !== targetName) return;
+
+      const modelEntity = document.getElementById(modelId);
+      if (modelEntity) {
+        fadeInModel(modelEntity);
+      }
+
+      // ✅ 3D 모델 등장 후 비디오 루프 재생
+      video.loop = true;
+      video.play();
+    });
+  }
 
   // xrimagefound: 이미지 인식 시
   document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     const name = event.detail.name;
     if (!targetMap[name]) return;
+
+    // 활성 타겟 갱신
+    activeTarget = name;
 
     // 스캔 오버레이 숨김
     if (overlay) {
@@ -289,15 +276,18 @@ video.addEventListener('ended', () => {
     const { video, modelId } = targetMap[name];
     const modelEntity = document.getElementById(modelId);
 
-    // 비디오 처음부터 재생 (재스캔 시에도 초기화)
+    // ✅ 재스캔 시 루프 해제 후 처음부터 1회 재생
+    video.loop = false;
     video.currentTime = 0;
-    video.play();
+    video.play().catch(() => {
+      // 자동재생 차단 시 사용자 인터랙션 대기
+      document.addEventListener('click', () => video.play(), { once: true });
+      document.addEventListener('touchstart', () => video.play(), { once: true });
+    });
 
-    // 모델 숨김 상태로 초기화
+    // 모델 초기화 (숨김)
     if (modelEntity) {
       modelEntity.setAttribute('visible', false);
-
-      // 머티리얼 opacity 초기화
       const mesh = modelEntity.getObject3D('mesh');
       if (mesh) {
         mesh.traverse((node) => {
@@ -309,7 +299,7 @@ video.addEventListener('ended', () => {
       }
     }
 
-    // 비디오 종료 이벤트 바인딩
+    // ended 이벤트 바인딩
     bindVideoEnded(name);
   });
 
