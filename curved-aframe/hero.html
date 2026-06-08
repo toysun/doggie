@@ -11,6 +11,7 @@
   <script src="./../xr_st/landing-page.js"></script>  
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <script crossorigin="anonymous" src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
   <script>
      const onxrloaded = async () => {
        const res = await fetch('./hero.json')
@@ -57,7 +58,7 @@
         playsinline
         webkit-playsinline
         crossorigin="anonymous"
-        src="./assets/Media/hero_lamp_vid.mp4">
+        src="./assets/Media/water-portal.mp4">
       </video>
       <video
         id="wine-label-video1"
@@ -87,6 +88,7 @@
       <a-entity
         id="video-plane-hero"
         xrextras-play-video="video: #wine-label-video; canstop: true"
+        material="shader: chromakey; src: #portal-video; color: 0 0 0; blending: additive; side: front"
         geometry="primitive: plane; height: 1.5; width: 1;">
       </a-entity>
       <!-- 초기 visible: false로 대기 -->
