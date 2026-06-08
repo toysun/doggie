@@ -266,7 +266,7 @@ let activeTarget = null; // 상단에 선언
 document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   const name = event.detail.name;
   activeTarget = name;
-  ...
+  
 });
 // ended 핸들러에서 activeTarget 비교
 video.addEventListener('ended', () => {
