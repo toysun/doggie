@@ -185,12 +185,16 @@
   let activeTarget = null;
 
   // 타겟별 비디오/모델 매핑
-  const targetMap = {
-    'hero_target': {
-      video: document.getElementById('wine-label-video'),
-      modelId: 'model-hero'
-    }
-  };
+const targetMap = {
+  'hero_target': {
+    video: document.getElementById('wine-label-video'),
+    modelId: 'model-hero'
+  },
+  'hero_target1': {
+    video: document.getElementById('wine-label-video1'),
+    modelId: 'model-w1'
+  }
+};
 
   // 모델 페이드인 함수
   function fadeInModel(modelEntity) {
