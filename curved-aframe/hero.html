@@ -32,7 +32,7 @@
 </head>
 
 <body>
-  <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.5; z-index: 10; pointer-events: none;">
+  <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
     <img src="./assets/Media/hero-illust-s.svg" alt="스마트폰을 흔들어 스캔하세요" />
   </div>
 
@@ -185,21 +185,27 @@
 
   // 활성 타겟 추적
   let activeTarget = null;
-
+  
   // 타겟별 비디오/모델 매핑
 const targetMap = {
   'hero_target': {
     video: document.getElementById('wine-label-video'),
     modelId: 'model-hero',
-    overlayImg: './assets/Media/hero-illust-s.svg'       // 타겟1 오버레이 이미지
+    overlayImg: './assets/Media/hero-illust-s.svg',
+    overlayOpacity: '0.5'    // 타겟1 투명도
   },
   'hero_target1': {
     video: document.getElementById('wine-label-video1'),
     modelId: 'model-hero1',
-    overlayImg: './assets/Media/stone-illust-s.svg'      // 타겟2 오버레이 이미지
+    overlayImg: './assets/Media/stone-illust-s.svg',
+    overlayOpacity: '0.5'    // 타겟2 투명도 (원하는 값으로 변경)
   }
 };
 
+  
+  // ✅ 초기 투명도 적용 (targetMap 선언 이후)
+overlay.style.opacity = targetMap['hero_target'].overlayOpacity;
+  
   // 모델 페이드인 함수
   function fadeInModel(modelEntity) {
     modelEntity.setAttribute('visible', true);
@@ -326,14 +332,11 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
   });
 
   // xrimagelost: 이미지 소실 시 오버레이 복구
-const targetOrder = ['hero_target', 'hero_target1']; // 타겟 순서 정의
-
 document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
   const name = event.detail.name;
   if (!targetMap[name]) return;
 
   if (overlay) {
-    // ✅ 현재 타겟의 다음 순서 타겟 이미지로 교체
     const currentIndex = targetOrder.indexOf(name);
     const nextIndex = (currentIndex + 1) % targetOrder.length;
     const nextTarget = targetOrder[nextIndex];
@@ -344,7 +347,7 @@ document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
 
     overlay.style.display = 'flex';
     overlay.style.animation = 'none';
-    overlay.style.opacity = '1';
+    overlay.style.opacity = targetMap[nextTarget].overlayOpacity || '1'; // ✅ 타겟별 투명도 적용
   }
 });
 </script>
