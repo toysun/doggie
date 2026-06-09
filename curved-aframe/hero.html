@@ -100,7 +100,7 @@
         gltf-model="#bean-glb" 
         position="0 0.5 0.2" 
         rotation="0 0 0"
-        scale="0.7 0.7 0.7"
+        scale="0.5 0.5 0.5"
         visible="false"
         shadow="receive: false"
         animation="property: position; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
@@ -115,18 +115,19 @@
         id="video-plane-hero1"
         xrextras-play-video="video: #wine-label-video1; canstop: true"
         material="shader: chromakey; src: #wine-label-video1; color: 0 0 0; blending: additive; side: front"
-        geometry="primitive: plane; height: 1; width: 1;">
+        geometry="primitive: plane; height: 1; width: 1;"
+        animation="property: scale; from: 0 0 0; to: 1 1 1; loop: false; dur: 5000">
       </a-entity>
       <a-entity
         id="model-hero1"
         gltf-model="#blades-glb"
-        scale="1 1 1"
+        scale="0.5 0.5 0.5"
         rotation="0 0 0"
-        position="0 0 1"
+        position="0 0.5 0.2"
         visible="false"
         shadow="receive: false"
         animation="property: position; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
-        animation__1="property: rotation; from: 0 0 0; to: 0 360 0; loop: true; delay: 10000; dur: 10000"
+        animation__1="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; delay: 10000; dur: 10000"
         animation-mixer>
       </a-entity>
     </xrextras-named-image-target>
