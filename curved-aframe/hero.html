@@ -29,9 +29,19 @@
      }
      window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
   </script>
+  <style>
+    #start_area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+    #start_btn { padding: 15px 30px; font-size: 18px; font-weight: bold; background: #066265; color: white; border: none; border-radius: 10px; margin-top: 20px; cursor: pointer; }
+  </style>
 </head>
 
 <body>
+      <div id="start_area">     
+        <img src="./img/lumi-wink-2.gif" alt="아이콘" width="100">
+        <img src="./img/ar-navi-text.png" alt="AR 등대 길찾기" width="200">
+        <p style="color: #066265; font-weight:bold;">증강현실(AR) 사용시,<br>주변 사물과 부딪치지 않도록 주의하세요.</p> 
+        <button id="start_btn" onclick="startNavigation()">안내 시작</button>
+    </div>
   <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
     <img src="./assets/Media/hero-illust-s.svg" alt="스마트폰을 흔들어 스캔하세요" />
   </div>
@@ -179,7 +189,37 @@
       shadow>
     </a-plane>
   </a-scene>
+<script>
+  // 시작 버튼 클릭 시 실행
+        async function startNavigation() {
+            // 1. [iOS 13+ 전용] 기기 방향(나침반/자이로스코프) 권한 명시적 요청
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const permission = await DeviceOrientationEvent.requestPermission();
+                    if (permission !== 'granted') {
+                        alert("AR 길안내를 위해 기기 방향 센서 권한이 필요합니다.");
+                        // 권한 거부 시에도 지도는 작동해야 하므로 계속 진행
+                    }
+                } catch (error) {
+                    console.error("방향 센서 권한 요청 에러:", error);
+                }
+            }
 
+            // 2. 시작 화면 숨기고 UI 표시
+            document.getElementById("start_area").style.display = "none";
+            document.getElementById("minimap-wrapper").style.display = "block";
+            document.getElementById("info-panel").style.display = "block";
+
+            const themeMeta = document.getElementById("theme-color-meta");
+            if (themeMeta) {
+               const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+               const originalColor = isDarkMode ? "#000000" : "#f1f3f4";
+               themeMeta.setAttribute("content", originalColor);
+            }
+            // 3. 버튼을 누른 직후에 AR 씬(카메라+GPS)을 동적으로 삽입 (권한 요청 팝업 발생 지점)
+            const arContainer = document.getElementById("ar-container");
+            arContainer.innerHTML = `
+            </script>
 <script>
   const overlay = document.getElementById('scanning-overlay');
 
