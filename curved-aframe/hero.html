@@ -65,7 +65,7 @@
       <a-asset-item id="bean-glb"   src="./assets/Models/compass-blue.glb"></a-asset-item>
       <a-asset-item id="blades-glb" src="./assets/Models/blue-anchor.glb"></a-asset-item>
       <video id="wine-label-video"  muted autoplay playsinline webkit-playsinline crossorigin="anonymous" src="./assets/Media/portal-video-s.mp4"></video>
-      <video id="wine-label-video1" muted autoplay playsinline webkit-playsinline crossorigin="anonymous" src="./assets/Media/portal-video-s.mp4"></video>
+      <video id="wine-label-video1" muted autoplay playsinline webkit-playsinline crossorigin="anonymous" src="./assets/Media/portal-video-s1.mp4"></video>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -184,19 +184,21 @@
     startFade();
   }
 
-  function bindVideoEnded(targetName) {
-    const { video, modelId } = targetMap[targetName];
-    if (video._boundTargets && video._boundTargets.includes(targetName)) return;
-    if (!video._boundTargets) video._boundTargets = [];
-    video._boundTargets.push(targetName);
-    video.addEventListener('ended', () => {
-      if (activeTarget !== targetName) return;
-      const modelEntity = document.getElementById(modelId);
-      if (modelEntity) fadeInModel(modelEntity);
-      video.loop = true;
-      video.play();
-    });
-  }
+const boundTargets = new Set();   // ← 전역 선언 (targetMap 아래에 추가)
+
+function bindVideoEnded(targetName) {
+  if (boundTargets.has(targetName)) return;   // 이미 바인딩된 타겟은 스킵
+  boundTargets.add(targetName);
+
+  const { video, modelId } = targetMap[targetName];
+  video.addEventListener('ended', () => {
+    if (activeTarget !== targetName) return;
+    const modelEntity = document.getElementById(modelId);
+    if (modelEntity) fadeInModel(modelEntity);
+    video.loop = true;
+    video.play();
+  });
+}
 
   document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     const name = event.detail.name;
