@@ -1,288 +1,5 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta charset="UTF-8">
-  <title>curved-aframe</title>
-
-  <script src="./../xr_st/8frame-1.5.0.min.js"></script>
-  <script src="./../xr_st/xrextras.js"></script>
-  <script src="./../xr_st/landing-page.js"></script>  
-  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
-  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
-  <script crossorigin="anonymous" src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
-  <script>
-     const onxrloaded = async () => {
-       const res  = await fetch('./hero.json');   const json  = await res.json()
-       const res1 = await fetch('./hero1.json');  const json1 = await res1.json()
-       const res2 = await fetch('./w1-engine.json'); const json2 = await res2.json()
-       const res3 = await fetch('./d1-engine.json'); const json3 = await res3.json()
-       XR8.XrController.configure({ imageTargetData: [json, json1, json2, json3] })
-     }
-     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
-  </script>
-  <style>
-    #start_area {
-      position: absolute; top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: #ffffff; z-index: 9999;
-      display: flex; flex-direction: column;
-      justify-content: center; align-items: center; text-align: center;
-    }
-    #start_btn {
-      padding: 15px 30px; font-size: 18px; font-weight: bold;
-      background: #066265; color: white;
-      border: none; border-radius: 10px; margin-top: 20px; cursor: pointer;
-    }
-    /* 수집도감 버튼 (우측 하단 토글) */
-#collection-toggle {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  background: #1a5fa8;
-  border: 3px solid #ffffff;
-  border-radius: 50%;
-  z-index: 100;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-}
-#collection-toggle img {
-  width: 38px;
-  height: 38px;
-  object-fit: contain;
-}
-#collection-badge {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  background: #e74c3c;
-  color: white;
-  border-radius: 50%;
-  width: 20px;
-  height: 20px;
-  font-size: 11px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  display: none;
-}
-
-/* 수집도감 패널 */
-#collection-panel {
-  position: fixed;
-  bottom: 90px;
-  right: 20px;
-  width: 160px;
-  background: #f5f0e8;
-  border: 4px solid #1a5fa8;
-  border-radius: 16px;
-  z-index: 100;
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  padding-bottom: 12px;
-  overflow: hidden;
-}
-#collection-panel-title {
-  background: #1a5fa8;
-  width: 100%;
-  text-align: center;
-  padding: 8px 0 4px;
-  color: white;
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-#collection-panel-title span {
-  display: block;
-  color: #FFD700;
-  font-size: 15px;
-  font-weight: bold;
-}
-.collection-slot {
-  width: 110px;
-  height: 110px;
-  background: #f5c842;
-  border-radius: 50%;
-  border: 3px dashed #ffffff;
-  margin: 12px auto 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-.collection-slot .question {
-  font-size: 40px;
-  font-weight: bold;
-  color: #ffffff;
-  opacity: 0.85;
-}
-.collection-slot img {
-  width: 80px;
-  height: 80px;
-  object-fit: contain;
-  display: none;
-}
-.collection-slot.collected .question { display: none; }
-.collection-slot.collected img { display: block; }
-.collection-divider {
-  width: 90%;
-  border: none;
-  border-top: 2px dashed #ccbbaa;
-  margin: 10px auto 0;
-}
-
-/* 3D 모델 터치 힌트 */
-#touch-hint {
-  position: fixed;
-  bottom: 90px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.6);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  z-index: 100;
-  display: none;
-  pointer-events: none;
-  white-space: nowrap;
-}
-
-/* 수집 완료 팝업 */
-#collect-popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0);
-  background: white;
-  border: 4px solid #1a5fa8;
-  border-radius: 20px;
-  z-index: 200;
-  padding: 24px 32px;
-  text-align: center;
-  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  pointer-events: none;
-}
-#collect-popup.show { transform: translate(-50%, -50%) scale(1); }
-#collect-popup img { width: 80px; height: 80px; object-fit: contain; }
-#collect-popup p { margin: 8px 0 0; font-size: 14px; font-weight: bold; color: #1a5fa8; }
-  </style>
-</head>
-
-<body>
-  <!-- 시작 화면 -->
-  <div id="start_area">
-    <img src="./assets/Media/lh-hunt-t.png" alt="AR 등대 탐험대" width="200">
-    <img src="./assets/Media/hunt-spot.png" alt="AR 등대 보물 찾기" width="400">
-    <p style="color: #066265; font-weight:bold;">
-      등대 주변에서 <br>위의 2개 장면에 숨겨진,<br>항해에 도움이 되는 아이템을 찾으세요.
-    </p>
-    <button id="start_btn" onclick="startNavigation()">찾기 시작</button>
-  </div>
-
-  <!-- 스캔 오버레이 -->
-  <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
-    <img src="./assets/Media/hero-illust-s.svg" alt="스마트폰을 흔들어 스캔하세요" />
-  </div>
-<!-- 수집도감 토글 버튼 -->
-<div id="collection-toggle" onclick="toggleCollection()">
-  <img src="./assets/Media/lh-hunt-t.png" alt="수집도감">
-  <div id="collection-badge">0</div>
-</div>
-
-<!-- 수집도감 패널 -->
-<div id="collection-panel">
-  <div id="collection-panel-title">
-    등대 탐험대<span>수집도감</span>
-  </div>
-  <div class="collection-slot" id="slot-hero_target">
-    <span class="question">?</span>
-    <img src="./assets/Media/compass-thumb.png" alt="나침반">
-  </div>
-  <hr class="collection-divider">
-  <div class="collection-slot" id="slot-hero_target1">
-    <span class="question">?</span>
-    <img src="./assets/Media/anchor-thumb.png" alt="닻">
-  </div>
-</div>
-
-<!-- 터치 힌트 -->
-<div id="touch-hint">아이템을 터치해서 수집하세요!</div>
-
-<!-- 수집 완료 팝업 -->
-<div id="collect-popup">
-  <img id="collect-popup-img" src="" alt="">
-  <p id="collect-popup-msg">수집 완료!</p>
-</div>
-  <a-scene
-    landing-page
-    xrextras-loading
-    xrextras-runtime-error
-    renderer="colorManagement: true; physicallyBasedRendering: true;"
-    xrweb="disableWorldTracking: true">
-
-    <a-assets>
-      <a-asset-item id="bean-glb"   src="./assets/Models/compass-blue.glb"></a-asset-item>
-      <a-asset-item id="blades-glb" src="./assets/Models/blue-anchor.glb"></a-asset-item>
-      <video id="wine-label-video"  muted autoplay playsinline webkit-playsinline crossorigin="anonymous" src="./assets/Media/portal-video-s.mp4"></video>
-      <video id="wine-label-video1" muted autoplay playsinline webkit-playsinline crossorigin="anonymous" src="./assets/Media/portal-video-s1.mp4"></video>
-    </a-assets>
-
-    <xrextras-capture-button></xrextras-capture-button>
-    <xrextras-capture-preview></xrextras-capture-preview>
-
-    <a-camera position="0 1 1" raycaster="objects: .cantap" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
-    <a-light type="directional" intensity="2.5" position="0 1 0"></a-light>
-    <a-light type="ambient" intensity="0.5"></a-light>
-
-    <xrextras-named-image-target name="hero_target">
-      <a-entity id="video-plane-hero"
-        xrextras-play-video="video: #wine-label-video; canstop: true"
-        material="shader: chromakey; src: #wine-label-video; color: 0 0 0; blending: additive; side: front"
-        geometry="primitive: plane; height: 1; width: 1;"
-        animation="property: scale; from: 0 0 0; to: 1 1 1; loop: false; dur: 5000">
-      </a-entity>
-      <a-entity id="model-hero" gltf-model="#bean-glb"
-        position="0 0.5 0.2" rotation="0 0 0" scale="0.5 0.5 0.5"
-        visible="false" shadow="receive: false"
-        animation="property: position; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
-        animation__1="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; delay: 10000; dur: 10000"
-        animation-mixer>
-      </a-entity>
-    </xrextras-named-image-target>
-
-    <xrextras-named-image-target name="hero_target1">
-      <a-entity id="video-plane-hero1"
-        xrextras-play-video="video: #wine-label-video1; canstop: true"
-        material="shader: chromakey; src: #wine-label-video1; color: 0 0 0; blending: additive; side: front"
-        geometry="primitive: plane; height: 1; width: 1;"
-        animation="property: scale; from: 0 0 0; to: 1 1 1; loop: false; dur: 5000">
-      </a-entity>
-      <a-entity id="model-hero1" gltf-model="#blades-glb"
-        scale="0.5 0.5 0.5" rotation="0 0 0" position="0 0.5 0.2"
-        visible="false" shadow="receive: false"
-        animation="property: position; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
-        animation__1="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; delay: 10000; dur: 10000"
-        animation-mixer>
-      </a-entity>
-    </xrextras-named-image-target>
-
-    <a-plane id="ground" rotation="-90 0 0" width="1000" height="1000" material="shader: shadow" shadow></a-plane>
-  </a-scene>
-
 <script>
-  // ✅ startNavigation: 시작 화면 제거 후 AR 씬 활성화
   async function startNavigation() {
-    // iOS 13+ 기기 방향 센서 권한 요청
     if (typeof DeviceOrientationEvent !== 'undefined' &&
         typeof DeviceOrientationEvent.requestPermission === 'function') {
       try {
@@ -294,16 +11,12 @@
         console.error("방향 센서 권한 요청 에러:", e);
       }
     }
-
-    // ✅ 시작 화면만 숨김 — ar-container/minimap 등 없는 요소 참조 제거
     document.getElementById('start_area').style.display = 'none';
   }
 
-  // ── AR 로직 ──────────────────────────────────────────────
   const overlay = document.getElementById('scanning-overlay');
   let activeTarget = null;
 
-  // ✅ targetOrder 선언 복구
   const targetOrder = ['hero_target', 'hero_target1'];
 
   const targetMap = {
@@ -311,66 +24,60 @@
       video: document.getElementById('wine-label-video'),
       modelId: 'model-hero',
       overlayImg: './assets/Media/hero-illust-s.svg',
-      overlayOpacity: '0.5'
-      thumbImg: './assets/Media/compass-thumb.png',   // ✅ 수집도감 썸네일
-      itemName: '나침반'                                // ✅ 아이템 이름
+      overlayOpacity: '0.5',                           // ✅ 쉼표 추가
+      thumbImg: './assets/Media/compass-thumb.png',
+      itemName: '나침반'
     },
     'hero_target1': {
       video: document.getElementById('wine-label-video1'),
       modelId: 'model-hero1',
       overlayImg: './assets/Media/stone-illust-s.svg',
-      overlayOpacity: '0.5'
-      thumbImg: './assets/Media/anchor-thumb.png',    // ✅ 수집도감 썸네일
-      itemName: '닻'                                   // ✅ 아이템 이름
+      overlayOpacity: '0.5',                           // ✅ 쉼표 추가
+      thumbImg: './assets/Media/anchor-thumb.png',
+      itemName: '닻'
     }
   };
-  //const boundTargets = new Set();   // ← 전역 선언 (targetMap 아래에 추가)
-  // ✅ 수집 상태
-const collected = {};
 
-// ✅ 수집도감 토글
-function toggleCollection() {
-  const panel = document.getElementById('collection-panel');
-  panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
-}
+  const boundTargets = new Set();   // ✅ 주석 해제
 
-// ✅ 수집 실행
-function collectItem(targetName) {
-  if (collected[targetName]) return;   // 이미 수집됨
-  collected[targetName] = true;
+  const collected = {};
 
-  // 수집도감 슬롯 업데이트
-  const slot = document.getElementById('slot-' + targetName);
-  if (slot) slot.classList.add('collected');
-
-  // 배지 카운트 업데이트
-  const count = Object.keys(collected).length;
-  const badge = document.getElementById('collection-badge');
-  badge.textContent = count;
-  badge.style.display = 'flex';
-
-  // 수집 팝업 표시
-  const popup = document.getElementById('collect-popup');
-  const popupImg = document.getElementById('collect-popup-img');
-  const popupMsg = document.getElementById('collect-popup-msg');
-  popupImg.src = targetMap[targetName].thumbImg;
-  popupMsg.textContent = targetMap[targetName].itemName + ' 수집 완료!';
-  popup.classList.add('show');
-  setTimeout(() => { popup.classList.remove('show'); }, 2000);
-
-  // 터치 힌트 숨김
-  document.getElementById('touch-hint').style.display = 'none';
-}
-
-// ✅ 3D 모델 터치 이벤트 등록 (fadeInModel 완료 후 호출)
-function enableModelTouch(modelEntity, targetName) {
-  modelEntity.classList.add('cantap');
-  modelEntity.addEventListener('click', () => {
-    collectItem(targetName);
-  });
-}
-  // ✅ 초기 투명도 적용
   overlay.style.opacity = targetMap['hero_target'].overlayOpacity;
+
+  function toggleCollection() {
+    const panel = document.getElementById('collection-panel');
+    panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
+  }
+
+  function collectItem(targetName) {
+    if (collected[targetName]) return;
+    collected[targetName] = true;
+
+    const slot = document.getElementById('slot-' + targetName);
+    if (slot) slot.classList.add('collected');
+
+    const count = Object.keys(collected).length;
+    const badge = document.getElementById('collection-badge');
+    badge.textContent = count;
+    badge.style.display = 'flex';
+
+    const popup    = document.getElementById('collect-popup');
+    const popupImg = document.getElementById('collect-popup-img');
+    const popupMsg = document.getElementById('collect-popup-msg');
+    popupImg.src = targetMap[targetName].thumbImg;
+    popupMsg.textContent = targetMap[targetName].itemName + ' 수집 완료!';
+    popup.classList.add('show');
+    setTimeout(() => { popup.classList.remove('show'); }, 2000);
+
+    document.getElementById('touch-hint').style.display = 'none';
+  }
+
+  function enableModelTouch(modelEntity, targetName) {
+    modelEntity.classList.add('cantap');
+    modelEntity.addEventListener('click', () => {
+      collectItem(targetName);
+    });
+  }
 
   function fadeInModel(modelEntity) {
     modelEntity.setAttribute('visible', true);
@@ -401,24 +108,23 @@ function enableModelTouch(modelEntity, targetName) {
     startFade();
   }
 
+  function bindVideoEnded(targetName) {
+    if (boundTargets.has(targetName)) return;
+    boundTargets.add(targetName);
 
-
-function bindVideoEnded(targetName) {
-  if (boundTargets.has(targetName)) return;   // 이미 바인딩된 타겟은 스킵
-  boundTargets.add(targetName);
-
-  const { video, modelId } = targetMap[targetName];
-  video.addEventListener('ended', () => {
-    if (activeTarget !== targetName) return;
-    const modelEntity = document.getElementById(modelId);
-    if (modelEntity) {
-    fadeInModel(modelEntity);
-    enableModelTouch(modelEntity, targetName);   // ✅ 터치 수집 활성화
-    document.getElementById('touch-hint').style.display = 'block';  // ✅ 힌트 표시
-    video.loop = true;
-    video.play();
-  });
-}
+    const { video, modelId } = targetMap[targetName];
+    video.addEventListener('ended', () => {
+      if (activeTarget !== targetName) return;
+      const modelEntity = document.getElementById(modelId);
+      if (modelEntity) {                                         // ✅ if 블록 정상화
+        fadeInModel(modelEntity);
+        enableModelTouch(modelEntity, targetName);
+        document.getElementById('touch-hint').style.display = 'block';
+      }                                                          // ✅ if 닫기
+      video.loop = true;
+      video.play();
+    });                                                          // ✅ addEventListener 닫기
+  }                                                              // ✅ 함수 닫기
 
   document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     const name = event.detail.name;
@@ -467,5 +173,3 @@ function bindVideoEnded(targetName) {
     }
   });
 </script>
-</body>
-</html>
