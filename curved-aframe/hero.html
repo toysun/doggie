@@ -14,34 +14,42 @@
   <script crossorigin="anonymous" src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
   <script>
      const onxrloaded = async () => {
-       const res = await fetch('./hero.json')
-       const json = await res.json()
-       const res1 = await fetch('./hero1.json')
-       const json1 = await res1.json()
-       const res2 = await fetch('./w1-engine.json')
-       const json2 = await res2.json()
-       const res3 = await fetch('./d1-engine.json')
-       const json3 = await res3.json()
-
-       XR8.XrController.configure({
-         imageTargetData: [json, json1, json2, json3],
-       })
+       const res  = await fetch('./hero.json');   const json  = await res.json()
+       const res1 = await fetch('./hero1.json');  const json1 = await res1.json()
+       const res2 = await fetch('./w1-engine.json'); const json2 = await res2.json()
+       const res3 = await fetch('./d1-engine.json'); const json3 = await res3.json()
+       XR8.XrController.configure({ imageTargetData: [json, json1, json2, json3] })
      }
      window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
   </script>
   <style>
-    #start_area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-    #start_btn { padding: 15px 30px; font-size: 18px; font-weight: bold; background: #066265; color: white; border: none; border-radius: 10px; margin-top: 20px; cursor: pointer; }
+    #start_area {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #ffffff; z-index: 9999;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center; text-align: center;
+    }
+    #start_btn {
+      padding: 15px 30px; font-size: 18px; font-weight: bold;
+      background: #066265; color: white;
+      border: none; border-radius: 10px; margin-top: 20px; cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
-      <div id="start_area">     
-        <img src="./assets/Media/lh-hunt-t.png" alt="AR 등대 탐험대" width="200">
-        <img src="./assets/Media/hunt-spot.png" alt="AR 등대 보물 찾기" width="400">
-        <p style="color: #066265; font-weight:bold;">등대 주면에서 <br>위의 2개 장면에 숨겨진,<br>항해에 도움이 되는 아이템을 찾으세요.</p> 
-        <button id="start_btn" onclick="startNavigation()">찾기 시작</button>
-    </div>
+  <!-- 시작 화면 -->
+  <div id="start_area">
+    <img src="./assets/Media/lh-hunt-t.png" alt="AR 등대 탐험대" width="200">
+    <img src="./assets/Media/hunt-spot.png" alt="AR 등대 보물 찾기" width="400">
+    <p style="color: #066265; font-weight:bold;">
+      등대 주변에서 <br>위의 2개 장면에 숨겨진,<br>항해에 도움이 되는 아이템을 찾으세요.
+    </p>
+    <button id="start_btn" onclick="startNavigation()">찾기 시작</button>
+  </div>
+
+  <!-- 스캔 오버레이 -->
   <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
     <img src="./assets/Media/hero-illust-s.svg" alt="스마트폰을 흔들어 스캔하세요" />
   </div>
@@ -52,308 +60,162 @@
     xrextras-runtime-error
     renderer="colorManagement: true; physicallyBasedRendering: true;"
     xrweb="disableWorldTracking: true">
-    
-    <a-assets>
-      <a-asset-item id="bean-glb" src="./assets/Models/compass-blue.glb"></a-asset-item>
-      <a-asset-item id="blades-glb" src="./assets/Models/blue-anchor.glb"></a-asset-item>
-      <!--a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
-      <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
-      <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item-->
 
-      <!-- loop 제거: 1회 재생 후 마지막 프레임 유지 -->
-      <video
-        id="wine-label-video"
-        muted
-        autoplay
-        loop="true"
-        playsinline
-        webkit-playsinline
-        crossorigin="anonymous"
-        src="./assets/Media/portal-video-s.mp4">
-      </video>
-      <video
-        id="wine-label-video1"
-        muted
-        autoplay
-        loop="true"
-        playsinline
-        webkit-playsinline
-        crossorigin="anonymous"
-        src="./assets/Media/portal-video-s.mp4">
-    </video>
+    <a-assets>
+      <a-asset-item id="bean-glb"   src="./assets/Models/compass-blue.glb"></a-asset-item>
+      <a-asset-item id="blades-glb" src="./assets/Models/blue-anchor.glb"></a-asset-item>
+      <video id="wine-label-video"  muted autoplay playsinline webkit-playsinline crossorigin="anonymous" src="./assets/Media/portal-video-s.mp4"></video>
+      <video id="wine-label-video1" muted autoplay playsinline webkit-playsinline crossorigin="anonymous" src="./assets/Media/portal-video-s.mp4"></video>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
 
-    <a-camera
-      position="0 1 1"
-      raycaster="objects: .cantap"
-      cursor="fuse: false; rayOrigin: mouse;">
-    </a-camera>
-
+    <a-camera position="0 1 1" raycaster="objects: .cantap" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
     <a-light type="directional" intensity="0.5" position="0 1 0"></a-light>
     <a-light type="ambient" intensity="0.1"></a-light>
 
-    <!-- hero_target: 비디오 종료 후 3D 모델 등장 -->
     <xrextras-named-image-target name="hero_target">
-      <a-entity
-        id="video-plane-hero"
+      <a-entity id="video-plane-hero"
         xrextras-play-video="video: #wine-label-video; canstop: true"
         material="shader: chromakey; src: #wine-label-video; color: 0 0 0; blending: additive; side: front"
         geometry="primitive: plane; height: 1; width: 1;"
         animation="property: scale; from: 0 0 0; to: 1 1 1; loop: false; dur: 5000">
       </a-entity>
-      <!-- 초기 visible: false로 대기 -->
-      <a-entity 
-        id="model-hero"
-        gltf-model="#bean-glb" 
-        position="0 0.5 0.2" 
-        rotation="0 0 0"
-        scale="0.5 0.5 0.5"
-        visible="false"
-        shadow="receive: false"
+      <a-entity id="model-hero" gltf-model="#bean-glb"
+        position="0 0.5 0.2" rotation="0 0 0" scale="0.5 0.5 0.5"
+        visible="false" shadow="receive: false"
         animation="property: position; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
         animation__1="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; delay: 10000; dur: 10000"
         animation-mixer>
       </a-entity>
     </xrextras-named-image-target>
 
-    <!-- w1-engine -->
     <xrextras-named-image-target name="hero_target1">
-      <a-entity
-        id="video-plane-hero1"
+      <a-entity id="video-plane-hero1"
         xrextras-play-video="video: #wine-label-video1; canstop: true"
         material="shader: chromakey; src: #wine-label-video1; color: 0 0 0; blending: additive; side: front"
         geometry="primitive: plane; height: 1; width: 1;"
         animation="property: scale; from: 0 0 0; to: 1 1 1; loop: false; dur: 5000">
       </a-entity>
-      <a-entity
-        id="model-hero1"
-        gltf-model="#blades-glb"
-        scale="0.5 0.5 0.5"
-        rotation="0 0 0"
-        position="0 0.5 0.2"
-        visible="false"
-        shadow="receive: false"
+      <a-entity id="model-hero1" gltf-model="#blades-glb"
+        scale="0.5 0.5 0.5" rotation="0 0 0" position="0 0.5 0.2"
+        visible="false" shadow="receive: false"
         animation="property: position; from: 0 0.5 -10; to: 0 0.5 0.2; loop: false; dur: 10000"
         animation__1="property: rotation; from: 0 0 0; to: 0 0 360; loop: true; delay: 10000; dur: 10000"
         animation-mixer>
       </a-entity>
     </xrextras-named-image-target>
 
-    <!-- d-engine -->
-    <!--xrextras-named-image-target name="d-engine">
-      <a-entity
-        id="video-plane-d"
-        xrextras-play-video="video: #wine-label-video1; canstop: true"
-        geometry="primitive: plane; height: 1; width: 1;">
-      </a-entity>
-      <a-entity
-        id="model-d"
-        gltf-model="#blades-glb"
-        scale="0.01 0.01 0.01"
-        position="0 0 1"
-        visible="false"
-        xrextras-spin="speed: 10000"
-        shadow="receive: false"
-        animation-mixer>
-      </a-entity>
-    </xrextras-named-image-target-->
-
-    <!-- d1-engine -->
-    <!--xrextras-named-image-target name="d1-engine">
-      <a-entity
-        id="video-plane-d1"
-        xrextras-play-video="video: #wine-label-video1; canstop: true"
-        geometry="primitive: plane; height: 1; width: 1;">
-      </a-entity>
-      <a-entity
-        id="model-d1"
-        gltf-model="#blades-glb-1"
-        scale="0.3 0.3 0.3"
-        position="0 0 1"
-        visible="false"
-        xrextras-spin="speed: 10000"
-        shadow="receive: false"
-        animation-mixer>
-      </a-entity>
-    </xrextras-named-image-target-->
-
-    <a-plane
-      id="ground"
-      rotation="-90 0 0"
-      width="1000"
-      height="1000"
-      material="shader: shadow"
-      shadow>
-    </a-plane>
+    <a-plane id="ground" rotation="-90 0 0" width="1000" height="1000" material="shader: shadow" shadow></a-plane>
   </a-scene>
+
 <script>
-  // 시작 버튼 클릭 시 실행
-        async function startNavigation() {
-            // 1. [iOS 13+ 전용] 기기 방향(나침반/자이로스코프) 권한 명시적 요청
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                try {
-                    const permission = await DeviceOrientationEvent.requestPermission();
-                    if (permission !== 'granted') {
-                        alert("AR 길안내를 위해 기기 방향 센서 권한이 필요합니다.");
-                        // 권한 거부 시에도 지도는 작동해야 하므로 계속 진행
-                    }
-                } catch (error) {
-                    console.error("방향 센서 권한 요청 에러:", error);
-                }
-            }
+  // ✅ startNavigation: 시작 화면 제거 후 AR 씬 활성화
+  async function startNavigation() {
+    // iOS 13+ 기기 방향 센서 권한 요청
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const permission = await DeviceOrientationEvent.requestPermission();
+        if (permission !== 'granted') {
+          alert("AR을 위해 기기 방향 센서 권한이 필요합니다.");
+        }
+      } catch (e) {
+        console.error("방향 센서 권한 요청 에러:", e);
+      }
+    }
 
-            // 2. 시작 화면 숨기고 UI 표시
-            document.getElementById("start_area").style.display = "none";
-            document.getElementById("minimap-wrapper").style.display = "block";
-            document.getElementById("info-panel").style.display = "block";
-
-            const themeMeta = document.getElementById("theme-color-meta");
-            if (themeMeta) {
-               const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-               const originalColor = isDarkMode ? "#000000" : "#f1f3f4";
-               themeMeta.setAttribute("content", originalColor);
-            }
-            // 3. 버튼을 누른 직후에 AR 씬(카메라+GPS)을 동적으로 삽입 (권한 요청 팝업 발생 지점)
-            const arContainer = document.getElementById("ar-container");
-            arContainer.innerHTML = `
-            </script>
-<script>
-  const overlay = document.getElementById('scanning-overlay');
-
-  // 활성 타겟 추적
-  let activeTarget = null;
-  
-  // 타겟별 비디오/모델 매핑
-const targetMap = {
-  'hero_target': {
-    video: document.getElementById('wine-label-video'),
-    modelId: 'model-hero',
-    overlayImg: './assets/Media/hero-illust-s.svg',
-    overlayOpacity: '0.5'    // 타겟1 투명도
-  },
-  'hero_target1': {
-    video: document.getElementById('wine-label-video1'),
-    modelId: 'model-hero1',
-    overlayImg: './assets/Media/stone-illust-s.svg',
-    overlayOpacity: '0.5'    // 타겟2 투명도 (원하는 값으로 변경)
+    // ✅ 시작 화면만 숨김 — ar-container/minimap 등 없는 요소 참조 제거
+    document.getElementById('start_area').style.display = 'none';
   }
-};
 
-  
-  // ✅ 초기 투명도 적용 (targetMap 선언 이후)
-overlay.style.opacity = targetMap['hero_target'].overlayOpacity;
-  
-  // 모델 페이드인 함수
+  // ── AR 로직 ──────────────────────────────────────────────
+  const overlay = document.getElementById('scanning-overlay');
+  let activeTarget = null;
+
+  // ✅ targetOrder 선언 복구
+  const targetOrder = ['hero_target', 'hero_target1'];
+
+  const targetMap = {
+    'hero_target': {
+      video: document.getElementById('wine-label-video'),
+      modelId: 'model-hero',
+      overlayImg: './assets/Media/hero-illust-s.svg',
+      overlayOpacity: '0.5'
+    },
+    'hero_target1': {
+      video: document.getElementById('wine-label-video1'),
+      modelId: 'model-hero1',
+      overlayImg: './assets/Media/stone-illust-s.svg',
+      overlayOpacity: '0.5'
+    }
+  };
+
+  // ✅ 초기 투명도 적용
+  overlay.style.opacity = targetMap['hero_target'].overlayOpacity;
+
   function fadeInModel(modelEntity) {
     modelEntity.setAttribute('visible', true);
-
     function startFade() {
       const mesh = modelEntity.getObject3D('mesh');
-      if (!mesh) {
-        setTimeout(startFade, 100);
-        return;
-      }
-
+      if (!mesh) { setTimeout(startFade, 100); return; }
       mesh.traverse((node) => {
         if (node.material) {
           const mats = Array.isArray(node.material) ? node.material : [node.material];
-          mats.forEach((mat) => {
-            mat.transparent = true;
-            mat.opacity = 0;
-          });
+          mats.forEach((mat) => { mat.transparent = true; mat.opacity = 0; });
         }
       });
-
-      function easeInOutQuad(t) {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-      }
-
-      const duration = 1500;
-      const start = performance.now();
-
+      function easeInOutQuad(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+      const duration = 1500, start = performance.now();
       function fade(now) {
-        const elapsed = now - start;
-        const progress = Math.min(elapsed / duration, 1);
+        const progress = Math.min((now - start) / duration, 1);
         const eased = easeInOutQuad(progress);
-
         mesh.traverse((node) => {
           if (node.material) {
             const mats = Array.isArray(node.material) ? node.material : [node.material];
             mats.forEach((mat) => { mat.opacity = eased; });
           }
         });
-
         if (progress < 1) requestAnimationFrame(fade);
       }
-
       requestAnimationFrame(fade);
     }
-
     startFade();
   }
 
-  // 비디오 ended 이벤트 바인딩 (최초 1회만)
   function bindVideoEnded(targetName) {
     const { video, modelId } = targetMap[targetName];
-
     if (video._boundTargets && video._boundTargets.includes(targetName)) return;
-
     if (!video._boundTargets) video._boundTargets = [];
     video._boundTargets.push(targetName);
-
     video.addEventListener('ended', () => {
-      // 현재 활성 타겟과 일치할 때만 처리
       if (activeTarget !== targetName) return;
-
       const modelEntity = document.getElementById(modelId);
-      if (modelEntity) {
-        fadeInModel(modelEntity);
-      }
-
-      // ✅ 3D 모델 등장 후 비디오 루프 재생
+      if (modelEntity) fadeInModel(modelEntity);
       video.loop = true;
       video.play();
     });
   }
 
-  // xrimagefound: 이미지 인식 시
-document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  const name = event.detail.name;
-  if (!targetMap[name]) return;
-
-  // 활성 타겟 갱신
-  activeTarget = name;
-
-  // ✅ 오버레이 이미지 교체 (타겟별 이미지로 변경)
-  if (overlay) {
-    const overlayImgEl = overlay.querySelector('img');
-    if (overlayImgEl && targetMap[name].overlayImg) {
-      overlayImgEl.src = targetMap[name].overlayImg;
+  document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+    const name = event.detail.name;
+    if (!targetMap[name]) return;
+    activeTarget = name;
+    if (overlay) {
+      const overlayImgEl = overlay.querySelector('img');
+      if (overlayImgEl) overlayImgEl.src = targetMap[name].overlayImg;
+      overlay.style.animation = 'fadeOut 0.5s forwards';
+      setTimeout(() => { overlay.style.display = 'none'; }, 500);
     }
-  }
-
-  // 스캔 오버레이 숨김
-  if (overlay) {
-    overlay.style.animation = 'fadeOut 0.5s forwards';
-    setTimeout(() => { overlay.style.display = 'none'; }, 500);
-  }
-
     const { video, modelId } = targetMap[name];
     const modelEntity = document.getElementById(modelId);
-
-    // ✅ 재스캔 시 루프 해제 후 처음부터 1회 재생
     video.loop = false;
     video.currentTime = 0;
     video.play().catch(() => {
-      // 자동재생 차단 시 사용자 인터랙션 대기
-      document.addEventListener('click', () => video.play(), { once: true });
+      document.addEventListener('click',      () => video.play(), { once: true });
       document.addEventListener('touchstart', () => video.play(), { once: true });
     });
-
-    // 모델 초기화 (숨김)
     if (modelEntity) {
       modelEntity.setAttribute('visible', false);
       const mesh = modelEntity.getObject3D('mesh');
@@ -366,30 +228,22 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
         });
       }
     }
-
-    // ended 이벤트 바인딩
     bindVideoEnded(name);
   });
 
-  // xrimagelost: 이미지 소실 시 오버레이 복구
-document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
-  const name = event.detail.name;
-  if (!targetMap[name]) return;
-
-  if (overlay) {
-    const currentIndex = targetOrder.indexOf(name);
-    const nextIndex = (currentIndex + 1) % targetOrder.length;
-    const nextTarget = targetOrder[nextIndex];
-    const overlayImgEl = overlay.querySelector('img');
-    if (overlayImgEl && targetMap[nextTarget].overlayImg) {
-      overlayImgEl.src = targetMap[nextTarget].overlayImg;
+  document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+    const name = event.detail.name;
+    if (!targetMap[name]) return;
+    if (overlay) {
+      const currentIndex = targetOrder.indexOf(name);
+      const nextTarget   = targetOrder[(currentIndex + 1) % targetOrder.length];
+      const overlayImgEl = overlay.querySelector('img');
+      if (overlayImgEl) overlayImgEl.src = targetMap[nextTarget].overlayImg;
+      overlay.style.display   = 'flex';
+      overlay.style.animation = 'none';
+      overlay.style.opacity   = targetMap[nextTarget].overlayOpacity || '1';
     }
-
-    overlay.style.display = 'flex';
-    overlay.style.animation = 'none';
-    overlay.style.opacity = targetMap[nextTarget].overlayOpacity || '1'; // ✅ 타겟별 투명도 적용
-  }
-});
+  });
 </script>
 </body>
 </html>
