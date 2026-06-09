@@ -190,11 +190,13 @@
 const targetMap = {
   'hero_target': {
     video: document.getElementById('wine-label-video'),
-    modelId: 'model-hero'
+    modelId: 'model-hero',
+    overlayImg: './assets/Media/hero-illust-s.svg'       // 타겟1 오버레이 이미지
   },
   'hero_target1': {
     video: document.getElementById('wine-label-video1'),
-    modelId: 'model-hero1'
+    modelId: 'model-hero1',
+    overlayImg: './assets/Media/stone-illust-s.svg'      // 타겟2 오버레이 이미지
   }
 };
 
@@ -272,18 +274,26 @@ const targetMap = {
   }
 
   // xrimagefound: 이미지 인식 시
-  document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-    const name = event.detail.name;
-    if (!targetMap[name]) return;
+document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+  const name = event.detail.name;
+  if (!targetMap[name]) return;
 
-    // 활성 타겟 갱신
-    activeTarget = name;
+  // 활성 타겟 갱신
+  activeTarget = name;
 
-    // 스캔 오버레이 숨김
-    if (overlay) {
-      overlay.style.animation = 'fadeOut 0.5s forwards';
-      setTimeout(() => { overlay.style.display = 'none'; }, 500);
+  // ✅ 오버레이 이미지 교체 (타겟별 이미지로 변경)
+  if (overlay) {
+    const overlayImgEl = overlay.querySelector('img');
+    if (overlayImgEl && targetMap[name].overlayImg) {
+      overlayImgEl.src = targetMap[name].overlayImg;
     }
+  }
+
+  // 스캔 오버레이 숨김
+  if (overlay) {
+    overlay.style.animation = 'fadeOut 0.5s forwards';
+    setTimeout(() => { overlay.style.display = 'none'; }, 500);
+  }
 
     const { video, modelId } = targetMap[name];
     const modelEntity = document.getElementById(modelId);
@@ -316,16 +326,27 @@ const targetMap = {
   });
 
   // xrimagelost: 이미지 소실 시 오버레이 복구
-  document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
-    const name = event.detail.name;
-    if (!targetMap[name]) return;
+const targetOrder = ['hero_target', 'hero_target1']; // 타겟 순서 정의
 
-    if (overlay) {
-      overlay.style.display = 'flex';
-      overlay.style.animation = 'none';
-      overlay.style.opacity = '1';
+document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+  const name = event.detail.name;
+  if (!targetMap[name]) return;
+
+  if (overlay) {
+    // ✅ 현재 타겟의 다음 순서 타겟 이미지로 교체
+    const currentIndex = targetOrder.indexOf(name);
+    const nextIndex = (currentIndex + 1) % targetOrder.length;
+    const nextTarget = targetOrder[nextIndex];
+    const overlayImgEl = overlay.querySelector('img');
+    if (overlayImgEl && targetMap[nextTarget].overlayImg) {
+      overlayImgEl.src = targetMap[nextTarget].overlayImg;
     }
-  });
+
+    overlay.style.display = 'flex';
+    overlay.style.animation = 'none';
+    overlay.style.opacity = '1';
+  }
+});
 </script>
 </body>
 </html>
