@@ -151,7 +151,8 @@
       overlayOpacity: '0.5'
     }
   };
-
+  const boundTargets = new Set();   // ← 전역 선언 (targetMap 아래에 추가)
+  
   // ✅ 초기 투명도 적용
   overlay.style.opacity = targetMap['hero_target'].overlayOpacity;
 
@@ -184,7 +185,7 @@
     startFade();
   }
 
-const boundTargets = new Set();   // ← 전역 선언 (targetMap 아래에 추가)
+
 
 function bindVideoEnded(targetName) {
   if (boundTargets.has(targetName)) return;   // 이미 바인딩된 타겟은 스킵
