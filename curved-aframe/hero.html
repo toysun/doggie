@@ -360,220 +360,151 @@
     </a-plane>
   </a-scene>
 <script>
-  // 시작 버튼 클릭 시 실행
-        async function startNavigation() {
-            // 1. [iOS 13+ 전용] 기기 방향(나침반/자이로스코프) 권한 명시적 요청
-            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                try {
-                    const permission = await DeviceOrientationEvent.requestPermission();
-                    if (permission !== 'granted') {
-                        alert("AR 길안내를 위해 기기 방향 센서 권한이 필요합니다.");
-                        // 권한 거부 시에도 지도는 작동해야 하므로 계속 진행
-                    }
-                } catch (error) {
-                    console.error("방향 센서 권한 요청 에러:", error);
-                }
-            }
-
-            // 2. 시작 화면 숨기고 UI 표시
-            document.getElementById("start_area").style.display = "none";
-            document.getElementById("minimap-wrapper").style.display = "block";
-            document.getElementById("info-panel").style.display = "block";
-
-            const themeMeta = document.getElementById("theme-color-meta");
-            if (themeMeta) {
-               const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-               const originalColor = isDarkMode ? "#000000" : "#f1f3f4";
-               themeMeta.setAttribute("content", originalColor);
-            }
-            // 3. 버튼을 누른 직후에 AR 씬(카메라+GPS)을 동적으로 삽입 (권한 요청 팝업 발생 지점)
-            const arContainer = document.getElementById("ar-container");
-            arContainer.innerHTML = `
-            </script>
-<script>
-  const overlay = document.getElementById('scanning-overlay');
-
-  // 활성 타겟 추적
-  let activeTarget = null;
-  
-  // targetMap 수정: thumbImg, itemName 추가
-const targetMap = {
-  'hero_target': {
-    video: document.getElementById('wine-label-video'),
-    modelId: 'model-hero',
-    overlayImg: './assets/Media/hero-illust-s.svg',
-    overlayOpacity: '0.5',
-    thumbImg: './assets/Media/compass-thumb.png',   // ✅ 수집도감 썸네일
-    itemName: '나침반'                                // ✅ 아이템 이름
-  },
-  'hero_target1': {
-    video: document.getElementById('wine-label-video1'),
-    modelId: 'model-hero1',
-    overlayImg: './assets/Media/stone-illust-s.svg',
-    overlayOpacity: '0.5',
-    thumbImg: './assets/Media/anchor-thumb.png',    // ✅ 수집도감 썸네일
-    itemName: '닻'                                   // ✅ 아이템 이름
+  async function startNavigation() {
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+      try {
+        const permission = await DeviceOrientationEvent.requestPermission();
+        if (permission !== 'granted') {
+          alert("AR을 위해 기기 방향 센서 권한이 필요합니다.");
+        }
+      } catch (e) {
+        console.error("방향 센서 권한 요청 에러:", e);
+      }
+    }
+    document.getElementById('start_area').style.display = 'none';
   }
-};
-// ✅ 수집 상태
-const collected = {};
 
-// ✅ 수집도감 토글
-function toggleCollection() {
-  const panel = document.getElementById('collection-panel');
-  panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
-}
+  const overlay = document.getElementById('scanning-overlay');
+  let activeTarget = null;
 
-// ✅ 수집 실행
-function collectItem(targetName) {
-  if (collected[targetName]) return;   // 이미 수집됨
-  collected[targetName] = true;
+  const targetOrder = ['hero_target', 'hero_target1'];
 
-  // 수집도감 슬롯 업데이트
-  const slot = document.getElementById('slot-' + targetName);
-  if (slot) slot.classList.add('collected');
+  const targetMap = {
+    'hero_target': {
+      video: document.getElementById('wine-label-video'),
+      modelId: 'model-hero',
+      overlayImg: './assets/Media/hero-illust-s.svg',
+      overlayOpacity: '0.5',                           // ✅ 쉼표 추가
+      thumbImg: './assets/Media/compass-thumb.png',
+      itemName: '나침반'
+    },
+    'hero_target1': {
+      video: document.getElementById('wine-label-video1'),
+      modelId: 'model-hero1',
+      overlayImg: './assets/Media/stone-illust-s.svg',
+      overlayOpacity: '0.5',                           // ✅ 쉼표 추가
+      thumbImg: './assets/Media/anchor-thumb.png',
+      itemName: '닻'
+    }
+  };
 
-  // 배지 카운트 업데이트
-  const count = Object.keys(collected).length;
-  const badge = document.getElementById('collection-badge');
-  badge.textContent = count;
-  badge.style.display = 'flex';
+  const boundTargets = new Set();   // ✅ 주석 해제
 
-  // 수집 팝업 표시
-  const popup = document.getElementById('collect-popup');
-  const popupImg = document.getElementById('collect-popup-img');
-  const popupMsg = document.getElementById('collect-popup-msg');
-  popupImg.src = targetMap[targetName].thumbImg;
-  popupMsg.textContent = targetMap[targetName].itemName + ' 수집 완료!';
-  popup.classList.add('show');
-  setTimeout(() => { popup.classList.remove('show'); }, 2000);
+  const collected = {};
 
-  // 터치 힌트 숨김
-  document.getElementById('touch-hint').style.display = 'none';
-}
+  overlay.style.opacity = targetMap['hero_target'].overlayOpacity;
 
-// ✅ 3D 모델 터치 이벤트 등록 (fadeInModel 완료 후 호출)
-function enableModelTouch(modelEntity, targetName) {
-  modelEntity.classList.add('cantap');
-  modelEntity.addEventListener('click', () => {
-    collectItem(targetName);
-  });
-}
-  
-  // ✅ 초기 투명도 적용 (targetMap 선언 이후)
-overlay.style.opacity = targetMap['hero_target'].overlayOpacity;
-  
-  // 모델 페이드인 함수
+  function toggleCollection() {
+    const panel = document.getElementById('collection-panel');
+    panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
+  }
+
+  function collectItem(targetName) {
+    if (collected[targetName]) return;
+    collected[targetName] = true;
+
+    const slot = document.getElementById('slot-' + targetName);
+    if (slot) slot.classList.add('collected');
+
+    const count = Object.keys(collected).length;
+    const badge = document.getElementById('collection-badge');
+    badge.textContent = count;
+    badge.style.display = 'flex';
+
+    const popup    = document.getElementById('collect-popup');
+    const popupImg = document.getElementById('collect-popup-img');
+    const popupMsg = document.getElementById('collect-popup-msg');
+    popupImg.src = targetMap[targetName].thumbImg;
+    popupMsg.textContent = targetMap[targetName].itemName + ' 수집 완료!';
+    popup.classList.add('show');
+    setTimeout(() => { popup.classList.remove('show'); }, 2000);
+
+    document.getElementById('touch-hint').style.display = 'none';
+  }
+
+  function enableModelTouch(modelEntity, targetName) {
+    modelEntity.classList.add('cantap');
+    modelEntity.addEventListener('click', () => {
+      collectItem(targetName);
+    });
+  }
+
   function fadeInModel(modelEntity) {
     modelEntity.setAttribute('visible', true);
-
     function startFade() {
       const mesh = modelEntity.getObject3D('mesh');
-      if (!mesh) {
-        setTimeout(startFade, 100);
-        return;
-      }
-
+      if (!mesh) { setTimeout(startFade, 100); return; }
       mesh.traverse((node) => {
         if (node.material) {
           const mats = Array.isArray(node.material) ? node.material : [node.material];
-          mats.forEach((mat) => {
-            mat.transparent = true;
-            mat.opacity = 0;
-          });
+          mats.forEach((mat) => { mat.transparent = true; mat.opacity = 0; });
         }
       });
-
-      function easeInOutQuad(t) {
-        return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-      }
-
-      const duration = 1500;
-      const start = performance.now();
-
+      function easeInOutQuad(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+      const duration = 1500, start = performance.now();
       function fade(now) {
-        const elapsed = now - start;
-        const progress = Math.min(elapsed / duration, 1);
+        const progress = Math.min((now - start) / duration, 1);
         const eased = easeInOutQuad(progress);
-
         mesh.traverse((node) => {
           if (node.material) {
             const mats = Array.isArray(node.material) ? node.material : [node.material];
             mats.forEach((mat) => { mat.opacity = eased; });
           }
         });
-
         if (progress < 1) requestAnimationFrame(fade);
       }
-
       requestAnimationFrame(fade);
     }
-
     startFade();
   }
 
-  // 비디오 ended 이벤트 바인딩 (최초 1회만)
   function bindVideoEnded(targetName) {
+    if (boundTargets.has(targetName)) return;
+    boundTargets.add(targetName);
+
     const { video, modelId } = targetMap[targetName];
-
-    if (video._boundTargets && video._boundTargets.includes(targetName)) return;
-
-    if (!video._boundTargets) video._boundTargets = [];
-    video._boundTargets.push(targetName);
-
     video.addEventListener('ended', () => {
-      // 현재 활성 타겟과 일치할 때만 처리
       if (activeTarget !== targetName) return;
-
       const modelEntity = document.getElementById(modelId);
-      if (modelEntity) {
-  fadeInModel(modelEntity);
-  enableModelTouch(modelEntity, targetName);   // ✅ 터치 수집 활성화
-  document.getElementById('touch-hint').style.display = 'block';  // ✅ 힌트 표시
-}
-      }
-
-      // ✅ 3D 모델 등장 후 비디오 루프 재생
+      if (modelEntity) {                                         // ✅ if 블록 정상화
+        fadeInModel(modelEntity);
+        enableModelTouch(modelEntity, targetName);
+        document.getElementById('touch-hint').style.display = 'block';
+      }                                                          // ✅ if 닫기
       video.loop = true;
       video.play();
-    });
-  }
+    });                                                          // ✅ addEventListener 닫기
+  }                                                              // ✅ 함수 닫기
 
-  // xrimagefound: 이미지 인식 시
-document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
-  const name = event.detail.name;
-  if (!targetMap[name]) return;
-
-  // 활성 타겟 갱신
-  activeTarget = name;
-
-  // ✅ 오버레이 이미지 교체 (타겟별 이미지로 변경)
-  if (overlay) {
-    const overlayImgEl = overlay.querySelector('img');
-    if (overlayImgEl && targetMap[name].overlayImg) {
-      overlayImgEl.src = targetMap[name].overlayImg;
+  document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
+    const name = event.detail.name;
+    if (!targetMap[name]) return;
+    activeTarget = name;
+    if (overlay) {
+      const overlayImgEl = overlay.querySelector('img');
+      if (overlayImgEl) overlayImgEl.src = targetMap[name].overlayImg;
+      overlay.style.animation = 'fadeOut 0.5s forwards';
+      setTimeout(() => { overlay.style.display = 'none'; }, 500);
     }
-  }
-
-  // 스캔 오버레이 숨김
-  if (overlay) {
-    overlay.style.animation = 'fadeOut 0.5s forwards';
-    setTimeout(() => { overlay.style.display = 'none'; }, 500);
-  }
-
     const { video, modelId } = targetMap[name];
     const modelEntity = document.getElementById(modelId);
-
-    // ✅ 재스캔 시 루프 해제 후 처음부터 1회 재생
     video.loop = false;
     video.currentTime = 0;
     video.play().catch(() => {
-      // 자동재생 차단 시 사용자 인터랙션 대기
-      document.addEventListener('click', () => video.play(), { once: true });
+      document.addEventListener('click',      () => video.play(), { once: true });
       document.addEventListener('touchstart', () => video.play(), { once: true });
     });
-
-    // 모델 초기화 (숨김)
     if (modelEntity) {
       modelEntity.setAttribute('visible', false);
       const mesh = modelEntity.getObject3D('mesh');
@@ -586,30 +517,22 @@ document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
         });
       }
     }
-
-    // ended 이벤트 바인딩
     bindVideoEnded(name);
   });
 
-  // xrimagelost: 이미지 소실 시 오버레이 복구
-document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
-  const name = event.detail.name;
-  if (!targetMap[name]) return;
-
-  if (overlay) {
-    const currentIndex = targetOrder.indexOf(name);
-    const nextIndex = (currentIndex + 1) % targetOrder.length;
-    const nextTarget = targetOrder[nextIndex];
-    const overlayImgEl = overlay.querySelector('img');
-    if (overlayImgEl && targetMap[nextTarget].overlayImg) {
-      overlayImgEl.src = targetMap[nextTarget].overlayImg;
+  document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
+    const name = event.detail.name;
+    if (!targetMap[name]) return;
+    if (overlay) {
+      const currentIndex = targetOrder.indexOf(name);
+      const nextTarget   = targetOrder[(currentIndex + 1) % targetOrder.length];
+      const overlayImgEl = overlay.querySelector('img');
+      if (overlayImgEl) overlayImgEl.src = targetMap[nextTarget].overlayImg;
+      overlay.style.display   = 'flex';
+      overlay.style.animation = 'none';
+      overlay.style.opacity   = targetMap[nextTarget].overlayOpacity || '1';
     }
-
-    overlay.style.display = 'flex';
-    overlay.style.animation = 'none';
-    overlay.style.opacity = targetMap[nextTarget].overlayOpacity || '1'; // ✅ 타겟별 투명도 적용
-  }
-});
+  });
 </script>
 </body>
 </html>
