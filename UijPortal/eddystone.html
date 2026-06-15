@@ -45,7 +45,7 @@
     <!-- models -->
     <a-asset-item id="portal-rim-model" src="./assets/models/ring-s2.glb"></a-asset-item>
     <a-asset-item id="thunder-model" src="./assets/models/thunder-lighting.glb"></a-asset-item>
-    <!--a-asset-item id="platform-model" src="./assets/models/thunder-lighting.glb"></a-asset-item-->
+    <a-asset-item id="platform-model" src="./assets/models/water_wave_for_ar.glb"></a-asset-item>
     <a-asset-item id="lh-model" src="./assets/models/lighthouse-rock-seagull.glb"></a-asset-item>
     <a-asset-item id="boat-model" src="./assets/models/fishing_boat.glb"></a-asset-item>
     <!--a-asset-item id="birds-model" src="./assets/models/birds.glb"></a-asset-item-->
@@ -107,21 +107,21 @@
     <a-entity
       gltf-model="#thunder-model"
       rotation="0 90 0"
-      position="8 -1.5 -5"
-      scale="1 1 1"
+      position="8 -5.5 -5"
+      scale="3 3 3"
       shadow="cast: false"
       animation-mixer>
     </a-entity>
 
-    <!--a-entity
+    <a-entity
       gltf-model="#platform-model"
       rotation="0 -90 0"
       reflections="type: static"
       position="-0.4 -15 -70"
-      scale="1 1 1"
+      scale="30 30 30"
       animation-mixer
       shadow="receive: false">
-    </a-entity-->
+    </a-entity>
     
     <!--a-plane
       material="src: #satellite-img; transparent: true; roughness: 0.8; metalness: 0"
@@ -153,7 +153,7 @@
       gltf-model="#boat-model"
       reflections="type: static"
       rotation="0 -30 0"
-      position="10 -15 -30"
+      position="20 -15 -50"
       scale="0.03 0.03 0.03"
       shadow="receive: false"
        animation-mixer>
@@ -168,14 +168,15 @@
      </a-entity>
       </a-entity-->
 
-        <!--a-entity
+        <a-entity
     id="waveVideo"
     auto-play-video="video: #wave-video"
+    material="shader: chromakey; src: #portal-video; color: 0 0 0; blending: additive; side: front"
     geometry="primitive: plane; height: 3.5; width: 2.5;"
     position="0 5.5 -12.1"
-    rotation="0 0 0"
+    rotation="0 90 0"
     scale="30 30 30">
-  </a-entity-->
+  </a-entity>
     
      <a-sky src="#skybox-img" rotation="0 -90 0"></a-sky>
 
