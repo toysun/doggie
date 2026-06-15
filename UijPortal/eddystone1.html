@@ -78,6 +78,9 @@
   <button class="skybox-btn" id="btn-sky1" onclick="setSkybox(1)" aria-label="바다 구름 하늘">
     <img src="./assets/textures/sea-cloud.png" alt="바다 구름">
   </button>
+    <button class="skybox-btn" id="btn-sky2" onclick="setSkybox(2)" aria-label="바다 파란 하늘">
+    <img src="./assets/textures/sea-blue.png" alt="바다 파란">
+  </button>
 </div>
 
 <a-scene
@@ -99,6 +102,7 @@
     <!-- textures -->
     <img id="skybox-img"      src="./assets/textures/sea-storm.png">
     <img id="skybox-img1"     src="./assets/textures/sea-cloud1.png">
+    <img id="sea-blue"        src="./assets/textures/sea-blue.png">
     <img id="blob-shadow-img" src="./assets/textures/blob-shadow.png">
     <!-- ✅ 닫는 태그 오류 수정: " --> 제거 -->
     <img id="palanquin-low-img" src="./assets/textures/palanquin-low.png">
@@ -219,6 +223,7 @@
   const skyboxList = [
     { btnId: 'btn-sky0', assetId: '#skybox-img'  },
     { btnId: 'btn-sky1', assetId: '#skybox-img1' },
+    { btnId: 'btn-sky2', assetId: '#sea-blue'    }, 
   ];
 
   let currentSky = 0;
