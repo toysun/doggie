@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>World Portal</title>
+
+  <script src="./../xr_st/8frame-1.5.0.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>
+  <script crossorigin="anonymous" src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Contrail+One&display=swap" rel="stylesheet">
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <script type="module" src="./app.js" defer></script>
+  <link rel="stylesheet" href="./index.css">
+
+  <style>
+    /* ── 스카이박스 교체 버튼 패널 ── */
+    #skybox-panel {
+      position: fixed;
+      right: 16px;
+      bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 9999;
+    }
+
+    .skybox-btn {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      border: 3px solid #ffffff;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      transition: transform 0.15s, border-color 0.15s;
+      background: #000;
+      padding: 0;
+    }
+
+    .skybox-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      pointer-events: none;
+    }
+
+    .skybox-btn.active {
+      border-color: #00e5ff;
+      transform: scale(1.12);
+      box-shadow: 0 0 0 2px #00e5ff, 0 2px 12px rgba(0,0,0,0.6);
+    }
+
+    .skybox-btn:not(.active):hover {
+      transform: scale(1.06);
+      border-color: #cceeff;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="overlay" style="display: none" class="absolute-fill">
+  <img id="recenterButton" src="./assets/textures/recenter.png">
+  <span id="promptText"></span>
+</div>
+
+<!-- ✅ 스카이박스 교체 버튼 패널 -->
+<div id="skybox-panel">
+  <button class="skybox-btn active" id="btn-sky0" onclick="setSkybox(0)" aria-label="바다 폭풍 하늘">
+    <img src="./assets/textures/sea-storm.png" alt="바다 폭풍">
+  </button>
+  <button class="skybox-btn" id="btn-sky1" onclick="setSkybox(1)" aria-label="바다 구름 하늘">
+    <img src="./assets/textures/sea-cloud.png" alt="바다 구름">
+  </button>
+</div>
+
+<a-scene
+  responsive-immersive
+  landing-page="mediaSrc: #landing-page-video;"
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement: true;"
+  xrweb="allowedDevices: any; disableDefaultEnvironment: true;">
+
+  <xrextras-resource id="landing-page-video" src="./assets/moon-portal.mp4"></xrextras-resource>
+
+  <a-assets>
+    <!-- models -->
+    <a-asset-item id="portal-rim-model" src="./assets/models/ring-s2.glb"></a-asset-item>
+    <a-asset-item id="platform-model"   src="./assets/models/water_wave_for_ar.glb"></a-asset-item>
+    <a-asset-item id="lh-model"         src="./assets/models/lighthouse-rock-seagull.glb"></a-asset-item>
+    <a-asset-item id="boat-model"       src="./assets/models/fishing_boat.glb"></a-asset-item>
+    <!-- textures -->
+    <img id="skybox-img"      src="./assets/textures/sea-storm.png">
+    <img id="skybox-img1"     src="./assets/textures/sea-cloud.png">
+    <img id="blob-shadow-img" src="./assets/textures/blob-shadow.png">
+    <!-- ✅ 닫는 태그 오류 수정: " --> 제거 -->
+    <img id="palanquin-low-img" src="./assets/textures/palanquin-low.png">
+    <video id="portal-video" muted autoplay playsinline crossorigin="anonymous" loop src="./assets/textures/portal-video.mp4"></video>
+    <video id="wave-video"   muted autoplay playsinline crossorigin="anonymous" loop src="./assets/textures/wave-square-ns.mp4"></video>
+  </a-assets>
+
+  <xrextras-capture-button></xrextras-capture-button>
+  <xrextras-capture-preview></xrextras-capture-preview>
+
+  <!-- ✅ a-camera 닫는 태그 추가 / 중복 animation 속성 제거 -->
+  <a-camera id="camera" position="0 9 11"></a-camera>
+
+  <!-- Hider walls -->
+  <xrextras-opaque-background remove="true">
+    <a-entity id="hider-walls">
+      <a-box scale="100 1 100"   position="0 -1 49"    xrextras-hider-material></a-box>
+      <a-box scale="100 100 1"   position="0 50 75"    xrextras-hider-material></a-box>
+      <a-box scale="100 1 100"   position="0 100 49"   xrextras-hider-material></a-box>
+      <a-box scale="1 100 100"   position="-30 50 50"  xrextras-hider-material></a-box>
+      <a-box scale="1 100 100"   position="30 50 50"   xrextras-hider-material></a-box>
+      <a-ring id="portalHiderRing" radius-inner="0.001" radius-outer="100"
+        position="0 7.5 -0.2" xrextras-hider-material></a-ring>
+    </a-entity>
+
+    <a-entity id="portal-wall">
+      <!-- ✅ scale Z=0 → 1 수정 -->
+      <a-circle radius="5.2" rotation="0 180 0" position="0 7.5 0"    scale="0.8 0.8 1" xrextras-hider-material></a-circle>
+      <a-circle radius="5.2" rotation="0 180 0" position="0 7.5 0.25" scale="0.8 0.8 1" xrextras-hider-material></a-circle>
+    </a-entity>
+  </xrextras-opaque-background>
+
+  <!-- Lights -->
+  <a-entity
+    light="type: directional; castShadow: true;
+      shadowMapHeight:2048; shadowMapWidth:2048;
+      shadowCameraTop:35; shadowCameraBottom:-20;
+      shadowCameraRight:40; shadowCameraLeft:-10;
+      target: #portalRim"
+    xrextras-attach="target: portalRim; offset: 18 7 14"
+    shadow>
+  </a-entity>
+  <a-light type="ambient" intensity="0.3"></a-light>
+
+  <!-- Portal Contents -->
+  <a-entity id="portal-contents">
+
+    <a-entity
+      gltf-model="#platform-model"
+      rotation="0 0 0"
+      reflections="type: static"
+      position="0 0 0"
+      scale="10 10 10"
+      animation-mixer
+      shadow="receive: false">
+    </a-entity>
+
+    <a-entity
+      gltf-model="#lh-model"
+      rotation="0 -45 0"
+      reflections="type: static"
+      position="-34 -15 -63"
+      scale="5 5 5"
+      shadow="receive: false"
+      animation-mixer>
+    </a-entity>
+
+    <a-entity
+      gltf-model="#boat-model"
+      reflections="type: static"
+      rotation="0 -30 0"
+      position="30 -15 -70"
+      scale="0.03 0.03 0.03"
+      shadow="receive: false"
+      animation-mixer>
+    </a-entity>
+
+    <!-- ✅ id="sky" 추가로 JS에서 src 교체 가능하게 -->
+    <a-sky id="sky" src="#skybox-img" rotation="0 -90 0"></a-sky>
+
+    <!-- Portal -->
+    <a-entity
+      id="portalRim"
+      gltf-model="#portal-rim-model"
+      spin="axis: x; speed: 14000"
+      reflections="type: realtime"
+      position="0 7.5 0"
+      rotation="90 -90 -90"
+      scale="0.00002 0.00002 0.00002"
+      shadow="receive: false">
+    </a-entity>
+
+    <!-- ✅ auto-play-video → xrextras-play-video 수정 -->
+    <a-entity
+      id="portalVideo"
+      xrextras-play-video="video: #portal-video; canstop: true"
+      material="shader: chromakey; src: #portal-video; color: 0 0 0; blending: additive; side: front"
+      geometry="primitive: plane; height: 1.5; width: 1.5;"
+      position="0 7.5 0.1"
+      scale="0.02 0.02 0.02">
+    </a-entity>
+
+    <a-circle
+      id="portalShadow"
+      radius="1.5"
+      material="src: #blob-shadow-img; opacity: 0.65; roughness: 0.8; metalness: 0"
+      position="0 0.01 1.25"
+      rotation="-90 0 0"
+      scale="0.02 0.02 0.02">
+    </a-circle>
+
+  </a-entity><!-- ✅ portal-contents 닫기 -->
+
+</a-scene>
+
+<script>
+  // ── 스카이박스 교체 ──────────────────────────────────────
+  const skyboxList = [
+    { btnId: 'btn-sky0', assetId: '#skybox-img'  },
+    { btnId: 'btn-sky1', assetId: '#skybox-img1' },
+  ];
+
+  let currentSky = 0;
+
+  function setSkybox(index) {
+    if (index === currentSky) return;
+    currentSky = index;
+
+    // a-sky src 교체
+    const sky = document.getElementById('sky');
+    if (sky) sky.setAttribute('src', skyboxList[index].assetId);
+
+    // 버튼 active 상태 전환
+    skyboxList.forEach((item, i) => {
+      const btn = document.getElementById(item.btnId);
+      if (btn) btn.classList.toggle('active', i === index);
+    });
+  }
+</script>
+
+</body>
+</html>
