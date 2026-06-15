@@ -44,7 +44,7 @@
   <a-assets>
     <!-- models -->
     <a-asset-item id="portal-rim-model" src="./assets/models/ring-s2.glb"></a-asset-item>
-    <a-asset-item id="thunder-model" src="./assets/models/thunder-lighting.glb"></a-asset-item>
+    <!--a-asset-item id="thunder-model" src="./assets/models/thunder-lighting.glb"></a-asset-item-->
     <a-asset-item id="platform-model" src="./assets/models/water_wave_for_ar.glb"></a-asset-item>
     <a-asset-item id="lh-model" src="./assets/models/lighthouse-rock-seagull.glb"></a-asset-item>
     <a-asset-item id="boat-model" src="./assets/models/fishing_boat.glb"></a-asset-item>
@@ -104,14 +104,14 @@
   <!-- Portal Contents -->
   <a-entity id="portal-contents">
       
-    <a-entity
+    <!--a-entity
       gltf-model="#thunder-model"
       rotation="0 90 0"
       position="8 -25.5 -75"
       scale="3 3 3"
       shadow="cast: false"
       animation-mixer>
-    </a-entity>
+    </a-entity-->
 
     <a-entity
       gltf-model="#platform-model"
@@ -168,7 +168,7 @@
      </a-entity>
       </a-entity-->
 
-        <a-entity
+        <!--a-entity
     id="waveVideo"
     auto-play-video="video: #wave-video"
     material="shader: chromakey; src: #wave-video; color: 0 0 0; blending: additive; side: front"
@@ -176,7 +176,7 @@
     position="0 0 0"
     rotation="0 0 -90"
     scale="300 300 300">
-  </a-entity>
+  </a-entity-->
     
      <a-sky src="#skybox-img" rotation="0 -90 0"></a-sky>
 
