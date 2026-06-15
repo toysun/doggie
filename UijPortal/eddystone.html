@@ -44,10 +44,10 @@
   <a-assets>
     <!-- models -->
     <a-asset-item id="portal-rim-model" src="./assets/models/ring-s2.glb"></a-asset-item>
-    <a-asset-item id="moon-model" src="./assets/models/transparent-ground.glb"></a-asset-item>
-    <a-asset-item id="platform-model" src="./assets/models/thunder-lighting.glb"></a-asset-item>
-    <a-asset-item id="flag-model" src="./assets/models/lighthouse-rock-seagull.glb"></a-asset-item>
-    <a-asset-item id="rocks-model" src="./assets/models/fishing_boat.glb"></a-asset-item>
+    <a-asset-item id="thunder-model" src="./assets/models/thunder-lighting.glb"></a-asset-item>
+    <!--a-asset-item id="platform-model" src="./assets/models/thunder-lighting.glb"></a-asset-item-->
+    <a-asset-item id="lh-model" src="./assets/models/lighthouse-rock-seagull.glb"></a-asset-item>
+    <a-asset-item id="boat-model" src="./assets/models/fishing_boat.glb"></a-asset-item>
     <!--a-asset-item id="birds-model" src="./assets/models/birds.glb"></a-asset-item-->
     <!-- textures -->
     <img id="skybox-img" src="./assets/textures/sea-storm.png">
@@ -55,7 +55,7 @@
     <!--img id="satellite-img" src="./assets/textures/crain-fly.png">
     <img id="palanquin-low-img" src="./assets/textures/palanquin-low.png"-->
     <video id="portal-video" muted autoplay playsinline crossorigin="anonymous" loop="true" src="./assets/textures/portal-video.mp4"></video>
-    <video id="palanquin-video" muted autoplay playsinline crossorigin="anonymous" loop="true" src="./assets/textures/wave-square-ns.mp4"></video>
+    <video id="wave-video" muted autoplay playsinline crossorigin="anonymous" loop="true" src="./assets/textures/wave-square-ns.mp4"></video>
   </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
@@ -105,21 +105,22 @@
   <a-entity id="portal-contents">
       
     <a-entity
-      gltf-model="#moon-model"
+      gltf-model="#thunder-model"
       rotation="0 90 0"
       position="8 -0.5 -5"
       scale="1.5 1.5 1.5"
       shadow="cast: false">
     </a-entity>
 
-    <a-entity
+    <!--a-entity
       gltf-model="#platform-model"
       rotation="0 -90 0"
       reflections="type: static"
       position="-0.4 -15 -70"
       scale="1 1 1"
+      animation-mixer
       shadow="receive: false">
-    </a-entity>
+    </a-entity-->
     
     <!--a-plane
       material="src: #satellite-img; transparent: true; roughness: 0.8; metalness: 0"
@@ -138,7 +139,7 @@
      </a-plane-->
     
      <a-entity
-      gltf-model="#flag-model"
+      gltf-model="#lh-model"
       rotation="0 -45 0"
       reflections="type: static"
       position="-34 -15 -123"
@@ -148,7 +149,7 @@
      </a-entity>
     
      <a-entity
-      gltf-model="#rocks-model"
+      gltf-model="#boat-model"
       reflections="type: static"
       rotation="0 -30 0"
       position="5 -15 -90"
@@ -156,8 +157,8 @@
       shadow="receive: false"
        animation-mixer>
      </a-entity>
-    <a-entity rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
-    <!--a-entity
+    <!--a-entity rotation="0 0 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000">
+    <a-entity
       gltf-model="#birds-model"
       position="150 150 -25"
       scale="50.75 50.75 50.75"
