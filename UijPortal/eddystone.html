@@ -117,7 +117,7 @@
       rotation="0 -90 0"
       reflections="type: static"
       position="-0.4 -15 -70"
-      scale="9 9 9"
+      scale="1 1 1"
       shadow="receive: false">
     </a-entity>
     
@@ -142,7 +142,7 @@
       rotation="0 -45 0"
       reflections="type: static"
       position="-34 -15 -123"
-      scale="30 30 30"
+      scale="1 1 1"
       shadow="receive: false"
        animation-mixer>
      </a-entity>
@@ -152,7 +152,7 @@
       reflections="type: static"
       rotation="0 -30 0"
       position="5 -15 -90"
-      scale="0.8 0.8 0.8"
+      scale="0.01 0.01 0.01"
       shadow="receive: false"
        animation-mixer>
      </a-entity>
@@ -169,10 +169,11 @@
         <a-entity
     id="palanquinVideo"
     auto-play-video="video: #palanquin-video"
-    material="shader: chromakey; src: #palanquin-video; color: 0.9 1 0.8; opacity: 1"
+    material="shader: chromakey; src: #palanquin-video; color: 0 0 0; opacity: 1"
     geometry="primitive: plane; height: 3.5; width: 2.5;"
     position="0 5.5 -12.1"
-    scale="10 10 10">
+    rotation-"0 180 0"
+    scale="50 50 50">
   </a-entity>
     
      <a-sky src="#skybox-img" rotation="0 -90 0"></a-sky>
