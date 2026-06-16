@@ -184,7 +184,7 @@
         <button id="start_btn" onclick="startNavigation()">찾기 시작</button>
     </div>
   <div id="scanning-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; pointer-events: none;">
-    <img src="./assets/Media/mukho-illust.svg" alt="스마트폰을 흔들어 스캔하세요" />
+    <img src="./assets/Media/yd-illust.svg" alt="스마트폰을 흔들어 스캔하세요" />
   </div>
 <!-- 수집도감 토글 버튼 -->
 <div id="collection-toggle" onclick="toggleCollection()">
@@ -197,12 +197,12 @@
   <div id="collection-panel-title">
     등대 탐험대<span>수집도감</span>
   </div>
-  <div class="collection-slot" id="slot-mukho_target">
+  <div class="collection-slot" id="slot-yd_target">
     <span class="question">?</span>
     <img src="./assets/Media/whale-thumb.png" alt="아기고래">
   </div>
   <hr class="collection-divider">
-  <div class="collection-slot" id="slot-mukho_target1">
+  <div class="collection-slot" id="slot-yd_target1">
     <span class="question">?</span>
     <img src="./assets/Media/turtle-thumb.png" alt="바다거북">
   </div>
@@ -383,7 +383,7 @@
   const targetOrder = ['yd_target', 'yd_target1'];
 
   const targetMap = {
-    'mukho_target': {
+    'yd_target': {
       video: document.getElementById('wine-label-video'),
       modelId: 'model-hero',
       overlayImg: './assets/Media/yd-illust-s.svg',
@@ -391,7 +391,7 @@
       thumbImg: './assets/Media/whale-thumb.png',
       itemName: '나침반'
     },
-    'mukho_target1': {
+    'yd_target1': {
       video: document.getElementById('wine-label-video1'),
       modelId: 'model-hero1',
       overlayImg: './assets/Media/yd-illust1-s.svg',
