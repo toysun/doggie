@@ -214,7 +214,7 @@ AFRAME.registerComponent('camera-tour', {
   <xrextras-capture-preview></xrextras-capture-preview>
 
   <!-- ✅ a-camera 닫는 태그 추가 / 중복 animation 속성 제거 -->
-  <a-camera id="camera" position="0 9 11" camera-tour></a-camera>
+  <a-camera id="camera" position="0 9 11"></a-camera>
 
   <!-- Hider walls -->
   <xrextras-opaque-background remove="true">
@@ -248,7 +248,7 @@ AFRAME.registerComponent('camera-tour', {
   <a-light type="ambient" intensity="0.3"></a-light>
 
   <!-- Portal Contents -->
-  <a-entity id="portal-contents">
+  <a-entity id="portal-contents" portal-tour>
 
     <a-entity
       gltf-model="#platform-model"
@@ -321,22 +321,110 @@ AFRAME.registerComponent('camera-tour', {
     </a-circle>
 
   </a-entity><!-- ✅ portal-contents 닫기 -->
+<!-- </a-scene> 바로 앞, <script type="module"> 보다 먼저 위치 -->
+<script>
+// ✅ A-Frame이 준비된 후 등록 보장
+document.addEventListener('DOMContentLoaded', () => {
 
+  AFRAME.registerComponent('portal-tour', {
+    init() {
+      this.touring = false;
+    },
+
+    startTour() {
+      if (this.touring) return;
+      this.touring = true;
+
+      const el = this.el;  // portal-contents 엔티티
+
+      // 투어 시퀀스: 콘텐츠를 반대 방향으로 이동 = 카메라가 전진하는 효과
+      // 카메라가 z=-10으로 이동 = 콘텐츠가 z=+10으로 이동 (반대)
+      const steps = [
+        // 0. 포털 통과: 콘텐츠를 앞으로 당김 (카메라가 안으로 들어가는 효과)
+        { px: 0, py: 0, pz: 21,  ry:   0, dur: 3000 },
+        // 1. 좌측 둘러보기: 콘텐츠를 우로 회전 (카메라가 좌를 보는 효과)
+        { px: 0, py: 0, pz: 21,  ry: -90, dur: 2500 },
+        // 2. 정면 복귀
+        { px: 0, py: 0, pz: 21,  ry:   0, dur: 2000 },
+        // 3. 우측 둘러보기: 콘텐츠를 좌로 회전
+        { px: 0, py: 0, pz: 21,  ry:  90, dur: 2500 },
+        // 4. 정면 복귀
+        { px: 0, py: 0, pz: 21,  ry:   0, dur: 2000 },
+        // 5. 포털 밖으로 복귀: 콘텐츠 원위치
+        { px: 0, py: 0, pz:  0,  ry:   0, dur: 3000 },
+      ];
+
+      function ease(t) {
+        return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2;
+      }
+
+      let chain    = Promise.resolve();
+      let prevPos  = { x: el.object3D.position.x, y: el.object3D.position.y, z: el.object3D.position.z };
+      let prevRotY = THREE.MathUtils.radToDeg(el.object3D.rotation.y);
+
+      steps.forEach((step) => {
+        const fromPos  = { ...prevPos };
+        const fromRotY = prevRotY;
+        const toPos    = { x: step.px, y: step.py, z: step.pz };
+        const toRotY   = step.ry;
+        const dur      = step.dur;
+        prevPos  = { ...toPos };
+        prevRotY = toRotY;
+
+        chain = chain.then(() => new Promise(resolve => {
+          const startTime = performance.now();
+
+          function tick(now) {
+            const t = Math.min((now - startTime) / dur, 1);
+            const e = ease(t);
+
+            el.object3D.position.set(
+              fromPos.x + (toPos.x - fromPos.x) * e,
+              fromPos.y + (toPos.y - fromPos.y) * e,
+              fromPos.z + (toPos.z - fromPos.z) * e
+            );
+            el.object3D.rotation.y = THREE.MathUtils.degToRad(
+              fromRotY + (toRotY - fromRotY) * e
+            );
+
+            if (t < 1) {
+              requestAnimationFrame(tick);
+            } else {
+              resolve();
+            }
+          }
+          requestAnimationFrame(tick);
+        }));
+      });
+
+      chain.then(() => {
+        this.touring = false;
+        // ✅ 투어 완료 후 스카이박스 버튼 복구
+        document.getElementById('skybox-panel').style.pointerEvents = '';
+        document.getElementById('skybox-panel').style.opacity = '1';
+      });
+    }
+  });
+
+}); // DOMContentLoaded
+</script>
 </a-scene>
 <!-- </a-scene> 바로 아래 추가 -->
 <script>
-  let tourStarted = false;
-
-  // 씬 터치/클릭 시 투어 시작 (1회만)
+let tourStarted = false;
   document.querySelector('a-scene').addEventListener('click', () => {
     if (tourStarted) return;
     tourStarted = true;
 
-    // 포털 오픈 연출 대기 후 투어 시작
+    // ✅ 투어 중 스카이박스 버튼 비활성화
+    document.getElementById('skybox-panel').style.pointerEvents = 'none';
+    document.getElementById('skybox-panel').style.opacity = '0.3';
+
     setTimeout(() => {
-      const cam = document.getElementById('camera');
-      if (cam && cam.components['camera-tour']) {
-        cam.components['camera-tour'].startTour();
+      // ✅ camera 대신 portal-contents에서 portal-tour 호출
+      const contents = document.getElementById('portal-contents');
+      if (contents && contents.components['portal-tour']) {
+        contents.components['portal-tour'].startTour();
       }
     }, 1000);
   });
