@@ -197,14 +197,14 @@
   <div id="collection-panel-title">
     등대 탐험대<span>수집도감</span>
   </div>
-  <div class="collection-slot" id="slot-hero_target">
+  <div class="collection-slot" id="slot-mukho_target">
     <span class="question">?</span>
-    <img src="./assets/Media/compass-thumb.png" alt="나침반">
+    <img src="./assets/Media/ship-steering.png" alt="조타륜">
   </div>
   <hr class="collection-divider">
-  <div class="collection-slot" id="slot-hero_target1">
+  <div class="collection-slot" id="slot-mukho_target1">
     <span class="question">?</span>
-    <img src="./assets/Media/anchor-thumb.png" alt="닻">
+    <img src="./assets/Media/lifebuoy.png" alt="구명튜브">
   </div>
 </div>
 
@@ -224,8 +224,8 @@
     xrweb="disableWorldTracking: true">
     
     <a-assets>
-      <a-asset-item id="bean-glb" src="./assets/Models/compass-blue.glb"></a-asset-item>
-      <a-asset-item id="blades-glb" src="./assets/Models/blue-anchor.glb"></a-asset-item>
+      <a-asset-item id="bean-glb" src="./assets/Models/blue-shipwheel.glb"></a-asset-item>
+      <a-asset-item id="blades-glb" src="./assets/Models/watercolor-lifebuoy.glb"></a-asset-item>
       <!--a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
       <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
       <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item-->
@@ -266,7 +266,7 @@
     <a-light type="ambient" intensity="0.1"></a-light>
 
     <!-- hero_target: 비디오 종료 후 3D 모델 등장 -->
-    <xrextras-named-image-target name="hero_target">
+    <xrextras-named-image-target name="mukho_target">
       <a-entity
         id="video-plane-hero"
         xrextras-play-video="video: #wine-label-video; canstop: true"
@@ -291,7 +291,7 @@
     </xrextras-named-image-target>
 
     <!-- w1-engine -->
-    <xrextras-named-image-target name="hero_target1">
+    <xrextras-named-image-target name="mukho_target1">
       <a-entity
         id="video-plane-hero1"
         xrextras-play-video="video: #wine-label-video1; canstop: true"
@@ -380,23 +380,23 @@
   const overlay = document.getElementById('scanning-overlay');
   let activeTarget = null;
 
-  const targetOrder = ['hero_target', 'hero_target1'];
+  const targetOrder = ['mukho_target', 'mukho_target1'];
 
   const targetMap = {
-    'hero_target': {
+    'mukho_target': {
       video: document.getElementById('wine-label-video'),
       modelId: 'model-hero',
-      overlayImg: './assets/Media/hero-illust-s.svg',
+      overlayImg: './assets/Media/mukho-illust-s.svg',
       overlayOpacity: '0.5',                           // ✅ 쉼표 추가
-      thumbImg: './assets/Media/compass-thumb.png',
+      thumbImg: './assets/Media/ship-steering.png',
       itemName: '나침반'
     },
-    'hero_target1': {
+    'mukho_target1': {
       video: document.getElementById('wine-label-video1'),
       modelId: 'model-hero1',
-      overlayImg: './assets/Media/stone-illust-s.svg',
+      overlayImg: './assets/Media/mukho-illust1.svg',
       overlayOpacity: '0.5',                           // ✅ 쉼표 추가
-      thumbImg: './assets/Media/anchor-thumb.png',
+      thumbImg: './assets/Media/lifebuoy.png',
       itemName: '닻'
     }
   };
@@ -405,7 +405,7 @@
 
   const collected = {};
 
-  overlay.style.opacity = targetMap['hero_target'].overlayOpacity;
+  overlay.style.opacity = targetMap['mukho_target'].overlayOpacity;
 
   function toggleCollection() {
     const panel = document.getElementById('collection-panel');
