@@ -14,9 +14,9 @@
   <script crossorigin="anonymous" src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
   <script>
      const onxrloaded = async () => {
-       const res = await fetch('./mukho.json')
+       const res = await fetch('./yd.json')
        const json = await res.json()
-       const res1 = await fetch('./mukho1.json')
+       const res1 = await fetch('./yd1.json')
        const json1 = await res1.json()
        const res2 = await fetch('./w1-engine.json')
        const json2 = await res2.json()
@@ -179,7 +179,7 @@
 <body>
       <div id="start_area">     
         <img src="./assets/Media/lh-hunt-t.png" alt="AR 등대 탐험대" width="200">
-        <img src="./assets/Media/hunt-spot1.png" alt="AR 등대 보물 찾기" width="400">
+        <img src="./assets/Media/hunt-spot2.png" alt="AR 등대 보물 찾기" width="400">
         <p style="color: #066265; font-weight:bold;">등대 주면에서 <br>위의 2개 장면에 숨겨진,<br>항해에 도움이 되는 아이템을 찾으세요.</p> 
         <button id="start_btn" onclick="startNavigation()">찾기 시작</button>
     </div>
@@ -199,12 +199,12 @@
   </div>
   <div class="collection-slot" id="slot-mukho_target">
     <span class="question">?</span>
-    <img src="./assets/Media/ship-steering.png" alt="조타륜">
+    <img src="./assets/Media/whale-thumb.png" alt="아기고래">
   </div>
   <hr class="collection-divider">
   <div class="collection-slot" id="slot-mukho_target1">
     <span class="question">?</span>
-    <img src="./assets/Media/lifebuoy.png" alt="구명튜브">
+    <img src="./assets/Media/turtle-thumb.png" alt="바다거북">
   </div>
 </div>
 
@@ -224,8 +224,8 @@
     xrweb="disableWorldTracking: true">
     
     <a-assets>
-      <a-asset-item id="bean-glb" src="./assets/Models/blue-shipwheel.glb"></a-asset-item>
-      <a-asset-item id="blades-glb" src="./assets/Models/watercolor-lifebuoy.glb"></a-asset-item>
+      <a-asset-item id="bean-glb" src="./assets/Models/blue-whale-baby.glb"></a-asset-item>
+      <a-asset-item id="blades-glb" src="./assets/Models/Azure-sea-turtle.glb"></a-asset-item>
       <!--a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
       <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
       <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item-->
@@ -266,7 +266,7 @@
     <a-light type="ambient" intensity="0.1"></a-light>
 
     <!-- hero_target: 비디오 종료 후 3D 모델 등장 -->
-    <xrextras-named-image-target name="mukho_target">
+    <xrextras-named-image-target name="yd_target">
       <a-entity
         id="video-plane-hero"
         xrextras-play-video="video: #wine-label-video; canstop: true"
@@ -291,7 +291,7 @@
     </xrextras-named-image-target>
 
     <!-- w1-engine -->
-    <xrextras-named-image-target name="mukho_target1">
+    <xrextras-named-image-target name="yd_target1">
       <a-entity
         id="video-plane-hero1"
         xrextras-play-video="video: #wine-label-video1; canstop: true"
@@ -380,23 +380,23 @@
   const overlay = document.getElementById('scanning-overlay');
   let activeTarget = null;
 
-  const targetOrder = ['mukho_target', 'mukho_target1'];
+  const targetOrder = ['yd_target', 'yd_target1'];
 
   const targetMap = {
     'mukho_target': {
       video: document.getElementById('wine-label-video'),
       modelId: 'model-hero',
-      overlayImg: './assets/Media/mukho-illust-s.svg',
+      overlayImg: './assets/Media/yd-illust-s.svg',
       overlayOpacity: '0.5',                           // ✅ 쉼표 추가
-      thumbImg: './assets/Media/ship-steering.png',
+      thumbImg: './assets/Media/whale-thumb.png',
       itemName: '나침반'
     },
     'mukho_target1': {
       video: document.getElementById('wine-label-video1'),
       modelId: 'model-hero1',
-      overlayImg: './assets/Media/mukho-illust1-s.svg',
+      overlayImg: './assets/Media/yd-illust1-s.svg',
       overlayOpacity: '0.5',                           // ✅ 쉼표 추가
-      thumbImg: './assets/Media/lifebuoy.png',
+      thumbImg: './assets/Media/turtle-thumb.png',
       itemName: '닻'
     }
   };
@@ -405,7 +405,7 @@
 
   const collected = {};
 
-  overlay.style.opacity = targetMap['mukho_target'].overlayOpacity;
+  overlay.style.opacity = targetMap['yd_target'].overlayOpacity;
 
   function toggleCollection() {
     const panel = document.getElementById('collection-panel');
