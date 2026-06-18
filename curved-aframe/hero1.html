@@ -415,77 +415,140 @@
   }
 
   // ========================================================
-  // ✅ 신규: 3D 모델 클릭 시 테두리 발광(outline glow) 효과
+  // ✅ 수정: 3D 모델 클릭 시 발광(glow) 효과 — 복제(clone) 없는 방식
   // ========================================================
-  // 원리: 모델 메시 전체를 복제(clone)하여 살짝 더 크게 스케일하고,
-  // 안쪽 면이 보이도록(BackSide) 단색 발광 재질을 입히면
-  // 원본 모델 가장자리 너머로 빛나는 테두리처럼 보이는 고전적인
-  // "셀쉐이딩 아웃라인" 기법입니다. 클릭 순간 살짝 부풀어 오르며
-  // 페이드 아웃되는 애니메이션을 주어 "수집되는 빛" 느낌을 줍니다.
-  function playCollectGlow(modelEntity, glowColorHex) {
-    const mesh = modelEntity.getObject3D('mesh');
-    if (!mesh || !mesh.parent) return;
+  // 이전 버전은 mesh.clone(true)로 모델을 복제해 만든 "아웃라인" 메시를
+  // 사용했습니다. 그런데 일반 Object3D.clone()은 리깅(스켈레톤/본)이
+  // 들어간 SkinnedMesh를 제대로 복제하지 못해서, 본 참조가 깨진 복제본이
+  // 화면에 보이지 않게 되는 경우가 있습니다(에러 없이 조용히 실패).
+  // 나침반 모델은 단순 메시라 우연히 잘 됐지만, 닻 모델이 리깅된 구조라면
+  // 바로 이 문제로 발광 효과만 빠졌을 가능성이 큽니다.
+  //
+  // 그래서 복제를 전혀 하지 않는 두 가지 방식을 함께 사용합니다:
+  //  1) 모델의 "실제" 재질에 직접 emissive(자체 발광) 색을 살짝 입혔다가
+  //     원래대로 되돌리는 방식 — glTF에서 불러온 표준 재질이면 거의 항상
+  //     emissive 속성을 갖고 있어 모델 구조와 무관하게 동작합니다.
+  //  2) 모델의 바운딩 크기에 맞춘 "헤일로(halo)" 스프라이트를 모델 중심에
+  //     겹쳐 띄우는 방식 — 캔버스로 그린 방사형 그라디언트 텍스처를 쓰는
+  //     2D 스프라이트라서, 본/스켈레톤/노멀 방향 등 모델 내부 구조와
+  //     완전히 무관하게 어떤 모델에도 항상 똑같이 보입니다. 결과적으로
+  //     emissive가 없는 모델이라도 최소한 이 헤일로는 항상 보입니다.
+  function createGlowTexture(colorHex) {
+    const size = 128;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    const r = (colorHex >> 16) & 255;
+    const g = (colorHex >> 8) & 255;
+    const b = colorHex & 255;
+    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
+    gradient.addColorStop(0,   `rgba(${r},${g},${b},0.9)`);
+    gradient.addColorStop(0.4, `rgba(${r},${g},${b},0.45)`);
+    gradient.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, size, size);
+    return canvas;
+  }
 
+  function playCollectGlow(modelEntity, glowColorHex) {
     const THREE = window.THREE || (window.AFRAME && window.AFRAME.THREE);
-    if (!THREE) return; // THREE.js를 찾을 수 없으면 효과 없이 안전하게 종료
+    const mesh = modelEntity.getObject3D('mesh');
+    if (!mesh || !THREE) return;
 
     const glowColor = (typeof glowColorHex === 'number') ? glowColorHex : 0xffe066;
 
-    // 모델 전체(하위 계층 포함)를 복제하고 발광 재질로 교체
-    const outlineRoot = mesh.clone(true);
-    outlineRoot.traverse((node) => {
-      if (node.isMesh) {
-        node.material = new THREE.MeshBasicMaterial({
-          color: glowColor,
-          side: THREE.BackSide,   // 안쪽 면만 렌더링 → 바깥쪽으로 테두리처럼 비어져 보임
-          transparent: true,
-          opacity: 0.9,
-          depthWrite: false
-        });
-      }
-    });
-
-    const baseScale = outlineRoot.scale.clone();
-    mesh.parent.add(outlineRoot);
-
-    const duration = 650; // ms
-    const start = performance.now();
-
-    function animateGlow(now) {
-      const t = Math.min((now - start) / duration, 1);
-      // 0→1 구간 동안 살짝 부풀었다가 가라앉는 곡선 (sin 곡선으로 자연스럽게)
-      const expand = 1.04 + 0.16 * Math.sin(t * Math.PI); // 1.04 → 1.20 → 1.04
-      const opacity = 0.9 * (1 - t);
-
-      outlineRoot.scale.copy(baseScale).multiplyScalar(expand);
-      outlineRoot.traverse((node) => {
-        if (node.isMesh) node.material.opacity = opacity;
+    try {
+      // ---- 1) 모델의 실제 재질에 emissive 플래시 적용 (복제 없음) ----
+      const flashedMats = [];
+      mesh.traverse((node) => {
+        if (node.isMesh && node.material) {
+          const mats = Array.isArray(node.material) ? node.material : [node.material];
+          mats.forEach((mat) => {
+            if (mat && mat.emissive) {
+              flashedMats.push({
+                mat,
+                origEmissive: mat.emissive.clone(),
+                origIntensity: (mat.emissiveIntensity !== undefined) ? mat.emissiveIntensity : 1
+              });
+              mat.emissive.set(glowColor);
+            }
+          });
+        }
       });
 
-      if (t < 1) {
-        requestAnimationFrame(animateGlow);
-      } else {
-        mesh.parent.remove(outlineRoot);
-        outlineRoot.traverse((node) => {
-          if (node.isMesh) node.material.dispose();
-        });
-      }
-    }
-    requestAnimationFrame(animateGlow);
+      // ---- 2) 모델 바운딩 크기에 맞춘 헤일로 스프라이트 ----
+      const box = new THREE.Box3().setFromObject(mesh);
+      const worldCenter = box.getCenter(new THREE.Vector3());
+      const sizeVec = box.getSize(new THREE.Vector3());
+      const radius = Math.max(sizeVec.x, sizeVec.y, sizeVec.z, 0.2) * 0.5;
 
-    // 보너스: 모델 자체에도 짧은 "팝" 스케일 펄스를 줘서 클릭감을 강조
-    const popEl = modelEntity;
-    const currentScale = popEl.object3D.scale;
-    const popFrom = `${currentScale.x} ${currentScale.y} ${currentScale.z}`;
-    const popTo = `${currentScale.x * 1.15} ${currentScale.y * 1.15} ${currentScale.z * 1.15}`;
-    popEl.setAttribute('animation__collectpop',
-      `property: scale; from: ${popFrom}; to: ${popTo}; dur: 160; dir: alternate; loop: 1; easing: easeOutQuad`);
-    // 펄스 종료 후 임시 애니메이션 속성 정리
-    setTimeout(() => {
-      if (popEl.hasAttribute('animation__collectpop')) {
-        popEl.removeAttribute('animation__collectpop');
+      mesh.parent.updateMatrixWorld(true);
+      const localCenter = mesh.parent.worldToLocal(worldCenter.clone());
+
+      const texture = new THREE.CanvasTexture(createGlowTexture(glowColor));
+      const spriteMat = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        depthWrite: false,
+        depthTest: false,           // 모델 형태와 무관하게 항상 보이도록
+        blending: THREE.AdditiveBlending
+      });
+      const halo = new THREE.Sprite(spriteMat);
+      halo.position.copy(localCenter);
+      const baseHaloScale = radius * 3.2;
+      halo.scale.set(baseHaloScale * 0.35, baseHaloScale * 0.35, 1);
+      mesh.parent.add(halo);
+
+      // ---- 3) 펄스 + 페이드아웃 애니메이션 ----
+      const duration = 650; // ms
+      const start = performance.now();
+
+      function animateGlow(now) {
+        const t = Math.min((now - start) / duration, 1);
+        const expand = 0.35 + 0.85 * Math.sin(t * Math.PI * 0.5); // 천천히 확장
+        const fade = 1 - t;
+
+        halo.scale.set(baseHaloScale * expand, baseHaloScale * expand, 1);
+        spriteMat.opacity = fade;
+
+        flashedMats.forEach(({ mat }) => {
+          mat.emissiveIntensity = 1.5 * Math.sin(t * Math.PI); // 0 → 1.5 → 0
+        });
+
+        if (t < 1) {
+          requestAnimationFrame(animateGlow);
+        } else {
+          mesh.parent.remove(halo);
+          spriteMat.map.dispose();
+          spriteMat.dispose();
+          flashedMats.forEach(({ mat, origEmissive, origIntensity }) => {
+            mat.emissive.copy(origEmissive);
+            mat.emissiveIntensity = origIntensity;
+          });
+        }
       }
-    }, 400);
+      requestAnimationFrame(animateGlow);
+    } catch (err) {
+      // 특정 모델 구조에서 예외가 나도 조용히 사라지지 않고 콘솔에 남도록 처리
+      console.error('[playCollectGlow] 발광 효과 처리 중 오류:', err);
+    }
+
+    // 보너스: 모델 자체에도 짧은 "팝" 스케일 펄스 (모델 구조와 무관하게 항상 동작)
+    try {
+      const currentScale = modelEntity.object3D.scale;
+      const popFrom = `${currentScale.x} ${currentScale.y} ${currentScale.z}`;
+      const popTo = `${currentScale.x * 1.15} ${currentScale.y * 1.15} ${currentScale.z * 1.15}`;
+      modelEntity.setAttribute('animation__collectpop',
+        `property: scale; from: ${popFrom}; to: ${popTo}; dur: 160; dir: alternate; loop: 1; easing: easeOutQuad`);
+      setTimeout(() => {
+        if (modelEntity.hasAttribute('animation__collectpop')) {
+          modelEntity.removeAttribute('animation__collectpop');
+        }
+      }, 400);
+    } catch (err) {
+      console.error('[playCollectGlow] 스케일 펄스 처리 중 오류:', err);
+    }
   }
 
   function collectItem(targetName) {
