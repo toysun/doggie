@@ -41,7 +41,7 @@
 
   <a-assets>
     <a-asset-item id="carModel" src="./assets/click-4-buttons.glb"></a-asset-item>
-    <!--a-asset-item id="carModel" src="https://guide3.ivyro.net/etc/wooyundang.glb"></a-asset-item-->
+    <a-asset-item id="carModel1" src="./assets/heart-balloons-pastel-confetti.glb"></a-asset-item>
     <img id="groundTex" src="assets/textures/concrete.jpg">
   </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
@@ -88,7 +88,20 @@
     animation-mixer
     shadow="receive: false">
   </a-entity>
-
+  <a-entity
+    id="car"
+    gltf-model="#carModel1"
+    rotation="0 70 0"
+    scale="1 1 1"
+    xrextras-hold-drag="rise-height: 0"
+    xrextras-two-finger-rotate
+    absolute-pinch-scale
+    proximity
+    animation="property: position; from: 0 10 0; to: 0 0 0; dir: linear; delay: 4000; dur: 8000; loop: false"
+    animation__1="property: scale; from: 0 0 0; to: 5 5 5; dir: linear; delay: 4000; dur: 8000; loop: false"
+    animation-mixer
+    shadow="receive: false">
+  </a-entity>
   <a-plane
     id="ground"
     rotation="-90 0 0"
