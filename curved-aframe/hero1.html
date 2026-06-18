@@ -557,7 +557,15 @@
 
     const { video, modelId } = targetMap[targetName];
     video.addEventListener('ended', () => {
-      if (activeTarget !== targetName) return;
+      // ✅ 수정: "현재 인식 중인 타겟 == 이 영상의 타겟" 체크를 제거했습니다.
+      // 기존 코드는 영상이 끝나는 시점에 activeTarget(가장 최근에 인식된
+      // 타겟)이 본인과 다르면 그대로 return 해버렸습니다. 두 타겟을 연속으로
+      // 스캔하는 과정에서 트래킹이 잠깐 흔들리거나 다른 타겟이 한 프레임
+      // 다시 인식되면 activeTarget이 바뀌어 버려서, 두 번째 영상이 끝나도
+      // fadeInModel/enableModelTouch가 영원히 호출되지 않고 → 모델에
+      // cantap 클래스/클릭 리스너가 안 붙어서 → 터치해도 수집되지 않는
+      // 문제가 있었습니다. 각 영상은 자기 자신의 모델에만 연결되어 있으므로
+      // 다른 타겟이 현재 활성 상태여도 안전하게 모델을 보여주면 됩니다.
       const modelEntity = document.getElementById(modelId);
       if (modelEntity) {                                         // ✅ if 블록 정상화
         fadeInModel(modelEntity);
