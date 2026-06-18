@@ -224,8 +224,8 @@
     xrweb="disableWorldTracking: true">
     
     <a-assets>
-      <a-asset-item id="bean-glb" src="./assets/Models/compass-blue.glb"></a-asset-item>
-      <a-asset-item id="blades-glb" src="./assets/Models/blue-anchor.glb"></a-asset-item>
+      <a-asset-item id="bean-glb" src="./assets/Models/blue-compass-ani.glb"></a-asset-item>
+      <a-asset-item id="blades-glb" src="./assets/Models/blue-anchor-ani.glb"></a-asset-item>
       <!--a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
       <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
       <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item-->
@@ -389,8 +389,7 @@
       overlayImg: './assets/Media/hero-illust-s.svg',
       overlayOpacity: '0.5',                           // ✅ 쉼표 추가
       thumbImg: './assets/Media/compass-thumb.png',
-      itemName: '나침반',
-      glowColor: 0xffe066                               // ✅ 클릭 시 발광 테두리 색상 (골드)
+      itemName: '나침반'
     },
     'hero_target1': {
       video: document.getElementById('wine-label-video1'),
@@ -398,8 +397,7 @@
       overlayImg: './assets/Media/stone-illust-s.svg',
       overlayOpacity: '0.5',                           // ✅ 쉼표 추가
       thumbImg: './assets/Media/anchor-thumb.png',
-      itemName: '닻',
-      glowColor: 0x6fe3ff                               // ✅ 클릭 시 발광 테두리 색상 (시안)
+      itemName: '닻'
     }
   };
 
@@ -412,143 +410,6 @@
   function toggleCollection() {
     const panel = document.getElementById('collection-panel');
     panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
-  }
-
-  // ========================================================
-  // ✅ 수정: 3D 모델 클릭 시 발광(glow) 효과 — 복제(clone) 없는 방식
-  // ========================================================
-  // 이전 버전은 mesh.clone(true)로 모델을 복제해 만든 "아웃라인" 메시를
-  // 사용했습니다. 그런데 일반 Object3D.clone()은 리깅(스켈레톤/본)이
-  // 들어간 SkinnedMesh를 제대로 복제하지 못해서, 본 참조가 깨진 복제본이
-  // 화면에 보이지 않게 되는 경우가 있습니다(에러 없이 조용히 실패).
-  // 나침반 모델은 단순 메시라 우연히 잘 됐지만, 닻 모델이 리깅된 구조라면
-  // 바로 이 문제로 발광 효과만 빠졌을 가능성이 큽니다.
-  //
-  // 그래서 복제를 전혀 하지 않는 두 가지 방식을 함께 사용합니다:
-  //  1) 모델의 "실제" 재질에 직접 emissive(자체 발광) 색을 살짝 입혔다가
-  //     원래대로 되돌리는 방식 — glTF에서 불러온 표준 재질이면 거의 항상
-  //     emissive 속성을 갖고 있어 모델 구조와 무관하게 동작합니다.
-  //  2) 모델의 바운딩 크기에 맞춘 "헤일로(halo)" 스프라이트를 모델 중심에
-  //     겹쳐 띄우는 방식 — 캔버스로 그린 방사형 그라디언트 텍스처를 쓰는
-  //     2D 스프라이트라서, 본/스켈레톤/노멀 방향 등 모델 내부 구조와
-  //     완전히 무관하게 어떤 모델에도 항상 똑같이 보입니다. 결과적으로
-  //     emissive가 없는 모델이라도 최소한 이 헤일로는 항상 보입니다.
-  function createGlowTexture(colorHex) {
-    const size = 128;
-    const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    const r = (colorHex >> 16) & 255;
-    const g = (colorHex >> 8) & 255;
-    const b = colorHex & 255;
-    const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2);
-    gradient.addColorStop(0,   `rgba(${r},${g},${b},0.9)`);
-    gradient.addColorStop(0.4, `rgba(${r},${g},${b},0.45)`);
-    gradient.addColorStop(1,   `rgba(${r},${g},${b},0)`);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, size, size);
-    return canvas;
-  }
-
-  function playCollectGlow(modelEntity, glowColorHex) {
-    const THREE = window.THREE || (window.AFRAME && window.AFRAME.THREE);
-    const mesh = modelEntity.getObject3D('mesh');
-    if (!mesh || !THREE) return;
-
-    const glowColor = (typeof glowColorHex === 'number') ? glowColorHex : 0xffe066;
-
-    try {
-      // ---- 1) 모델의 실제 재질에 emissive 플래시 적용 (복제 없음) ----
-      const flashedMats = [];
-      mesh.traverse((node) => {
-        if (node.isMesh && node.material) {
-          const mats = Array.isArray(node.material) ? node.material : [node.material];
-          mats.forEach((mat) => {
-            if (mat && mat.emissive) {
-              flashedMats.push({
-                mat,
-                origEmissive: mat.emissive.clone(),
-                origIntensity: (mat.emissiveIntensity !== undefined) ? mat.emissiveIntensity : 1
-              });
-              mat.emissive.set(glowColor);
-            }
-          });
-        }
-      });
-
-      // ---- 2) 모델 바운딩 크기에 맞춘 헤일로 스프라이트 ----
-      const box = new THREE.Box3().setFromObject(mesh);
-      const worldCenter = box.getCenter(new THREE.Vector3());
-      const sizeVec = box.getSize(new THREE.Vector3());
-      const radius = Math.max(sizeVec.x, sizeVec.y, sizeVec.z, 0.2) * 0.5;
-
-      mesh.parent.updateMatrixWorld(true);
-      const localCenter = mesh.parent.worldToLocal(worldCenter.clone());
-
-      const texture = new THREE.CanvasTexture(createGlowTexture(glowColor));
-      const spriteMat = new THREE.SpriteMaterial({
-        map: texture,
-        transparent: true,
-        depthWrite: false,
-        depthTest: false,           // 모델 형태와 무관하게 항상 보이도록
-        blending: THREE.AdditiveBlending
-      });
-      const halo = new THREE.Sprite(spriteMat);
-      halo.position.copy(localCenter);
-      const baseHaloScale = radius * 3.2;
-      halo.scale.set(baseHaloScale * 0.35, baseHaloScale * 0.35, 1);
-      mesh.parent.add(halo);
-
-      // ---- 3) 펄스 + 페이드아웃 애니메이션 ----
-      const duration = 650; // ms
-      const start = performance.now();
-
-      function animateGlow(now) {
-        const t = Math.min((now - start) / duration, 1);
-        const expand = 0.35 + 0.85 * Math.sin(t * Math.PI * 0.5); // 천천히 확장
-        const fade = 1 - t;
-
-        halo.scale.set(baseHaloScale * expand, baseHaloScale * expand, 1);
-        spriteMat.opacity = fade;
-
-        flashedMats.forEach(({ mat }) => {
-          mat.emissiveIntensity = 1.5 * Math.sin(t * Math.PI); // 0 → 1.5 → 0
-        });
-
-        if (t < 1) {
-          requestAnimationFrame(animateGlow);
-        } else {
-          mesh.parent.remove(halo);
-          spriteMat.map.dispose();
-          spriteMat.dispose();
-          flashedMats.forEach(({ mat, origEmissive, origIntensity }) => {
-            mat.emissive.copy(origEmissive);
-            mat.emissiveIntensity = origIntensity;
-          });
-        }
-      }
-      requestAnimationFrame(animateGlow);
-    } catch (err) {
-      // 특정 모델 구조에서 예외가 나도 조용히 사라지지 않고 콘솔에 남도록 처리
-      console.error('[playCollectGlow] 발광 효과 처리 중 오류:', err);
-    }
-
-    // 보너스: 모델 자체에도 짧은 "팝" 스케일 펄스 (모델 구조와 무관하게 항상 동작)
-    try {
-      const currentScale = modelEntity.object3D.scale;
-      const popFrom = `${currentScale.x} ${currentScale.y} ${currentScale.z}`;
-      const popTo = `${currentScale.x * 1.15} ${currentScale.y * 1.15} ${currentScale.z * 1.15}`;
-      modelEntity.setAttribute('animation__collectpop',
-        `property: scale; from: ${popFrom}; to: ${popTo}; dur: 160; dir: alternate; loop: 1; easing: easeOutQuad`);
-      setTimeout(() => {
-        if (modelEntity.hasAttribute('animation__collectpop')) {
-          modelEntity.removeAttribute('animation__collectpop');
-        }
-      }, 400);
-    } catch (err) {
-      console.error('[playCollectGlow] 스케일 펄스 처리 중 오류:', err);
-    }
   }
 
   function collectItem(targetName) {
@@ -577,10 +438,6 @@
   function enableModelTouch(modelEntity, targetName) {
     modelEntity.classList.add('cantap');
     modelEntity.addEventListener('click', () => {
-      // 아직 수집되지 않은 경우에만 발광 효과 재생 (중복 클릭 시 효과 반복 방지)
-      if (!collected[targetName]) {
-        playCollectGlow(modelEntity, targetMap[targetName].glowColor);
-      }
       collectItem(targetName);
     });
   }
@@ -620,15 +477,7 @@
 
     const { video, modelId } = targetMap[targetName];
     video.addEventListener('ended', () => {
-      // ✅ 수정: "현재 인식 중인 타겟 == 이 영상의 타겟" 체크를 제거했습니다.
-      // 기존 코드는 영상이 끝나는 시점에 activeTarget(가장 최근에 인식된
-      // 타겟)이 본인과 다르면 그대로 return 해버렸습니다. 두 타겟을 연속으로
-      // 스캔하는 과정에서 트래킹이 잠깐 흔들리거나 다른 타겟이 한 프레임
-      // 다시 인식되면 activeTarget이 바뀌어 버려서, 두 번째 영상이 끝나도
-      // fadeInModel/enableModelTouch가 영원히 호출되지 않고 → 모델에
-      // cantap 클래스/클릭 리스너가 안 붙어서 → 터치해도 수집되지 않는
-      // 문제가 있었습니다. 각 영상은 자기 자신의 모델에만 연결되어 있으므로
-      // 다른 타겟이 현재 활성 상태여도 안전하게 모델을 보여주면 됩니다.
+      if (activeTarget !== targetName) return;
       const modelEntity = document.getElementById(modelId);
       if (modelEntity) {                                         // ✅ if 블록 정상화
         fadeInModel(modelEntity);
