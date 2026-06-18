@@ -40,11 +40,11 @@
     scale: absolute">
 
   <a-assets>
-    <a-asset-item id="carModel" src="./assets/click-4-buttons.glb"></a-asset-item>
-    <a-asset-item id="carModel1" src="./assets/heart-balloons-pastel-confetti.glb"></a-asset-item>
-    <a-asset-item id="carModel1" src="./assets/heart-balloon-color-confetti.glb"></a-asset-item>
-    <a-asset-item id="carModel1" src="./assets/star-balloon-confetti.glb"></a-asset-item>
-    <a-asset-item id="carModel1" src="./assets/flower-confetti.glb"></a-asset-item>
+    <a-asset-item id="btn4" src="./assets/click-4-buttons.glb"></a-asset-item>
+    <a-asset-item id="confetti1" src="./assets/heart-balloons-pastel-confetti.glb"></a-asset-item>
+    <a-asset-item id="confetti2" src="./assets/heart-balloon-color-confetti.glb"></a-asset-item>
+    <a-asset-item id="confetti3" src="./assets/star-balloon-confetti.glb"></a-asset-item>
+    <a-asset-item id="confetti4" src="./assets/flower-confetti.glb"></a-asset-item>
     <img id="groundTex" src="assets/textures/concrete.jpg">
   </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
@@ -79,7 +79,7 @@
 
   <a-entity
     id="car"
-    gltf-model="#carModel"
+    gltf-model="#btn4"
     rotation="0 70 0"
     scale="1 1 1"
     xrextras-hold-drag="rise-height: 0"
@@ -91,7 +91,7 @@
   </a-entity>
   <a-entity
     id="car"
-    gltf-model="#carModel1"
+    gltf-model="#confetti1"
     rotation="0 70 0"
     scale="1 1 1"
     xrextras-hold-drag="rise-height: 0"
