@@ -73,10 +73,15 @@
 
   <a-light xr-light="max: 1" type="ambient"></a-light>
 
-  <!-- 키패드 모델: keypad-controller 가 버튼 클릭 감지 및 Take01~04 재생 -->
+  <!-- ============================================================
+       키패드 모델 (btn4)
+       - keypad-controller: 애니메이션 믹서/클립 관리 + playTake/triggerConfetti 실행만 담당
+       - class="cantap" 을 더 이상 여기에 두지 않음. 모델 표면(merge된
+         하나의 메시)을 직접 클릭해도 "어느 버튼인지" A-Frame이 구분할
+         방법이 없기 때문에, 클릭 감지는 아래 4개의 개별 히트박스로 분리.
+       ============================================================ -->
   <a-entity
     id="keypad"
-    class="cantap"
     gltf-model="#btn4-asset"
     rotation="0 70 0"
     scale="1 1 1"
@@ -86,6 +91,56 @@
     absolute-pinch-scale
     proximity
     shadow="receive: false">
+
+    <!-- ==========================================================
+         버튼별 개별 클릭 히트박스 (4개)
+         - keypad의 자식 엔티티이므로 keypad가 회전/이동/스케일 되어도
+           항상 같은 상대 위치를 유지합니다.
+         - keypad-button 컴포넌트가 idx(0~3)를 받아서 keypad-controller의
+           playTake()/triggerConfetti() 를 직접 호출합니다.
+
+         ★★★ 위치/크기 조정 필요 ★★★
+         아래 position/width/height/depth 값은 예시(2x2 격자) 입니다.
+         실제 버튼 위치에 맞게 직접 조정해야 합니다.
+
+         [조정 방법]
+         1. 아래 material의 opacity를 0.35 정도로 올리고 색을 다르게 둔 채
+            브라우저(또는 8th Wall 미리보기)에서 실제로 확인합니다.
+         2. 4개의 반투명 박스가 실제 버튼 4개 위치에 겹쳐 보이도록
+            position(x y z) / width / height / depth 값을 하나씩 바꿔가며 맞춥니다.
+            (keypad 자체의 rotation="0 70 0" 때문에, 로컬 좌표축이
+             화면상의 좌/우와 정확히 일치하지 않을 수 있으니 천천히 조정하세요.)
+         3. 정렬이 끝나면 opacity를 0으로 다시 낮춰 완전히 안 보이게 합니다.
+            (opacity: 0 이어도 raycaster 클릭 감지는 정상 동작합니다.)
+       ========================================================== -->
+    <a-box class="cantap"
+      keypad-button="idx: 0"
+      position="-0.15 0.05 0.05"
+      width="0.12" height="0.12" depth="0.08"
+      material="opacity: 0.35; color: #ff4d4d; transparent: true; shader: flat">
+    </a-box>
+
+    <a-box class="cantap"
+      keypad-button="idx: 1"
+      position="0.15 0.05 0.05"
+      width="0.12" height="0.12" depth="0.08"
+      material="opacity: 0.35; color: #4dff88; transparent: true; shader: flat">
+    </a-box>
+
+    <a-box class="cantap"
+      keypad-button="idx: 2"
+      position="-0.15 -0.15 0.05"
+      width="0.12" height="0.12" depth="0.08"
+      material="opacity: 0.35; color: #4d88ff; transparent: true; shader: flat">
+    </a-box>
+
+    <a-box class="cantap"
+      keypad-button="idx: 3"
+      position="0.15 -0.15 0.05"
+      width="0.12" height="0.12" depth="0.08"
+      material="opacity: 0.35; color: #ffd24d; transparent: true; shader: flat">
+    </a-box>
+
   </a-entity>
 
   <!-- 컨페티 엔티티 4개 (초기 숨김 / 버튼 클릭 시 1회 재생 후 자동 숨김) -->
@@ -113,18 +168,8 @@
 </a-scene>
 
 <!-- ================================================================
-  컴포넌트 등록 스크립트
-  ----------------------------------------------------------------
-  ★ 위치: </a-scene> 뒤, </body> 앞
-  ★ 이유: 8th Wall 은 xr.js 가 async 로드된 뒤 'xrloaded' 이벤트를
-          발생시키고, 그 시점까지 A-Frame 씬 초기화를 지연시킵니다.
-          따라서 xrloaded 콜백 안에서 컴포넌트를 등록해도
-          <a-scene> 파싱 전에 등록이 완료됩니다.
-          반대로 <head> 안 인라인 스크립트는 xr.js 가 아직 로드되지
-          않아 AFRAME 자체가 정의되지 않은 상태일 수 있어 에러가 납니다.
-  ----------------------------------------------------------------
-  window.XR8 이미 있으면 즉시 등록,
-  없으면 xrloaded 이벤트 때 등록 — 8th Wall 공식 권장 패턴.
+  컴포넌트 등록 스크립트 (</a-scene> 뒤, </body> 앞에 위치해야 함 — 8th Wall 의
+  xrloaded 패턴, 이전 수정사항 참고)
 ================================================================ -->
 <script>
 (function () {
@@ -133,7 +178,6 @@
     // ============================================================
     // [컴포넌트 1] confetti-once
     // 역할: GLB 모델의 첫 번째 애니메이션을 1회 재생 후 자동 숨김.
-    //       keypad-controller 가 comp.playOnce() 로 직접 호출.
     // ============================================================
     AFRAME.registerComponent('confetti-once', {
       init () {
@@ -156,14 +200,12 @@
           action.clampWhenFinished = true;
           this._action = action;
 
-          // 재생 완료 → 숨김
           this.mixer.addEventListener('finished', () => {
             this.el.setAttribute('visible', false);
           });
         });
       },
 
-      // keypad-controller 에서 호출
       playOnce () {
         this.el.setAttribute('visible', true);
         if (this._action) this._action.reset().play();
@@ -176,34 +218,17 @@
 
     // ============================================================
     // [컴포넌트 2] keypad-controller
-    // 역할: btn4 모델의 버튼 클릭 → Take0N 재생 + 해당 컨페티 호출.
-    //
-    // [버튼 감지]
-    //  클릭된 Three.js 메시와 부모 계층을 순회하며
-    //  이름 안의 숫자(1~4)로 버튼 인덱스를 자동 결정합니다.
-    //
-    //  ★ 자동 감지가 안 될 때:
-    //    콘솔의 "[keypad] mesh :" 로그에서 실제 메시명을 확인 후
-    //    아래 BUTTON_NAME_MAP 에 직접 매핑하세요.
-    //    예) BUTTON_NAME_MAP: { 'Btn_A': 0, 'Btn_B': 1, ... }
+    // 역할: btn4 모델의 애니메이션 믹서/클립을 관리하고,
+    //       playTake(n) / triggerConfetti(idx) 를 외부(keypad-button)
+    //       에서 호출할 수 있도록 공개 메서드로 제공.
+    //       ※ 더 이상 자체적으로 클릭을 감지하지 않습니다.
+    //         (클릭 감지는 자식 히트박스의 keypad-button 컴포넌트가 담당)
     // ============================================================
     AFRAME.registerComponent('keypad-controller', {
-
-      // 직접 매핑 테이블 (자동 감지 성공 시 미사용)
-      BUTTON_NAME_MAP: {
-        // 'MeshName': 0,  // Take01 + confetti1
-        // 'MeshName': 1,  // Take02 + confetti2
-        // 'MeshName': 2,  // Take03 + confetti3
-        // 'MeshName': 3,  // Take04 + confetti4
-      },
-
       init () {
         this.mixer     = null;
         this.clips     = {};
         this.isPlaying = false;
-        this._fallback = -1;
-
-        this.el.classList.add('cantap');
 
         this.el.addEventListener('model-loaded', (evt) => {
           const THREE = AFRAME.THREE;
@@ -215,37 +240,39 @@
           console.log('[keypad] 애니메이션 클립:', Object.keys(this.clips));
           model.traverse(n => { if (n.isMesh) console.log('[keypad] mesh :', n.name); });
         });
-
-        this.el.addEventListener('click', (evt) => {
-          const obj = evt.detail.intersection && evt.detail.intersection.object;
-          if (!obj) return;
-          const idx = this._detectButtonIndex(obj);
-          this._playTake(idx + 1);
-          this._triggerConfetti(idx);
-        });
       },
 
-      _detectButtonIndex (obj) {
-        let cur = obj;
-        while (cur) {
-          const name = cur.name || '';
-          if (name in this.BUTTON_NAME_MAP) return this.BUTTON_NAME_MAP[name];
-          const m = name.match(/([1-4])\D*$/);
-          if (m) return parseInt(m[1]) - 1;
-          cur = cur.parent;
-        }
-        // 자동 감지 실패 시 순환 폴백
-        console.warn('[keypad] 버튼 메시 감지 실패. 콘솔의 "mesh :" 로그를 보고 BUTTON_NAME_MAP 을 채워주세요.');
-        this._fallback = (this._fallback + 1) % 4;
-        return this._fallback;
+      // -----------------------------------------------------------
+      // 버튼 인덱스(1~4) → 실제 애니메이션 클립 찾기
+      // Take01/Take 01/Take_01/take1 등 표기 차이를 흡수합니다.
+      // -----------------------------------------------------------
+      _resolveClip (n) {
+        const keys = Object.keys(this.clips);
+        if (keys.length === 0) return null;
+
+        const candidates = [`take0${n}`, `take${n}`];
+        let found = keys.find(k => candidates.includes(k.toLowerCase().replace(/[\s_]/g, '')));
+        if (found) return this.clips[found];
+
+        const numPattern = new RegExp(`(^|[^0-9])0?${n}([^0-9]|$)`);
+        found = keys.find(k => numPattern.test(k));
+        if (found) return this.clips[found];
+
+        if (keys.length === 4) return this.clips[keys[n - 1]];
+
+        return null;
       },
 
-      _playTake (n) {
+      // 외부(keypad-button)에서 호출하는 공개 메서드
+      playTake (n) {
         if (!this.mixer || this.isPlaying) return;
-        const clipName = `Take0${n}`;
-        const clip     = this.clips[clipName];
+
+        const clip = this._resolveClip(n);
         if (!clip) {
-          console.warn(`[keypad] 클립 없음: "${clipName}". 실제 클립명을 콘솔에서 확인하세요.`);
+          console.warn(
+            `[keypad] Take0${n}에 대응하는 클립을 찾지 못했습니다.`,
+            '실제 클립명:', Object.keys(this.clips)
+          );
           return;
         }
         this.isPlaying = true;
@@ -261,7 +288,8 @@
         this.mixer.addEventListener('finished', onFinished);
       },
 
-      _triggerConfetti (idx) {
+      // 외부(keypad-button)에서 호출하는 공개 메서드
+      triggerConfetti (idx) {
         const ids  = ['confetti1-el', 'confetti2-el', 'confetti3-el', 'confetti4-el'];
         const el   = document.getElementById(ids[idx]);
         if (!el) return;
@@ -277,9 +305,32 @@
         if (this.mixer) this.mixer.update(dt / 1000);
       }
     });
+
+    // ============================================================
+    // [컴포넌트 3] keypad-button  (신규)
+    // 역할: 버튼별 개별 히트박스에 부착. 자신의 idx 를 알고 있으며,
+    //       클릭되면 부모(#keypad)의 keypad-controller를 찾아
+    //       해당 idx에 맞는 playTake()/triggerConfetti() 를 호출합니다.
+    //       모델 내부의 mesh 이름/구조와 완전히 무관하게 동작합니다.
+    // ============================================================
+    AFRAME.registerComponent('keypad-button', {
+      schema: { idx: { type: 'int', default: 0 } },
+
+      init () {
+        this.el.addEventListener('click', () => {
+          const keypadEl = this.el.parentEl;
+          const ctrl = keypadEl && keypadEl.components['keypad-controller'];
+          if (!ctrl) {
+            console.warn('[keypad-button] 부모에서 keypad-controller를 찾지 못했습니다.');
+            return;
+          }
+          ctrl.playTake(this.data.idx + 1);   // Take01~04
+          ctrl.triggerConfetti(this.data.idx); // confetti1-el~4-el
+        });
+      }
+    });
   }
 
-  // 8th Wall 공식 패턴: XR8 이미 로드됐으면 즉시, 아니면 xrloaded 때 실행
   window.XR8
     ? registerComponents()
     : window.addEventListener('xrloaded', registerComponents);
