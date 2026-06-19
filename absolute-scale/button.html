@@ -14,6 +14,31 @@
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
   <script>var vConsole = new window.VConsole();</script>
+  <script>
+  // ============================================================
+    // [신규 컴포넌트] fix-metal-material
+    // 역할: GLB 모델의 금속 재질을 조절하여 AR 환경에서 색이 잘 보이도록 수정
+    // ============================================================
+    AFRAME.registerComponent('fix-metal-material', {
+      init: function () {
+        this.el.addEventListener('model-loaded', (evt) => {
+          const model = evt.detail.model;
+          model.traverse((node) => {
+            if (node.isMesh && node.material) {
+              // 금속성을 약간 낮추고(거울 효과 감소), 거칠기를 높여 기본 빛을 잘 받게 만듭니다.
+              node.material.metalness = 0.3; // 1.0(완전 금속) -> 0.3으로 낮춤
+              node.material.roughness = 0.5; // 0.0(완전 매끄러움) -> 0.5로 높임
+              
+              // (선택) 색상이 너무 어두우면 텍스처 자체의 밝기를 약간 올려줍니다.
+              // node.material.color.setHex(0xffffff); 
+
+              node.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    });
+  </script>
   <link rel="stylesheet" href="./index.css">
 </head>
 
@@ -97,9 +122,9 @@
 
   </a-entity>
 
-  <a-entity id="confetti1-el" gltf-model="#confetti1-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
-  <a-entity id="confetti2-el" gltf-model="#confetti2-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
-  <a-entity id="confetti3-el" gltf-model="#confetti3-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
+  <a-entity id="confetti1-el" gltf-model="#confetti1-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
+  <a-entity id="confetti2-el" gltf-model="#confetti2-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
+  <a-entity id="confetti3-el" gltf-model="#confetti3-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
   <a-entity id="confetti4-el" gltf-model="#confetti4-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
 
   <a-plane id="ground" rotation="-90 0 0" width="100" height="100" material="shader: shadow; opacity: 0.5;" shadow></a-plane>
