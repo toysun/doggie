@@ -29,14 +29,7 @@
   xrextras-runtime-error
   gltf-model="dracoDecoderPath: https://cdn.8thwall.com/web/aframe/draco-decoder/"
   renderer="colorManagement: true"
-  xrweb="allowedDevices: any;
-    defaultEnvironmentFogIntensity: 0.5;
-    defaultEnvironmentFloorTexture: #groundTex;
-    defaultEnvironmentFloorColor: #FFF;
-    defaultEnvironmentSkyBottomColor: #B4C4CC;
-    defaultEnvironmentSkyTopColor: #5ac8fa;
-    defaultEnvironmentSkyGradientStrength: 0.5;
-    scale: absolute">
+  xrweb="allowedDevices: any; defaultEnvironmentFogIntensity: 0.5; defaultEnvironmentFloorTexture: #groundTex; defaultEnvironmentFloorColor: #FFF; defaultEnvironmentSkyBottomColor: #B4C4CC; defaultEnvironmentSkyTopColor: #5ac8fa; defaultEnvironmentSkyGradientStrength: 0.5; scale: absolute">
 
   <a-assets>
     <a-asset-item id="btn4-asset"      src="./assets/click-4-buttons.glb"></a-asset-item>
@@ -59,29 +52,13 @@
 
   <a-entity
     xr-light
-    light="type: directional;
-      castShadow: true;
-      shadowMapHeight: 2048;
-      shadowMapWidth:  2048;
-      shadowCameraTop: 20;
-      shadowCameraBottom: -20;
-      shadowCameraLeft: -20;
-      shadowCameraRight: 20;
-      target: #keypad;
-      shadowRadius: 3"
+    light="type: directional; castShadow: true; shadowMapHeight: 2048; shadowMapWidth:  2048; shadowCameraTop: 20; shadowCameraBottom: -20; shadowCameraLeft: -20; shadowCameraRight: 20; target: #keypad; shadowRadius: 3"
     xrextras-attach="target: keypad; offset: 0 15 0;"
     shadow>
   </a-entity>
 
   <a-light xr-light="max: 1" type="ambient"></a-light>
 
-  <!-- ============================================================
-       키패드 모델 (btn4)
-       - keypad-controller: 애니메이션 믹서/클립 관리 + playTake/triggerConfetti 실행만 담당
-       - class="cantap" 을 더 이상 여기에 두지 않음. 모델 표면(merge된
-         하나의 메시)을 직접 클릭해도 "어느 버튼인지" A-Frame이 구분할
-         방법이 없기 때문에, 클릭 감지는 아래 4개의 개별 히트박스로 분리.
-       ============================================================ -->
   <a-entity
     id="keypad"
     gltf-model="#btn4-asset"
@@ -94,93 +71,27 @@
     proximity
     shadow="receive: false">
 
-    <!-- ==========================================================
-         버튼별 개별 클릭 히트박스 (4개)
-         - keypad의 자식 엔티티이므로 keypad가 회전/이동/스케일 되어도
-           항상 같은 상대 위치를 유지합니다.
-         - keypad-button 컴포넌트가 idx(0~3)를 받아서 keypad-controller의
-           playTake()/triggerConfetti() 를 직접 호출합니다.
-
-         ★★★ 위치/크기 조정 필요 ★★★
-         아래 position/width/height/depth 값은 예시(2x2 격자) 입니다.
-         실제 버튼 위치에 맞게 직접 조정해야 합니다.
-
-         [조정 방법]
-         1. 아래 material의 opacity를 0.35 정도로 올리고 색을 다르게 둔 채
-            브라우저(또는 8th Wall 미리보기)에서 실제로 확인합니다.
-         2. 4개의 반투명 박스가 실제 버튼 4개 위치에 겹쳐 보이도록
-            position(x y z) / width / height / depth 값을 하나씩 바꿔가며 맞춥니다.
-            (keypad 자체의 rotation="0 70 0" 때문에, 로컬 좌표축이
-             화면상의 좌/우와 정확히 일치하지 않을 수 있으니 천천히 조정하세요.)
-         3. 정렬이 끝나면 opacity를 0으로 다시 낮춰 완전히 안 보이게 합니다.
-            (opacity: 0 이어도 raycaster 클릭 감지는 정상 동작합니다.)
-       ========================================================== -->
-    <a-box class="cantap"
-      keypad-button="idx: 0"
-      position="-0.4 0.05 0.05"
-      width="1.2" height="1.2" depth="0.8"
-      material="opacity: 0.35; color: #ff4d4d; transparent: true; shader: flat">
-    </a-box>
-
-    <a-box class="cantap"
-      keypad-button="idx: 1"
-      position="0.4 0.05 0.05"
-      width="1.2" height="1.2" depth="0.8"
-      material="opacity: 0.35; color: #4dff88; transparent: true; shader: flat">
-    </a-box>
-
-    <a-box class="cantap"
-      keypad-button="idx: 2"
-      position="-0.4 -0.15 0.05"
-      width="1.2" height="1.2" depth="0.8"
-      material="opacity: 0.35; color: #4d88ff; transparent: true; shader: flat">
-    </a-box>
-
-    <a-box class="cantap"
-      keypad-button="idx: 3"
-      position="0.4 -0.15 0.05"
-      width="1.2" height="1.2" depth="0.8"
-      material="opacity: 0.35; color: #ffd24d; transparent: true; shader: flat">
-    </a-box>
+    <a-box class="cantap" keypad-button="idx: 0" position="-0.4 0.05 0.05" width="1.2" height="1.2" depth="0.8" material="opacity: 0; transparent: true; shader: flat"></a-box>
+    <a-box class="cantap" keypad-button="idx: 1" position="0.4 0.05 0.05" width="1.2" height="1.2" depth="0.8" material="opacity: 0; transparent: true; shader: flat"></a-box>
+    <a-box class="cantap" keypad-button="idx: 2" position="-0.4 -0.15 0.05" width="1.2" height="1.2" depth="0.8" material="opacity: 0; transparent: true; shader: flat"></a-box>
+    <a-box class="cantap" keypad-button="idx: 3" position="0.4 -0.15 0.05" width="1.2" height="1.2" depth="0.8" material="opacity: 0; transparent: true; shader: flat"></a-box>
 
   </a-entity>
 
-  <!-- 컨페티 엔티티 4개 (초기 숨김 / 버튼 클릭 시 1회 재생 후 자동 숨김) -->
-  <a-entity id="confetti1-el" gltf-model="#confetti1-asset"
-    position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
+  <a-entity id="confetti1-el" gltf-model="#confetti1-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
+  <a-entity id="confetti2-el" gltf-model="#confetti2-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
+  <a-entity id="confetti3-el" gltf-model="#confetti3-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
+  <a-entity id="confetti4-el" gltf-model="#confetti4-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
 
-  <a-entity id="confetti2-el" gltf-model="#confetti2-asset"
-    position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
-
-  <a-entity id="confetti3-el" gltf-model="#confetti3-asset"
-    position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
-
-  <a-entity id="confetti4-el" gltf-model="#confetti4-asset"
-    position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
-
-  <a-plane
-    id="ground"
-    rotation="-90 0 0"
-    width="100"
-    height="100"
-    material="shader: shadow; opacity: 0.5;"
-    shadow>
-  </a-plane>
+  <a-plane id="ground" rotation="-90 0 0" width="100" height="100" material="shader: shadow; opacity: 0.5;" shadow></a-plane>
 
 </a-scene>
 
-<!-- ================================================================
-  컴포넌트 등록 스크립트 (</a-scene> 뒤, </body> 앞에 위치해야 함 — 8th Wall 의
-  xrloaded 패턴, 이전 수정사항 참고)
-================================================================ -->
 <script>
 (function () {
   function registerComponents () {
 
-    // ============================================================
-    // [컴포넌트 1] confetti-once
-    // 역할: GLB 모델의 첫 번째 애니메이션을 1회 재생 후 자동 숨김.
-    // ============================================================
+    // 1. 컨페티 1회 재생 및 자동 숨김 컴포넌트
     AFRAME.registerComponent('confetti-once', {
       init () {
         this.mixer   = null;
@@ -190,41 +101,33 @@
           const THREE = AFRAME.THREE;
           const model = evt.detail.model;
 
-          if (!model.animations || model.animations.length === 0) {
-            console.warn('[confetti-once] 애니메이션 없음:', this.el.id);
-            return;
-          }
+          if (!model.animations || model.animations.length === 0) return;
 
           this.mixer = new THREE.AnimationMixer(model);
-
           const action = this.mixer.clipAction(model.animations[0]);
           action.setLoop(THREE.LoopOnce, 1);
           action.clampWhenFinished = true;
           this._action = action;
-
+          
           this.mixer.addEventListener('finished', () => {
             this.el.setAttribute('visible', false);
           });
         });
       },
-
       playOnce () {
         this.el.setAttribute('visible', true);
         if (this._action) this._action.reset().play();
       },
-
       tick (t, dt) {
         if (this.mixer) this.mixer.update(dt / 1000);
       }
     });
 
-  // ============================================================
-    // [컴포넌트 2] keypad-controller (수정된 버전)
-    // ============================================================
+    // 2. 키패드 모델 제어 컴포넌트 (애니메이션 버그 수정판)
     AFRAME.registerComponent('keypad-controller', {
       init () {
         this.mixer   = null;
-        this.actions = {}; // 기존 clips 대신 재생할 수 있는 Action 자체를 저장합니다.
+        this.actions = {}; // Action 자체를 캐싱
 
         this.el.addEventListener('model-loaded', (evt) => {
           const THREE = AFRAME.THREE;
@@ -232,19 +135,16 @@
 
           this.mixer = new THREE.AnimationMixer(model);
           
-          // ★ 수정 포인트 1: 모델 로드 시점에 애니메이션 Action을 미리 생성하여 캐싱합니다.
+          // 모델 로드 시점에 애니메이션 Action 생성 및 캐싱
           (model.animations || []).forEach(c => {
             const action = this.mixer.clipAction(c);
             action.setLoop(THREE.LoopOnce, 1);
             action.clampWhenFinished = true;
             this.actions[c.name] = action;
           });
-
-          console.log('[keypad] 로드된 애니메이션 액션:', Object.keys(this.actions));
         });
       },
 
-      // 버튼 인덱스(1~4) → 실제 애니메이션 액션 찾기
       _resolveAction (n) {
         const keys = Object.keys(this.actions);
         if (keys.length === 0) return null;
@@ -261,38 +161,25 @@
         return null;
       },
 
-      // 외부(keypad-button)에서 호출하는 공개 메서드
       playTake (n) {
         if (!this.mixer) return;
-        
         const action = this._resolveAction(n);
-        if (!action) {
-          console.warn(`[keypad] Take0${n} 애니메이션을 찾지 못했습니다. (현재 목록: ${Object.keys(this.actions)})`);
-          return;
-        }
+        if (!action) return;
 
-        // ★ 수정 포인트 2: 불안정한 isPlaying 잠금 로직을 제거하고, 
-        // 기존에 재생 중이던 다른 버튼 애니메이션이 있다면 강제로 정지(stop)시킵니다.
-        // 이렇게 해야 연속 클릭 시 애니메이션 꼬임 현상이 발생하지 않습니다.
+        // 다른 애니메이션이 재생 중이라면 강제로 정지 (가중치 꼬임 방지)
         Object.values(this.actions).forEach(a => a.stop());
-
-        // ★ 수정 포인트 3: 가중치(weight)를 1로 고정하여 확실하게 보이도록 재생합니다.
+        
         action.reset();
         action.weight = 1; 
         action.play();
       },
 
-      // 외부(keypad-button)에서 호출하는 공개 메서드
       triggerConfetti (idx) {
         const ids  = ['confetti1-el', 'confetti2-el', 'confetti3-el', 'confetti4-el'];
         const el   = document.getElementById(ids[idx]);
         if (!el) return;
         const comp = el.components['confetti-once'];
-        if (comp) {
-          comp.playOnce();
-        } else {
-          console.warn('[keypad] confetti-once 컴포넌트 없음:', ids[idx]);
-        }
+        if (comp) comp.playOnce();
       },
 
       tick (t, dt) {
@@ -300,31 +187,23 @@
       }
     });
 
-    // ============================================================
-    // [컴포넌트 3] keypad-button  (신규)
-    // 역할: 버튼별 개별 히트박스에 부착. 자신의 idx 를 알고 있으며,
-    //       클릭되면 부모(#keypad)의 keypad-controller를 찾아
-    //       해당 idx에 맞는 playTake()/triggerConfetti() 를 호출합니다.
-    //       모델 내부의 mesh 이름/구조와 완전히 무관하게 동작합니다.
-    // ============================================================
+    // 3. 개별 버튼 히트박스 클릭 이벤트 컴포넌트
     AFRAME.registerComponent('keypad-button', {
       schema: { idx: { type: 'int', default: 0 } },
-
       init () {
         this.el.addEventListener('click', () => {
           const keypadEl = this.el.parentEl;
           const ctrl = keypadEl && keypadEl.components['keypad-controller'];
-          if (!ctrl) {
-            console.warn('[keypad-button] 부모에서 keypad-controller를 찾지 못했습니다.');
-            return;
-          }
-          ctrl.playTake(this.data.idx + 1);   // Take01~04
-          ctrl.triggerConfetti(this.data.idx); // confetti1-el~4-el
+          if (!ctrl) return;
+          
+          ctrl.playTake(this.data.idx + 1);    // 버튼 애니메이션 실행
+          ctrl.triggerConfetti(this.data.idx); // 해당 위치 컨페티 실행
         });
       }
     });
   }
 
+  // 8th Wall 환경 로드 확인 후 컴포넌트 등록
   window.XR8
     ? registerComponents()
     : window.addEventListener('xrloaded', registerComponents);
