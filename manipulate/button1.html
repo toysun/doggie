@@ -7,38 +7,11 @@
     <script src="./../xr_st/8frame-1.3.0.min.js"></script>
     <script src="./../xr_st/xrextras.js"></script>
     <script src='./../xr_st/landing-page.js'></script>
-     <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
-     <script src="./../xr_st/coaching-overlay.js"></script>
-     <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
-     <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
-     <!--script>var vConsole = new window.VConsole();</script-->
-      <script>
-  // ============================================================
-    // [신규 컴포넌트] fix-metal-material
-    // 역할: GLB 모델의 금속 재질을 조절하여 AR 환경에서 색이 잘 보이도록 수정
-    // ============================================================
-    AFRAME.registerComponent('fix-metal-material', {
-      init: function () {
-        this.el.addEventListener('model-loaded', (evt) => {
-          const model = evt.detail.model;
-          model.traverse((node) => {
-            if (node.isMesh && node.material) {
-              // 금속성을 약간 낮추고(거울 효과 감소), 거칠기를 높여 기본 빛을 잘 받게 만듭니다.
-              node.material.metalness = 0.3; // 1.0(완전 금속) -> 0.3으로 낮춤
-              node.material.roughness = 0.5; // 0.0(완전 매끄러움) -> 0.5로 높임
-              
-              // (선택) 색상이 너무 어두우면 텍스처 자체의 밝기를 약간 올려줍니다.
-              // node.material.color.setHex(0xffffff); 
-
-              node.material.needsUpdate = true;
-            }
-          });
-        });
-      }
-    });
-  </script>
-  
-  </head>
+    <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+    <script src="./../xr_st/coaching-overlay.js"></script>
+    <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+    <script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
+    </head>
 
   <body>
     <a-scene
@@ -49,19 +22,17 @@
       renderer="colorManagement: true"
       xrweb="allowedDevices: any">
 
-      <!-- We can define assets here to be loaded when A-Frame initializes -->
       <a-assets>
-    <a-asset-item id="btn4-asset"      src="./click-4-buttons.glb"></a-asset-item>
-    <a-asset-item id="confetti1-asset" src="./heart-balloons-pastel-confetti.glb"></a-asset-item>
-    <a-asset-item id="confetti2-asset" src="./heart-balloon-color-confetti.glb"></a-asset-item>
-    <a-asset-item id="confetti3-asset" src="./star-balloon-confetti.glb"></a-asset-item>
-    <a-asset-item id="confetti4-asset" src="./flower-confetti.glb"></a-asset-item>
+        <a-asset-item id="btn4-asset"      src="./click-4-buttons.glb"></a-asset-item>
+        <a-asset-item id="confetti1-asset" src="./heart-balloons-pastel-confetti.glb"></a-asset-item>
+        <a-asset-item id="confetti2-asset" src="./heart-balloon-color-confetti.glb"></a-asset-item>
+        <a-asset-item id="confetti3-asset" src="./star-balloon-confetti.glb"></a-asset-item>
+        <a-asset-item id="confetti4-asset" src="./flower-confetti.glb"></a-asset-item>
       </a-assets>
 
-    <xrextras-capture-button></xrextras-capture-button>
-    <xrextras-capture-preview></xrextras-capture-preview>
+      <xrextras-capture-button></xrextras-capture-button>
+      <xrextras-capture-preview></xrextras-capture-preview>
 
-      <!-- The raycaster will emit mouse events on scene objects specified with the cantap class -->
       <a-camera
         id="camera"
         position="0 16 24"
@@ -77,8 +48,8 @@
           shadowMapHeight:2048;
           shadowMapWidth:2048;
           shadowCameraTop: 10;
-          target: #model;"
-        xrextras-attach="target: model; offset: 1 15 3;"
+          target: #keypad;"
+        xrextras-attach="target: keypad; offset: 1 15 3;"
         shadow>
       </a-entity>
 
@@ -87,7 +58,6 @@
       <a-entity
         id="keypad"
         gltf-model="#btn4-asset"
-        class="cantap"
         keypad-controller
         xrextras-hold-drag
         xrextras-two-finger-rotate
@@ -95,48 +65,40 @@
         scale="5 5 5"
         rotation="0 -70 0"
         shadow="receive: false">
-      <a-box class="cantap" keypad-button="idx: 0" 
-      position="-0.48 0.4 -0.48" 
-      width="0.8" height="0.8" depth="0.8" 
-      material="opacity: 0.4; color: #ff4d4d; transparent: true; shader: flat">
-    </a-box>
+        
+        <a-box class="cantap" keypad-button="idx: 0" position="-0.48 0.4 -0.48" width="0.8" height="0.8" depth="0.8" material="opacity: 0.4; color: #ff4d4d; transparent: true; shader: flat"></a-box>
+        <a-box class="cantap" keypad-button="idx: 1" position="0.48 0.4 -0.48" width="0.8" height="0.8" depth="0.8" material="opacity: 0.4; color: #4dff88; transparent: true; shader: flat"></a-box>
+        <a-box class="cantap" keypad-button="idx: 2" position="-0.48 0.4 0.48" width="0.8" height="0.8" depth="0.8" material="opacity: 0.4; color: #4d88ff; transparent: true; shader: flat"></a-box>
+        <a-box class="cantap" keypad-button="idx: 3" position="0.48 0.4 0.48" width="0.8" height="0.8" depth="0.8" material="opacity: 0.4; color: #ffd24d; transparent: true; shader: flat"></a-box>
+      </a-entity>
 
-    <a-box class="cantap" keypad-button="idx: 1" 
-      position="0.48 0.4 -0.48" 
-      width="0.8" height="0.8" depth="0.8" 
-      material="opacity: 0.4; color: #4dff88; transparent: true; shader: flat">
-    </a-box>
+      <a-entity id="confetti1-el" gltf-model="#confetti1-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
+      <a-entity id="confetti2-el" gltf-model="#confetti2-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
+      <a-entity id="confetti3-el" gltf-model="#confetti3-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
+      <a-entity id="confetti4-el" gltf-model="#confetti4-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
 
-    <a-box class="cantap" keypad-button="idx: 2" 
-      position="-0.48 0.4 0.48" 
-      width="0.8" height="0.8" depth="0.8" 
-      material="opacity: 0.4; color: #4d88ff; transparent: true; shader: flat">
-    </a-box>
-
-    <a-box class="cantap" keypad-button="idx: 3" 
-      position="0.48 0.4 0.48" 
-      width="0.8" height="0.8" depth="0.8" 
-      material="opacity: 0.4; color: #ffd24d; transparent: true; shader: flat">
-    </a-box>
-  </a-entity>
-
-  <a-entity id="confetti1-el" gltf-model="#confetti1-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
-  <a-entity id="confetti2-el" gltf-model="#confetti2-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
-  <a-entity id="confetti3-el" gltf-model="#confetti3-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
-  <a-entity id="confetti4-el" gltf-model="#confetti4-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
-
-      <a-plane
-        id="ground"
-        rotation="-90 0 0"
-        width="1000"
-        height="1000"
-        material="shader: shadow"
-        shadow>
-      </a-plane>
+      <a-plane id="ground" rotation="-90 0 0" width="1000" height="1000" material="shader: shadow" shadow></a-plane>
     </a-scene>
-  <script>
+
+<script>
 (function () {
   function registerComponents () {
+
+    // 0. 금속 재질 픽스 컴포넌트 (위치 이동)
+    AFRAME.registerComponent('fix-metal-material', {
+      init: function () {
+        this.el.addEventListener('model-loaded', (evt) => {
+          const model = evt.detail.model;
+          model.traverse((node) => {
+            if (node.isMesh && node.material) {
+              node.material.metalness = 0.3;
+              node.material.roughness = 0.5;
+              node.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    });
 
     // 1. 컨페티 1회 재생 및 자동 숨김 컴포넌트
     AFRAME.registerComponent('confetti-once', {
@@ -170,11 +132,11 @@
       }
     });
 
-    // 2. 키패드 모델 제어 컴포넌트 (애니메이션 버그 수정판)
+    // 2. 키패드 모델 제어 컴포넌트
     AFRAME.registerComponent('keypad-controller', {
       init () {
         this.mixer   = null;
-        this.actions = {}; // Action 자체를 캐싱
+        this.actions = {};
 
         this.el.addEventListener('model-loaded', (evt) => {
           const THREE = AFRAME.THREE;
@@ -182,7 +144,6 @@
 
           this.mixer = new THREE.AnimationMixer(model);
           
-          // 모델 로드 시점에 애니메이션 Action 생성 및 캐싱
           (model.animations || []).forEach(c => {
             const action = this.mixer.clipAction(c);
             action.setLoop(THREE.LoopOnce, 1);
@@ -213,9 +174,7 @@
         const action = this._resolveAction(n);
         if (!action) return;
 
-        // 다른 애니메이션이 재생 중이라면 강제로 정지 (가중치 꼬임 방지)
         Object.values(this.actions).forEach(a => a.stop());
-        
         action.reset();
         action.weight = 1; 
         action.play();
@@ -241,21 +200,22 @@
         this.el.addEventListener('click', () => {
           const keypadEl = this.el.parentEl;
           const ctrl = keypadEl && keypadEl.components['keypad-controller'];
-          if (!ctrl) return;
+          if (!ctrl) {
+            console.warn('키패드 컨트롤러를 찾을 수 없습니다.');
+            return;
+          }
           
-          ctrl.playTake(this.data.idx + 1);    // 버튼 애니메이션 실행
-          ctrl.triggerConfetti(this.data.idx); // 해당 위치 컨페티 실행
+          ctrl.playTake(this.data.idx + 1);
+          ctrl.triggerConfetti(this.data.idx);
         });
       }
     });
   }
 
-  // 8th Wall 환경 로드 확인 후 컴포넌트 등록
   window.XR8
     ? registerComponents()
     : window.addEventListener('xrloaded', registerComponents);
 })();
 </script>
   </body>
-
 </html>
