@@ -218,76 +218,68 @@
       }
     });
 
-    // ============================================================
-    // [컴포넌트 2] keypad-controller
-    // 역할: btn4 모델의 애니메이션 믹서/클립을 관리하고,
-    //       playTake(n) / triggerConfetti(idx) 를 외부(keypad-button)
-    //       에서 호출할 수 있도록 공개 메서드로 제공.
-    //       ※ 더 이상 자체적으로 클릭을 감지하지 않습니다.
-    //         (클릭 감지는 자식 히트박스의 keypad-button 컴포넌트가 담당)
+  // ============================================================
+    // [컴포넌트 2] keypad-controller (수정된 버전)
     // ============================================================
     AFRAME.registerComponent('keypad-controller', {
       init () {
-        this.mixer     = null;
-        this.clips     = {};
-        this.isPlaying = false;
+        this.mixer   = null;
+        this.actions = {}; // 기존 clips 대신 재생할 수 있는 Action 자체를 저장합니다.
 
         this.el.addEventListener('model-loaded', (evt) => {
           const THREE = AFRAME.THREE;
           const model = evt.detail.model;
 
           this.mixer = new THREE.AnimationMixer(model);
-          (model.animations || []).forEach(c => { this.clips[c.name] = c; });
+          
+          // ★ 수정 포인트 1: 모델 로드 시점에 애니메이션 Action을 미리 생성하여 캐싱합니다.
+          (model.animations || []).forEach(c => {
+            const action = this.mixer.clipAction(c);
+            action.setLoop(THREE.LoopOnce, 1);
+            action.clampWhenFinished = true;
+            this.actions[c.name] = action;
+          });
 
-          console.log('[keypad] 애니메이션 클립:', Object.keys(this.clips));
-          model.traverse(n => { if (n.isMesh) console.log('[keypad] mesh :', n.name); });
+          console.log('[keypad] 로드된 애니메이션 액션:', Object.keys(this.actions));
         });
       },
 
-      // -----------------------------------------------------------
-      // 버튼 인덱스(1~4) → 실제 애니메이션 클립 찾기
-      // Take01/Take 01/Take_01/take1 등 표기 차이를 흡수합니다.
-      // -----------------------------------------------------------
-      _resolveClip (n) {
-        const keys = Object.keys(this.clips);
+      // 버튼 인덱스(1~4) → 실제 애니메이션 액션 찾기
+      _resolveAction (n) {
+        const keys = Object.keys(this.actions);
         if (keys.length === 0) return null;
 
         const candidates = [`take0${n}`, `take${n}`];
         let found = keys.find(k => candidates.includes(k.toLowerCase().replace(/[\s_]/g, '')));
-        if (found) return this.clips[found];
+        if (found) return this.actions[found];
 
         const numPattern = new RegExp(`(^|[^0-9])0?${n}([^0-9]|$)`);
         found = keys.find(k => numPattern.test(k));
-        if (found) return this.clips[found];
-
-        if (keys.length === 4) return this.clips[keys[n - 1]];
+        if (found) return this.actions[found];
+        if (keys.length === 4) return this.actions[keys[n - 1]];
 
         return null;
       },
 
       // 외부(keypad-button)에서 호출하는 공개 메서드
       playTake (n) {
-        if (!this.mixer || this.isPlaying) return;
-
-        const clip = this._resolveClip(n);
-        if (!clip) {
-          console.warn(
-            `[keypad] Take0${n}에 대응하는 클립을 찾지 못했습니다.`,
-            '실제 클립명:', Object.keys(this.clips)
-          );
+        if (!this.mixer) return;
+        
+        const action = this._resolveAction(n);
+        if (!action) {
+          console.warn(`[keypad] Take0${n} 애니메이션을 찾지 못했습니다. (현재 목록: ${Object.keys(this.actions)})`);
           return;
         }
-        this.isPlaying = true;
-        const action = this.mixer.clipAction(clip);
-        action.setLoop(AFRAME.THREE.LoopOnce, 1);
-        action.clampWhenFinished = true;
-        action.reset().play();
 
-        const onFinished = () => {
-          this.isPlaying = false;
-          this.mixer.removeEventListener('finished', onFinished);
-        };
-        this.mixer.addEventListener('finished', onFinished);
+        // ★ 수정 포인트 2: 불안정한 isPlaying 잠금 로직을 제거하고, 
+        // 기존에 재생 중이던 다른 버튼 애니메이션이 있다면 강제로 정지(stop)시킵니다.
+        // 이렇게 해야 연속 클릭 시 애니메이션 꼬임 현상이 발생하지 않습니다.
+        Object.values(this.actions).forEach(a => a.stop());
+
+        // ★ 수정 포인트 3: 가중치(weight)를 1로 고정하여 확실하게 보이도록 재생합니다.
+        action.reset();
+        action.weight = 1; 
+        action.play();
       },
 
       // 외부(keypad-button)에서 호출하는 공개 메서드
@@ -299,7 +291,7 @@
         if (comp) {
           comp.playOnce();
         } else {
-          console.warn('[keypad] confetti-once 없음:', ids[idx]);
+          console.warn('[keypad] confetti-once 컴포넌트 없음:', ids[idx]);
         }
       },
 
