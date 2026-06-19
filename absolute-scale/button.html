@@ -70,7 +70,7 @@
 
   <a-camera
     id="camera"
-    position="0 1.75 12"
+    position="0 16 24"
     raycaster="objects: .cantap"
     cursor="fuse: false; rayOrigin: mouse;">
   </a-camera>
@@ -87,7 +87,7 @@
   <a-entity
     id="keypad"
     gltf-model="#btn4-asset"
-    rotation="0 70 0"
+    rotation="0 -70 0"
     scale="1 1 1"
     keypad-controller
     xrextras-hold-drag="rise-height: 0"
@@ -127,7 +127,7 @@
   <a-entity id="confetti3-el" gltf-model="#confetti3-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once fix-metal-material></a-entity>
   <a-entity id="confetti4-el" gltf-model="#confetti4-asset" position="0 0 0" scale="1 1 1" visible="false" confetti-once></a-entity>
 
-  <a-plane id="ground" rotation="-90 0 0" width="100" height="100" material="shader: shadow; opacity: 0.5;" shadow></a-plane>
+  <a-plane id="ground" rotation="-90 0 0" width="1000" height="1000" material="shader: shadow; opacity: 0.5;" shadow></a-plane>
 
 </a-scene>
 
