@@ -2,6 +2,8 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <!-- <head> 안에 추가 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>8th Wall Web: Manipulate</title>
 
   <script src="//cdn.8thwall.com/web/aframe/8frame-1.4.1.min.js"></script>
@@ -19,39 +21,46 @@
         font-family: "Pretendard Variable", Pretendard, sans-serif;
     }
 
-    #container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: #edf6f5;
-        z-index: 999999;
-        pointer-events: auto;
-        overflow-y: auto;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 30px 15px;
-        transition: opacity 0.4s ease, visibility 0.4s ease;
-    }
+#container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;        /* ✅ 모바일 동적 뷰포트 대응 */
+    background-color: #edf6f5;
+    z-index: 999999;
+    pointer-events: auto;
+    overflow-y: auto;           /* ✅ 스크롤 보장 */
+    -webkit-overflow-scrolling: touch;  /* ✅ iOS 부드러운 스크롤 */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 15px 60px;    /* ✅ 하단 패딩 확보 — 마지막 버튼이 화면 끝에 붙지 않게 */
+    box-sizing: border-box;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
 
-    #start_area {
-        width: 100%;
-        max-width: 450px;
-        text-align: center;
-        background: #ffffff;
-        padding: 35px 25px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(65, 156, 146, 0.06);
-        border: 1px solid #d3eae7;
-    }
+#start_area {
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+    background: #ffffff;
+    padding: 35px 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(65, 156, 146, 0.06);
+    border: 1px solid #d3eae7;
+    margin-bottom: 20px;        /* ✅ 추가: 스크롤 시 하단 여유 */
+}
 
-    .main-guide-img {
-        margin-bottom: 15px;
-        display: inline-block;
-        height: auto;
-    }
+/* 이미지 크기를 화면 비율에 맞게 축소 — 모바일에서 과도하게 큰 이미지가 공간을 차지하는 것 방지 */
+.main-guide-img {
+    margin-bottom: 15px;
+    display: inline-block;
+    height: auto;
+    max-width: 60%;             /* ✅ 추가: 작은 화면에서 비율 제한 */
+}
 
     .guide-text {
         color: #245752;
@@ -85,12 +94,12 @@
         border-color: #419c92;
     }
 
-    .photozone-card img {
-        max-width: 50%;
-        height: auto;
-        margin-bottom: 15px;
-        border-radius: 8px;
-    }
+.photozone-card img {
+    max-width: 70%;             /* ✅ 100% → 70%로 축소: 카드 두 개가 한 화면에 들어오기 쉽게 */
+    height: auto;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
 
     .photozone-title {
         font-size: 16px;
