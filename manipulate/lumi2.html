@@ -8,8 +8,7 @@
 
   <script src="//cdn.8thwall.com/web/aframe/8frame-1.4.1.min.js"></script>
   <script src="./../xr_st/xrextras.js"></script>
-  <!--script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script-->
-  <script async src="./../xr_st/xr.js" data-preload-chunks="slam" data-disable-auto-start="true"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
 
   <style>
@@ -159,14 +158,18 @@
       </div>
     </div>
   </div>
-
+ <!-- ✅ AR 씬이 삽입될 빈 컨테이너 (버튼 클릭 전까지 비어있음) -->
+  <div id="ar-container"></div>
+ 
+  <!-- ✅ <a-scene> 마크업을 template 안에 보관 (DOM에 즉시 파싱되지 않음) -->
+  <template id="ar-scene-template">
 <a-scene
   xrextras-gesture-detector
   landing-page
   xrextras-loading
   xrextras-runtime-error
   renderer="colorManagement: true"
-  xrweb="allowedDevices: any; disableAutoStart: true">
+  xrweb="allowedDevices: any">
 
     <a-assets>
       <a-asset-item id="lumi-appear"     src="./lumi-photo-ani.glb"></a-asset-item>
@@ -268,8 +271,8 @@
       shadow>
     </a-plane>
   </a-scene>
-
-  <!--script>
+</template>
+  <script>
     // ✅ 버튼의 zoneType과 동일한 id를 가진 엔티티만 표시,
     //    나머지 등록된 zone 엔티티는 모두 숨김
     const zoneIds = ['lumi', 'crabby'];
@@ -295,43 +298,7 @@
         }
       });
     }
-</script-->
-  <script>
-        // ✅ 버튼의 zoneType과 동일한 id를 가진 엔티티만 표시,
-    //    나머지 등록된 zone 엔티티는 모두 숨김
-    const zoneIds = ['lumi', 'crabby'];
-    function startNavigation(zoneType) {
-  console.log("선택된 포토존 형태: " + zoneType);
-
-  const uiContainer = document.getElementById('container');
-  if (uiContainer) {
-    uiContainer.style.opacity = '0';
-    setTimeout(() => {
-      uiContainer.style.visibility = 'hidden';
-      uiContainer.style.display = 'none';
-    }, 400);
-  }
-
-  zoneIds.forEach((id) => {
-    const entity = document.getElementById(id);
-    if (entity) {
-      entity.setAttribute('visible', id === zoneType);
-    }
-  });
-
-  // ✅ 버튼 클릭 시점에 카메라 권한 요청 + AR 엔진 시작
-  const canvas = document.querySelector('a-scene').canvas
-    || document.querySelector('canvas.xrweb');
-
-  if (window.XR8) {
-    XR8.run({ canvas: canvas });   // 이 시점에 카메라 권한 팝업 발생
-  } else {
-    // XR8이 아직 로드되지 않았다면 로드 완료 후 실행
-    window.addEventListener('xrloaded', () => {
-      XR8.run({ canvas: canvas });
-    });
-  }
-}
-  </script>
+</script>
+  
 </body>
 </html>
