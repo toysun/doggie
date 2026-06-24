@@ -15,13 +15,114 @@
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script type="module" src="./app1.js" defer></script>
   <link rel="stylesheet" href="./index.css">
-  <style>#start_area { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-    #start_btn { padding: 15px 30px; font-size: 18px; font-weight: bold; background: #066265; color: white; border: none; border-radius: 10px; margin-top: 20px; cursor: pointer; }</style>
+<style>
+    /* 포토존 영역 전체 컨테이너 */
+    #start_area {
+        text-align: center;
+        padding: 10px 5px;
+    }
+
+    /* 상단 메인 가이드 아이콘 */
+    .main-guide-img {
+        margin-bottom: 12px;
+        display: inline-block;
+    }
+
+    /* 안내 문구 스타일 */
+    .guide-text {
+        color: #245752; /* 딥 청록 */
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 25px;
+        word-break: keep-all;
+    }
+
+    /* 포토존 선택 카드 컨테이너 (세로 배열) */
+    .photozone-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px; /* 카드 사이의 간격 */
+        margin-top: 15px;
+    }
+
+    /* 각각의 포토존 선택 카드 개별 스타일 */
+    .photozone-card {
+        background: #ffffff;
+        border: 1px solid #d3eae7;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: 0 4px 12px rgba(65, 156, 146, 0.05);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.2s ease;
+    }
+
+    .photozone-card:active {
+        transform: scale(0.98); /* 모바일 터치 시 살짝 눌리는 피드백 */
+    }
+
+    /* 카드 내 이미지 규격화 */
+    .photozone-card img {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    /* 포토존 이름/타이틀 */
+    .photozone-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #35877e;
+        margin-bottom: 12px;
+    }
+
+    /* 개별 포토존 시작 버튼 (ID 중복 제거 -> 클래스로 변경) */
+    .start-zone-btn {
+        width: 100%;
+        max-width: 200px;
+        height: 44px;
+        background: linear-gradient(to right, #79cb83, #3ca89e);
+        color: #ffffff;
+        border: none;
+        border-radius: 22px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(60, 168, 158, 0.2);
+    }
+</style>
 </head>
 
 <body>
 <div id="container"></div>
+<div id="start_area">     
+    <img src="./assets/Media/lh-hunt-t.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
+    
+    <p class="guide-text">
+        등대를 배경으로 <br>
+        아래의 2개 AR포토존 중 하나를 선택해서<br>
+        사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
+    </p>
 
+    <div class="photozone-container">
+        
+        <div class="photozone-card">
+            <div class="photozone-title">✨ AR 루미 포토존</div>
+            <img src="./assets/Media/hunt-spot.png" alt="AR 루미" width="200">
+            <button class="start-zone-btn" onclick="startNavigation('lumi')">포토존 시작</button>
+        </div>
+
+        <div class="photozone-card">
+            <div class="photozone-title">🌍 AR 세계의 등대 포토존</div>
+            <img src="./assets/Media/hunt-spot-1.png" alt="AR 세계의 등대" width="200">
+            <button class="start-zone-btn" onclick="startNavigation('world')">포토존 시작</button>
+        </div>
+
+    </div>  
+</div>
 <a-scene
   responsive-immersive
   coaching-overlay
@@ -111,5 +212,19 @@
     shadow
   ></a-plane>
 </a-scene>
+  <script>
+    // 어떤 포토존을 선택했는지 파라미터(zoneType)로 받아 처리하는 스크립트 예시
+    function startNavigation(zoneType) {
+        if (zoneType === 'lumi') {
+            console.log("AR 루미 포토존으로 이동합니다.");
+            // 원래 실행하려던 루미 포토존 관련 함수나 페이지 이동 코드를 적으세요.
+            // 예: location.href = "lumi_ar.html";
+        } else if (zoneType === 'world') {
+            console.log("AR 세계의 등대 포토존으로 이동합니다.");
+            // 원래 실행하려던 세계의 등대 포토존 관련 함수나 페이지 이동 코드를 적으세요.
+            // 예: location.href = "world_ar.html";
+        }
+    }
+</script>
 </body>
 </html>
