@@ -28,21 +28,22 @@
     }
 
     /* 화면 전체를 덮는 UI 컨테이너 (AR 구동 전 선택창) */
-    #container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: #edf6f5; /* 이미지 톤에 맞춘 연민트 배경 */
-        z-index: 9999; /* AR 화면보다 무조건 위에 배치 */
-        overflow-y: auto;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 30px 15px;
-        transition: opacity 0.4s ease, visibility 0.4s ease;
-    }
+  #container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #edf6f5;
+      z-index: 999999;        /* ✅ coaching-overlay 등 8th Wall UI보다 확실히 위 */
+      pointer-events: auto;   /* ✅ 명시적 터치 허용 */
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px 15px;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
 
     /* 포토존 영역 전체 컨테이너 */
     #start_area {
@@ -166,7 +167,6 @@
   <a-scene
     responsive-immersive
     coaching-overlay
-    landing-page
     xrextras-gesture-detector
     xrextras-loading
     xrextras-runtime-error
