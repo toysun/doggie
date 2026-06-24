@@ -10,9 +10,11 @@
   <script src="./../xr_st/landing-page.js"></script>
   <script crossorigin="anonymous" src="./../xr_st/aframe-chromakey-material-1.1.4.min.js"></script>
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Contrail+One&display=swap" rel="stylesheet">
+  
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
   <script type="module" src="./app.js" defer></script>
   <link rel="stylesheet" href="./index.css">
@@ -27,37 +29,55 @@
         font-family: "Pretendard Variable", Pretendard, sans-serif;
     }
 
+    /* 시작 화면 레이어 구조 격리 최적화 */
     #start_area {
-      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-      background: #ffffff;
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #edf6f5; /* 이미지 무드 매칭 연민트 배경색 */
       z-index: 99999;
       display: flex; flex-direction: column;
       justify-content: center; align-items: center; text-align: center;
+      padding: 20px;
     }
-    #start_btn {
-      padding: 15px 30px; font-size: 18px; font-weight: bold;
-      background: #066265; color: white;
-      border: none; border-radius: 10px; margin-top: 20px; cursor: pointer;
+    
+    .start-card {
+      background: #ffffff;
+      padding: 35px 25px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(65, 156, 146, 0.08);
+      border: 1px solid #d3eae7;
+      max-width: 400px;
+      width: 100%;
     }
 
+    #start_btn {
+      width: 100%;
+      max-width: 220px;
+      height: 50px;
+      font-size: 16px; font-weight: bold;
+      background: linear-gradient(to right, #79cb83, #3ca89e); color: white;
+      border: none; border-radius: 25px; margin-top: 25px; cursor: pointer;
+      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25);
+    }
+
+    /* 컨트롤 패널 배치 조절 */
     #skybox-panel {
       position: fixed;
       right: 16px;
-      bottom: 20px;
+      bottom: 25px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
       z-index: 9998;
     }
 
     .skybox-btn {
-      width: 54px;
-      height: 54px;
+      width: 52px;
+      height: 52px;
       border-radius: 50%;
       border: 3px solid #ffffff;
       overflow: hidden;
       cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       transition: transform 0.15s, border-color 0.15s;
       background: #000;
       padding: 0;
@@ -73,13 +93,8 @@
 
     .skybox-btn.active {
       border-color: #00e5ff;
-      transform: scale(1.12);
-      box-shadow: 0 0 0 2px #00e5ff, 0 2px 12px rgba(0,0,0,0.6);
-    }
-
-    .skybox-btn:not(.active):hover {
-      transform: scale(1.06);
-      border-color: #cceeff;
+      transform: scale(1.1);
+      box-shadow: 0 0 0 2px #00e5ff, 0 4px 12px rgba(0,0,0,0.4);
     }
   </style>
 </head>
@@ -87,12 +102,14 @@
 <body>
 
   <div id="start_area">
-    <img src="./assets/textures/photo-auth.png" alt="AR 포토존" width="200">
-    <img src="./assets/textures/world-lh-300.png" alt="AR 포털" width="200">
-    <p style="color: #066265; font-weight:bold;">
-      화면을 터치해서 <br>영국의 에디스톤 등대를 체험하고,<br>인증샷을 올리면 최종 인증이 완료됩니다.
-    </p>
-    <button id="start_btn" onclick="startNavigation()">포토존 시작</button>
+    <div class="start-card">
+        <img src="./assets/textures/photo-auth.png" alt="AR 포토존" width="180" style="margin-bottom: 10px;">
+        <img src="./assets/textures/world-lh-300.png" alt="AR 포털" width="180" style="margin-bottom: 15px;">
+        <p style="color: #245752; font-weight: 700; font-size: 15px; line-height: 1.6; word-break: keep-all;">
+          화면을 터치해서 <br>영국의 에디스톤 등대를 체험하고,<br>인증샷을 올리면 최종 인증이 완료됩니다.
+        </p>
+        <button id="start_btn" onclick="startNavigation()">포토존 시작</button>
+    </div>
   </div>
 
   <div id="overlay" style="display: none" class="absolute-fill">
@@ -100,7 +117,6 @@
     <span id="promptText"></span>
   </div>
 
-  <!-- 스카이박스 교체 버튼 패널 -->
   <div id="skybox-panel">
     <button class="skybox-btn active" id="btn-sky0" onclick="setSkybox(0)" aria-label="바다 폭풍 하늘">
       <img src="./assets/textures/sea-storm.png" alt="바다 폭풍">
@@ -132,6 +148,7 @@
       <img id="sea-blue"        src="./assets/textures/sea-blue.png">
       <img id="blob-shadow-img" src="./assets/textures/blob-shadow.png">
       <img id="eddystone-logo-img" src="./assets/textures/eddystone-logo-t.png">
+      
       <video id="portal-video" muted autoplay playsinline crossorigin="anonymous" loop src="./assets/textures/portal-video.mp4"></video>
       <video id="wave-video"   muted autoplay playsinline crossorigin="anonymous" loop src="./assets/textures/wave-square-ns.mp4"></video>
     </a-assets>
@@ -141,7 +158,6 @@
 
     <a-camera id="camera" position="0 10 10"></a-camera>
 
-    <!-- Hider walls -->
     <xrextras-opaque-background remove="true">
       <a-entity id="hider-walls">
         <a-box scale="100 1 100"   position="0 -1 49"    xrextras-hider-material></a-box>
@@ -149,8 +165,7 @@
         <a-box scale="100 1 100"   position="0 100 49"   xrextras-hider-material></a-box>
         <a-box scale="1 120 100"   position="-30 50 50"  xrextras-hider-material></a-box>
         <a-box scale="1 120 100"   position="30 50 50"   xrextras-hider-material></a-box>
-        <a-ring id="portalHiderRing" radius-inner="0.001" radius-outer="100"
-          position="0 8.5 -0.2" xrextras-hider-material></a-ring>
+        <a-ring id="portalHiderRing" radius-inner="0.001" radius-outer="100" position="0 8.5 -0.2" xrextras-hider-material></a-ring>
       </a-entity>
 
       <a-entity id="portal-wall">
@@ -159,21 +174,43 @@
       </a-entity>
     </xrextras-opaque-background>
 
-    <!-- Lights -->
     <a-entity
-      light="type: directional; castShadow: true;
-        shadowMapHeight:2048; shadowMapWidth:2048;
-        shadowCameraTop:35; shadowCameraBottom:-20;
-        shadowCameraRight:40; shadowCameraLeft:-10;
-        target: #portalRim"
+      light="type: directional; castShadow: true; shadowMapHeight:2048; shadowMapWidth:2048; shadowCameraTop:35; shadowCameraBottom:-20; shadowCameraRight:40; shadowCameraLeft:-10; target: #portalRim"
       xrextras-attach="target: portalRim; offset: 18 7 14"
       shadow>
     </a-entity>
     <a-light type="ambient" intensity="0.3"></a-light>
 
-    <!-- Portal Contents -->
-    <a-entity id="portal-contents">
+    <a-entity
+      id="portalRim"
+      gltf-model="#portal-rim-model"
+      spin="axis: x; speed: 14000"
+      reflections="type: realtime"
+      position="0 8.5 0"
+      rotation="90 -90 -90"
+      scale="0.00002 0.00002 0.00002"
+      shadow="receive: false">
+    </a-entity>
 
+    <a-entity
+      id="portalVideo"
+      xrextras-play-video="video: #portal-video; canstop: true"
+      material="shader: chromakey; src: #portal-video; color: 0 0 0; blending: additive; side: front"
+      geometry="primitive: plane; height: 1.5; width: 1.5;"
+      position="0 8.5 0.1"
+      scale="0.02 0.02 0.02">
+    </a-entity>
+
+    <a-circle
+      id="portalShadow"
+      radius="1.5"
+      material="src: #blob-shadow-img; opacity: 0.65; roughness: 0.8; metalness: 0"
+      position="0 0.01 1.25"
+      rotation="-90 0 0"
+      scale="0.02 0.02 0.02">
+    </a-circle>
+
+    <a-entity id="portal-contents">
       <a-plane
         material="src: #eddystone-logo-img; transparent: true; roughness: 0.8; metalness: 0"
         rotation="0 -20 0"
@@ -203,52 +240,28 @@
       </a-entity>
 
       <a-sky id="sky" src="#skybox-img" rotation="0 -90 0"></a-sky>
-
-      <!-- Portal -->
-      <a-entity
-        id="portalRim"
-        gltf-model="#portal-rim-model"
-        spin="axis: x; speed: 14000"
-        reflections="type: realtime"
-        position="0 8.5 0"
-        rotation="90 -90 -90"
-        scale="0.00002 0.00002 0.00002"
-        shadow="receive: false">
-      </a-entity>
-
-      <a-entity
-        id="portalVideo"
-        xrextras-play-video="video: #portal-video; canstop: true"
-        material="shader: chromakey; src: #portal-video; color: 0 0 0; blending: additive; side: front"
-        geometry="primitive: plane; height: 1.5; width: 1.5;"
-        position="0 8.5 0.1"
-        scale="0.02 0.02 0.02">
-      </a-entity>
-
-      <a-circle
-        id="portalShadow"
-        radius="1.5"
-        material="src: #blob-shadow-img; opacity: 0.65; roughness: 0.8; metalness: 0"
-        position="0 0.01 1.25"
-        rotation="-90 0 0"
-        scale="0.02 0.02 0.02">
-      </a-circle>
-
-    </a-entity><!-- portal-contents 닫기 -->
+    </a-entity>
 
   </a-scene>
 
-  <!-- ✅ 모든 JS를 하나의 <script> 블록으로 통합, 중복 선언 제거 -->
   <script>
-    // 시작 화면 닫기
     function startNavigation() {
       const startArea = document.getElementById('start_area');
       if (startArea) {
-        startArea.style.display = 'none';
+        startArea.style.opacity = '0';
+        setTimeout(() => {
+          startArea.style.display = 'none';
+        }, 300);
+      }
+      
+      // 보안 정책 대응: 미션을 시작할 때 비디오 및 오디오 미디어 소스를 안전하게 활성화 수동 개시
+      const portalVid = document.getElementById('portal-video');
+      if (portalVid) {
+         portalVid.play().catch(err => console.log("Video auto-play block handled safely."));
       }
     }
 
-    // 스카이박스 교체
+    // 스카이박스 교체 로직
     const skyboxList = [
       { btnId: 'btn-sky0', assetId: '#skybox-img'  },
       { btnId: 'btn-sky1', assetId: '#skybox-img1' },
