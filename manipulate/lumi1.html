@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>8th Wall Web: Manipulate</title>
+
+    <!-- We've included a slightly modified version of A-Frame, which fixes some polish concerns -->
+    <!--script src="./../xr_st/8frame-1.3.0.min.js"></script-->
+    <script src="//cdn.8thwall.com/web/aframe/8frame-1.4.1.min.js"></script>
+    <!-- XR Extras - provides utilities like load screen, almost there, and error handling.
+         See github.com/8thwall/web/tree/master/xrextras -->
+    <script src="./../xr_st/xrextras.js"></script>
+
+    <!-- Landing Pages - see https://www.8thwall.com/docs/web/#landing-pages -->
+    <!--script src='./../xr_st/landing-page/landing-page.js'></script-->
+
+    <!-- 8thWall Web - Replace the app key here with your own app key -->
+     <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+    <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+     <style>
+    /* Pretendard 폰트 전역 지정 */
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+    
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+    }
+
+    /* 화면 전체를 덮는 UI 컨테이너 (AR 구동 전 선택창) */
+  #container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: #edf6f5;
+      z-index: 999999;        /* ✅ coaching-overlay 등 8th Wall UI보다 확실히 위 */
+      pointer-events: auto;   /* ✅ 명시적 터치 허용 */
+      overflow-y: auto;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 30px 15px;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+  }
+
+    /* 포토존 영역 전체 컨테이너 */
+    #start_area {
+        width: 100%;
+        max-width: 450px;
+        text-align: center;
+        background: #ffffff;
+        padding: 35px 25px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(65, 156, 146, 0.06);
+        border: 1px solid #d3eae7;
+    }
+
+    /* 상단 메인 가이드 아이콘 */
+    .main-guide-img {
+        margin-bottom: 15px;
+        display: inline-block;
+        height: auto;
+    }
+
+    /* 안내 문구 스타일 */
+    .guide-text {
+        color: #245752;
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        word-break: keep-all;
+    }
+
+    /* 포토존 선택 카드 컨테이너 (세로 배열) */
+    .photozone-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    /* 각각의 포토존 선택 카드 개별 스타일 */
+    .photozone-card {
+        background: #fafdfd;
+        border: 1px solid #e1f0ee;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .photozone-card:active {
+        transform: scale(0.98);
+        border-color: #419c92;
+    }
+
+    /* 카드 내 이미지 규격화 */
+    .photozone-card img {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    /* 포토존 이름/타이틀 */
+    .photozone-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #35877e;
+        margin-bottom: 12px;
+    }
+
+    /* 개별 포토존 시작 버튼 */
+    .start-zone-btn {
+        width: 100%;
+        max-width: 200px;
+        height: 44px;
+        background: linear-gradient(to right, #79cb83, #3ca89e);
+        color: #ffffff;
+        border: none;
+        border-radius: 22px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(60, 168, 158, 0.2);
+        transition: opacity 0.2s;
+    }
+    .start-zone-btn:hover {
+        opacity: 0.95;
+    }
+  </style>
+
+  </head>
+     <div id="container">
+    <div id="start_area">     
+        <img src="./assets/texture/photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
+        
+        <p class="guide-text">
+            등대를 배경으로 <br>
+            아래의 2개 AR포토존 중 하나를 선택해서<br>
+            사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
+        </p>
+
+        <div class="photozone-container">
+            <div class="photozone-card">
+                <div class="photozone-title">✨ AR 루미 포토존</div>
+                <img src="./assets/texture/running-man.png" alt="AR 루미" width="200">
+                <button class="start-zone-btn" onclick="startNavigation('lumi')">포토존 시작</button>
+            </div>
+
+            <div class="photozone-card">
+                <div class="photozone-title">🌍 AR 세계의 등대 포토존</div>
+                <img src="./assets/texture/running-man-r.png" alt="AR 세계의 등대" width="200">
+                <button class="start-zone-btn" onclick="startNavigation('world')">포토존 시작</button>
+            </div>
+        </div>  
+    </div>
+  </div>
+
+  <body>
+    
+    <a-scene
+      xrextras-gesture-detector
+      landing-page
+      xrextras-loading
+      xrextras-runtime-error
+      renderer="colorManagement: true"
+      xrweb="allowedDevices: any">
+
+      <!-- We can define assets here to be loaded when A-Frame initializes -->
+      <a-assets>
+        <!-- Credit to Poly by Google for the model: https://poly.google.com/view/5ZMAz7_ucTn -->
+        <a-asset-item id="sandCastleModel" src="./lumi-photo-ani.glb"></a-asset-item>
+        <a-asset-item id="vfx" src="./butterfly-color-loop.glb"></a-asset-item>
+      </a-assets>
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+      <!-- The raycaster will emit mouse events on scene objects specified with the cantap class -->
+      <a-camera
+        id="camera"
+        position="0 8 16"
+        raycaster="objects: .cantap"
+        cursor="fuse: false; rayOrigin: mouse;">
+      </a-camera>
+
+      <a-entity
+        light="
+          type: directional;
+          intensity: 0.8;
+          castShadow: true;
+          shadowMapHeight:2048;
+          shadowMapWidth:2048;
+          shadowCameraTop: 10;
+          target: #model;"
+        xrextras-attach="target: model; offset: 1 15 3;"
+        shadow>
+      </a-entity>
+
+      <a-light type="ambient" intensity="0.7"></a-light>
+  <a-entity
+    id="car"
+    gltf-model="#sandCastleModel"
+    rotation="0 0 0"
+    scale="2 2 2"
+    xrextras-hold-drag="rise-height: 0"
+    xrextras-two-finger-rotate
+    absolute-pinch-scale
+    proximity
+    animation="property: position; from: 0 -10 0; to: 0 5 0; dir: linear; delay: 4000; dur: 8000; loop: false"
+    animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; delay: 4000; dur: 8000; loop: false"
+    animation-mixer
+    shadow="receive: false">
+      <a-entity
+    id="car"
+    gltf-model="#vfx"
+    rotation="0 0 0"
+    scale="2 2 2"
+    xrextras-hold-drag="rise-height: 0"
+    xrextras-two-finger-rotate
+    absolute-pinch-scale
+    proximity
+    animation-mixer
+    shadow="receive: false">
+  </a-entity>
+  </a-entity>
+      <a-plane
+        id="ground"
+        rotation="-90 0 0"
+        width="1000"
+        height="1000"
+        material="shader: shadow"
+        shadow>
+      </a-plane>
+    </a-scene>
+     <script>
+    function startNavigation(zoneType) {
+        // 1. 유저가 선택한 포토존 정보 콘솔 출력
+        console.log("선택된 포토존 형태: " + zoneType);
+
+        // 2. [핵심 기능] 포토존을 선택했으므로 상단 선택 UI 레이어를 화면에서 완전히 제거
+        const uiContainer = document.getElementById('container');
+        if(uiContainer) {
+            uiContainer.style.opacity = '0';
+            setTimeout(() => {
+                uiContainer.style.visibility = 'hidden';
+                uiContainer.style.display = 'none';
+            }, 400); // 부드럽게 페이드아웃 후 완전히 보이지 않게 처리
+        }
+
+        // 3. 선택한 포토존 분기 처리 로직 공간
+        if (zoneType === 'lumi') {
+            // 예시: 루미 전용 특정 에셋만 켜거나 전역 환경 변수를 컨트롤할 수 있습니다.
+            // 만약 별도 페이지 이동을 원하시면 아래 주석을 해제하세요.
+            /* location.href = "lumi_ar.html"; */
+        } else if (zoneType === 'world') {
+            /* location.href = "world_ar.html"; */
+        }
+    }
+  </script>
+  </body>
+
+</html>
