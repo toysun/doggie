@@ -29,14 +29,32 @@
         font-family: "Pretendard Variable", Pretendard, sans-serif;
     }
 
-    /* 시작 화면 레이어 구조 격리 최적화 */
+/* 시작 화면 레이어 구조 격리 최적화 */
     #start_area {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: #edf6f5; /* 이미지 무드 매칭 연민트 배경색 */
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh;
+      background: #edf6f5; 
       z-index: 99999;
-      display: flex; flex-direction: column;
-      justify-content: center; align-items: center; text-align: center;
+      display: flex; 
+      flex-direction: column;
+      justify-content: center; 
+      align-items: center; 
+      text-align: center;
       padding: 20px;
+      /* 부드러운 사라짐 효과를 위한 속성 추가 */
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* 버튼을 눌렀을 때 자바스크립트로 주입할 숨김 클래스 */
+    #start_area.hide {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important; /* 클릭/터치 이벤트 완전 차단 */
     }
     
     .start-card {
@@ -244,24 +262,33 @@
 
   </a-scene>
 
-  <script>
+<script>
     function startNavigation() {
+      console.log("포토존 시작 버튼이 클릭되었습니다.");
+      
       const startArea = document.getElementById('start_area');
       if (startArea) {
-        startArea.style.opacity = '0';
+        // 1. 클래스를 추가하여 부드럽게 페이드아웃 및 터치 차단
+        startArea.classList.add('hide');
+        
+        // 2. 애니메이션이 끝난 후 완전히 DOM에서 보이지 않도록 display 처리
         setTimeout(() => {
           startArea.style.display = 'none';
         }, 300);
       }
       
-      // 보안 정책 대응: 미션을 시작할 때 비디오 및 오디오 미디어 소스를 안전하게 활성화 수동 개시
+      // 3. 브라우저 미디어 보안 정책 우회 및 강제 재생 트리거
       const portalVid = document.getElementById('portal-video');
       if (portalVid) {
-         portalVid.play().catch(err => console.log("Video auto-play block handled safely."));
+         portalVid.play().then(() => {
+            console.log("포털 비디오 재생 성공");
+         }).catch(err => {
+            console.log("비디오 재생 대기 중:", err);
+         });
       }
     }
 
-    // 스카이박스 교체 로직
+    // 스카이박스 교체 로직 (기존 유지)
     const skyboxList = [
       { btnId: 'btn-sky0', assetId: '#skybox-img'  },
       { btnId: 'btn-sky1', assetId: '#skybox-img1' },
