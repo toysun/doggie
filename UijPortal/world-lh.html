@@ -29,34 +29,26 @@
         font-family: "Pretendard Variable", Pretendard, sans-serif;
     }
 
-/* 시작 화면 레이어 구조 격리 최적화 */
-    #start_area {
+#start_area {
       position: fixed; 
       top: 0; 
       left: 0; 
       width: 100vw; 
       height: 100vh;
       background: #edf6f5; 
-      z-index: 99999;
+      z-index: 99999 !important; /* 최상위 유지 */
       display: flex; 
       flex-direction: column;
       justify-content: center; 
       align-items: center; 
       text-align: center;
       padding: 20px;
-      /* 부드러운 사라짐 효과를 위한 속성 추가 */
       transition: opacity 0.3s ease, visibility 0.3s ease;
       opacity: 1;
       visibility: visible;
+      pointer-events: auto !important; /* 터치 이벤트 강제 활성화 */
     }
 
-    /* 버튼을 눌렀을 때 자바스크립트로 주입할 숨김 클래스 */
-    #start_area.hide {
-      opacity: 0 !important;
-      visibility: hidden !important;
-      pointer-events: none !important; /* 클릭/터치 이벤트 완전 차단 */
-    }
-    
     .start-card {
       background: #ffffff;
       padding: 35px 25px;
@@ -65,6 +57,13 @@
       border: 1px solid #d3eae7;
       max-width: 400px;
       width: 100%;
+      pointer-events: auto !important; /* 카드 내부 터치 보장 */
+    }
+
+    #start_area.hide {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important; /* 사라질 때는 터치 끄기 */
     }
 
     #start_btn {
@@ -126,7 +125,7 @@
         <p style="color: #245752; font-weight: 700; font-size: 15px; line-height: 1.6; word-break: keep-all;">
           화면을 터치해서 <br>영국의 에디스톤 등대를 체험하고,<br>인증샷을 올리면 최종 인증이 완료됩니다.
         </p>
-        <button id="start_btn" onclick="startNavigation()">포토존 시작</button>
+        <button id="start_btn">포토존 시작</button>
     </div>
   </div>
 
@@ -263,32 +262,47 @@
   </a-scene>
 
 <script>
-    function startNavigation() {
-      console.log("포토존 시작 버튼이 클릭되었습니다.");
+    // 페이지와 라이브러리가 완전히 로드된 후 실행
+    window.addEventListener('DOMContentLoaded', () => {
+      const startBtn = document.getElementById('start_btn');
       
+      if (startBtn) {
+        // 모바일 터치(touchstart)와 PC 클릭(click) 모두 대응
+        ['click', 'touchstart'].forEach(eventType => {
+          startBtn.addEventListener(eventType, (e) => {
+            // 8th Wall 3D 캔버스로 터치 이벤트가 넘어가서 씹히는 것을 원천 차단
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            
+            console.log(eventType + " 이벤트로 포토존 시작 버튼이 구동되었습니다.");
+            executeStart(); // 실제 시작 함수 호출
+          }, { passive: false }); // preventDefault 작동 보장
+        });
+      }
+    });
+
+    // 화면을 닫고 AR 환경을 켜는 핵심 기능 함수
+    function executeStart() {
       const startArea = document.getElementById('start_area');
       if (startArea) {
-        // 1. 클래스를 추가하여 부드럽게 페이드아웃 및 터치 차단
         startArea.classList.add('hide');
-        
-        // 2. 애니메이션이 끝난 후 완전히 DOM에서 보이지 않도록 display 처리
         setTimeout(() => {
           startArea.style.display = 'none';
         }, 300);
       }
       
-      // 3. 브라우저 미디어 보안 정책 우회 및 강제 재생 트리거
+      // 비디오 강제 재생 트리거
       const portalVid = document.getElementById('portal-video');
       if (portalVid) {
          portalVid.play().then(() => {
             console.log("포털 비디오 재생 성공");
          }).catch(err => {
-            console.log("비디오 재생 대기 중:", err);
+            console.log("비디오 재생 대기:", err);
          });
       }
     }
 
-    // 스카이박스 교체 로직 (기존 유지)
+    // 스카이박스 교체 로직 (기존 기능 유지)
     const skyboxList = [
       { btnId: 'btn-sky0', assetId: '#skybox-img'  },
       { btnId: 'btn-sky1', assetId: '#skybox-img1' },
