@@ -20,7 +20,7 @@
   <link rel="stylesheet" href="./index.css">
 
   <style>
-    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+   @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 
     *, *::before, *::after {
         box-sizing: border-box;
@@ -29,92 +29,86 @@
         font-family: "Pretendard Variable", Pretendard, sans-serif;
     }
 
-/* 시작 화면 레이어 - 무조건 상단부터 꽉 차게 배치 */
+    /* 🛠️ 전체 배경 레이어: 외부 flex 설정을 무력화하기 위해 display: block으로 변경 */
     #start_area {
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100vw; 
-      height: 100vh;
-      background: #edf6f5; 
+      position: fixed !important; 
+      top: 0 !important; 
+      left: 0 !important; 
+      width: 100vw !important; 
+      height: 100vh !important;
+      background: #edf6f5 !important; 
       z-index: 99999 !important; 
-      
-      /* 🛠️ 핵심 수정: 세로 가운데 정렬을 버리고 최상단(flex-start)부터 정렬 */
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start; 
-      align-items: center; 
-      
-      /* 넘칠 경우를 대비한 스크롤 자락 유지 */
-      overflow-y: auto; 
-      -webkit-overflow-scrolling: touch; 
-      
-      /* 상단 여백을 최소화(15px)하여 위로 바짝 붙임 */
-      padding: 15px; 
-      pointer-events: auto !important;
-      
+      display: block !important; /* flex 정렬을 완전히 해제 */
+      overflow-y: auto !important; 
+      -webkit-overflow-scrolling: touch !important; 
+      margin: 0 !important;
+      padding: 0 !important;
       transition: opacity 0.3s ease, visibility 0.3s ease;
       opacity: 1;
       visibility: visible;
     }
 
-    /* 상단 고정형 카드 레이아웃 */
+    /* 🛠️ 핵심 수정: 화면 상단 좌표를 '수학적'으로 고정 (가운데 정렬 무력화) */
     .start-card {
-      background: #ffffff;
-      padding: 22px 20px; /* 내부 패딩을 살짝 줄여 컴팩트하게 조율 */
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(65, 156, 146, 0.08);
-      border: 1px solid #d3eae7;
-      max-width: 400px;
-      width: 100%;
+      position: absolute !important;
+      top: 15px !important;      /* 외부 요인과 상관없이 무조건 화면 맨 위에서 15px 아래에 고정 */
+      left: 50% !important;      /* 화면 가로 기준 정중앙 배치 시작점 */
+      transform: translateX(-50%) !important; /* 카드 자체 너비의 절반만큼 왼쪽으로 밀어 완벽한 수평 중앙 정렬 */
       
-      /* 🛠️ 핵심 수정: 위아래 마진(vh)을 제거하여 상단 여백 유발 원인 차단 */
-      margin: 0 auto; 
+      background: #ffffff !important;
+      padding: 22px 15px !important;
+      border-radius: 20px !important;
+      box-shadow: 0 10px 30px rgba(65, 156, 146, 0.08) !important;
+      border: 1px solid #d3eae7 !important;
+      width: 90% !important;     /* 모바일 좌우 여백 확보 */
+      max-width: 380px !important;
+      margin: 0 !important;      /* 마진으로 인한 밀림 소멸 */
+      box-sizing: border-box !important;
       pointer-events: auto !important;
     }
 
-    /* 이미지 가로 정렬 레이아웃 (공간 압축 유지) */
+    /* 이미지 가로 정렬 */
     .img-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 15px;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 10px !important;
+      margin-bottom: 15px !important;
     }
     
     .img-wrapper img {
-      width: 38%; /* 조금 더 컴팩트하게 조절 */
-      max-width: 120px;
-      height: auto;
-      object-fit: contain;
+      width: 38% !important;
+      max-width: 110px !important;
+      height: auto !important;
+      object-fit: contain !important;
     }
 
-    /* 안내 메시지 텍스트 */
+    /* 안내 메시지 */
     .start-card p {
-      font-size: 14px;
-      line-height: 1.5;
-      color: #245752;
-      font-weight: 700;
-      word-break: keep-all;
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      color: #245752 !important;
+      font-weight: 700 !important;
+      word-break: keep-all !important;
     }
 
     /* 스타트 버튼 */
     #start_btn {
-      width: 100%;
-      max-width: 220px;
-      height: 46px;
-      font-size: 15px; 
-      font-weight: bold;
-      background: linear-gradient(to right, #79cb83, #3ca89e); 
-      color: white;
-      border: none; 
-      border-radius: 23px; 
-      margin-top: 18px; 
-      cursor: pointer;
-      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25);
+      width: 100% !important;
+      max-width: 220px !important;
+      height: 46px !important;
+      font-size: 15px !important; 
+      font-weight: bold !important;
+      background: linear-gradient(to right, #79cb83, #3ca89e) !important; 
+      color: white !important;
+      border: none !important; 
+      border-radius: 23px !important; 
+      margin-top: 18px !important; 
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25) !important;
     }
 
-    /* 숨김 클래스 */
+    /* 숨김 처리 */
     #start_area.hide {
       opacity: 0 !important;
       visibility: hidden !important;
