@@ -26,26 +26,7 @@
         padding: 0;
         font-family: "Pretendard Variable", Pretendard, sans-serif;
     }
-    #container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    min-height: 100vh;
-    min-height: 100dvh;        /* ✅ 모바일 동적 뷰포트 대응 */
-    background-color: #edf6f5;
-    z-index: 999999;
-    pointer-events: auto;
-    overflow-y: auto;           /* ✅ 스크롤 보장 */
-    -webkit-overflow-scrolling: touch;  /* ✅ iOS 부드러운 스크롤 */
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 20px 15px 60px;    /* ✅ 하단 패딩 확보 — 마지막 버튼이 화면 끝에 붙지 않게 */
-    box-sizing: border-box;
-    transition: opacity 0.4s ease, visibility 0.4s ease;
-}
+
     /* ② z-index 명확화 */
 #start_area {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -63,7 +44,7 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      z-index: 9999;
+      z-index: 9998;
     }
 
     .skybox-btn {
