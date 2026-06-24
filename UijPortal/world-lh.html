@@ -29,86 +29,89 @@
       font-family: "Pretendard Variable", Pretendard, sans-serif;
   }
 
-  #start_area {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    background: #edf6f5 !important;
-    z-index: 99999 !important;
-    display: block !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    opacity: 1;
-    visibility: visible;
-  }
+ /* 시작 화면 레이어 - 모바일 스크롤 완벽 허용 구조 */
+    #start_area {
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100vw; 
+      height: 100vh;
+      background: #edf6f5; 
+      z-index: 99999 !important; 
+      
+      /* 렌더링 한계를 넘어가면 세로 스크롤을 강제로 활성화 */
+      display: block;
+      overflow-y: auto; 
+      -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 보장 */
+      padding: 20px 15px;
+      pointer-events: auto !important;
+      
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
 
-  /* ✅ position: absolute → fixed 로 변경 */
-  .start-card {
-    position: absolute !important;
-    top: 15px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    /* 중앙 정렬 카드 레이아웃 정돈 */
+    .start-card {
+      background: #ffffff;
+      padding: 30px 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(65, 156, 146, 0.08);
+      border: 1px solid #d3eae7;
+      max-width: 400px;
+      width: 100%;
+      
+      /* 스크롤 박스 내부에서 자연스럽게 중앙 정렬되도록 여백 설정 */
+      margin: 4vh auto; 
+      pointer-events: auto !important;
+    }
 
-    background: #ffffff !important;
-    padding: 22px 15px !important;
-    border-radius: 20px !important;
-    box-shadow: 0 10px 30px rgba(65, 156, 146, 0.08) !important;
-    border: 1px solid #d3eae7 !important;
-    width: 90% !important;
-    max-width: 380px !important;
-    margin: 0 !important;
-    box-sizing: border-box !important;
-    pointer-events: auto !important;
-  }
+    /* 💡 세로 공간 절약을 위해 두 이미지를 가로로 정렬 */
+    .img-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .img-wrapper img {
+      width: 42%; /* 화면 너비에 맞게 유연하게 축소 */
+      max-width: 130px;
+      height: auto;
+      object-fit: contain;
+    }
 
-  .img-wrapper {
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 10px !important;
-    margin-bottom: 15px !important;
-  }
+    /* 안내 메시지 본문 규격 조정 */
+    .start-card p {
+      font-size: 14.5px;
+      line-height: 1.6;
+      color: #245752;
+      font-weight: 700;
+      word-break: keep-all;
+    }
 
-  .img-wrapper img {
-    width: 38% !important;
-    max-width: 110px !important;
-    height: auto !important;
-    object-fit: contain !important;
-  }
+    #start_btn {
+      width: 100%;
+      max-width: 220px;
+      height: 48px;
+      font-size: 16px; 
+      font-weight: bold;
+      background: linear-gradient(to right, #79cb83, #3ca89e); 
+      color: white;
+      border: none; 
+      border-radius: 24px; 
+      margin-top: 22px; 
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25);
+    }
 
-  .start-card p {
-    font-size: 14px !important;
-    line-height: 1.5 !important;
-    color: #245752 !important;
-    font-weight: 700 !important;
-    word-break: keep-all !important;
-  }
-
-  #start_btn {
-    width: 100% !important;
-    max-width: 220px !important;
-    height: 46px !important;
-    font-size: 15px !important;
-    font-weight: bold !important;
-    background: linear-gradient(to right, #79cb83, #3ca89e) !important;
-    color: white !important;
-    border: none !important;
-    border-radius: 23px !important;
-    margin-top: 18px !important;
-    cursor: pointer !important;
-    box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25) !important;
-  }
-
-  #start_area.hide {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
+    /* 숨김 처리 애니메이션 클래스 */
+    #start_area.hide {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
 
   #skybox-panel {
     position: fixed;
