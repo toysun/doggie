@@ -118,6 +118,44 @@
       visibility: hidden !important;
       pointer-events: none !important;
     }
+  /* ✅ 메뉴 컨테이너: 우측 하단, 세로 배치 */
+#container {
+  position: fixed;
+  right: 16px;
+  bottom: 90px;        /* ✅ 캡처 버튼(보통 하단 중앙)과 겹치지 않도록 위로 띄움 */
+  display: flex;
+  flex-direction: column;   /* ✅ 세로 배열 */
+  align-items: center;
+  gap: 12px;
+  z-index: 9998;
+  pointer-events: none;  /* 시작 전에는 터치 막음 (executeStart에서 auto로 전환) */
+}
+
+/* ✅ 메뉴 버튼 (꽃 아이콘 / 지우개) */
+.carousel {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  border: 3px solid #ffffff;
+  background-color: #000;
+  background-size: cover;
+  background-position: center;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  transition: transform 0.15s, border-color 0.15s;
+  padding: 0;
+}
+
+.carousel:hover {
+  transform: scale(1.06);
+  border-color: #cceeff;
+}
+
+.carousel.focused {
+  border-color: #00e5ff;
+  transform: scale(1.12);
+  box-shadow: 0 0 0 2px #00e5ff, 0 2px 12px rgba(0,0,0,0.6);
+}
 </style>
 </head>
 <body>
