@@ -264,7 +264,25 @@
       })
     }
   })
+    
+(function () {
+  function registerComponents () {
 
+    // 0. 금속 재질 픽스 컴포넌트 (위치 이동)
+    AFRAME.registerComponent('fix-metal-material', {
+      init: function () {
+        this.el.addEventListener('model-loaded', (evt) => {
+          const model = evt.detail.model;
+          model.traverse((node) => {
+            if (node.isMesh && node.material) {
+              node.material.metalness = 0.3;
+              node.material.roughness = 0.5;
+              node.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    });
   // A-Frame 컴포넌트 로직 연동
   AFRAME.registerComponent('selection-place-1', {
     init() {
