@@ -16,11 +16,127 @@
 
   <!--script type="module" src="./app1.js" defer></script-->
   <link rel="stylesheet" href="./index.css">
+<style>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+    }
+
+    /* ✅ html, body 자체 정렬 영향 차단 */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      position: relative !important;
+    }
+
+    /* ── 시작 안내 팝업 ── */
+    #start_area {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.55) !important;
+      z-index: 99999 !important;
+      display: block !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .start-card {
+      position: fixed !important;
+      top: 15px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+
+      background: #ffffff !important;
+      padding: 22px 15px !important;
+      border-radius: 20px !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+      border: 1px solid #d3eae7 !important;
+      width: 90% !important;
+      max-width: 380px !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      pointer-events: auto !important;
+      text-align: center;
+    }
+
+    .img-wrapper {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 10px !important;
+      margin-bottom: 15px !important;
+    }
+
+    .img-wrapper img {
+      width: 38% !important;
+      max-width: 110px !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+
+    .start-card p {
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      color: #245752 !important;
+      font-weight: 700 !important;
+      word-break: keep-all !important;
+    }
+
+    #start_btn {
+      width: 100% !important;
+      max-width: 220px !important;
+      height: 46px !important;
+      font-size: 15px !important;
+      font-weight: bold !important;
+      background: linear-gradient(to right, #79cb83, #3ca89e) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 23px !important;
+      margin-top: 18px !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25) !important;
+    }
+
+    #start_area.hide {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+</style>
 </head>
 <body>
 <div id="container"></div>
-
+<!-- ✅ 서비스 안내 팝업 -->
+  <div id="start_area">
+    <div class="start-card">
+      <div class="img-wrapper">
+        <img src="./assets/textures/photo-auth.png" alt="AR 포토존" width="200">
+        <img src="./assets/textures/world-lh-300.png" alt="AR 플레이" width="200">
+      </div>
+      <p>
+        등대 주변에서<br>
+        메뉴를 골라 바닥을 터치해서 등대 주변을 꾸며주세요,<br>
+        인증샷을 올리면 최종 인증이 완료됩니다.
+      </p>
+      <button id="start_btn">포토존 시작</button>
+    </div>
+  </div>
 <a-scene
   responsive-immersive
   landing-page
