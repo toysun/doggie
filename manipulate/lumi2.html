@@ -168,10 +168,10 @@
     xrweb="allowedDevices: any">
 
     <a-assets>
-      <a-asset-item id="lumi-appear"     src="./lumi-dance-5.glb"></a-asset-item>
-      <a-asset-item id="butterfly-color" src="./seagull-fly-loop.glb"></a-asset-item>
-      <a-asset-item id="crabby-dance"    src="./haemu-idle.glb"></a-asset-item>
-      <a-asset-item id="tropical-fish"   src="./cloud-storm-loop.glb"></a-asset-item>
+      <a-asset-item id="lumi-dance"     src="./lumi-dance-5.glb"></a-asset-item>
+      <a-asset-item id="seagull-fly" src="./seagull-fly-loop.glb"></a-asset-item>
+      <a-asset-item id="haemu-idle"    src="./haemu-idle.glb"></a-asset-item>
+      <a-asset-item id="cloud-storm"   src="./cloud-storm-loop.glb"></a-asset-item>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -192,31 +192,32 @@
         shadowMapHeight:2048;
         shadowMapWidth:2048;
         shadowCameraTop: 10;
-        target: #model;"
-      xrextras-attach="target: model; offset: 1 15 3;"
+        target: #ground;"
+      xrextras-attach="target: ground; offset: 1 15 3;"
       shadow>
     </a-entity>
 
     <a-light type="ambient" intensity="0.7"></a-light>
 
-    <!-- ✅ 루미 + 나비 그룹: 초기 visible=false (선택 전 숨김) -->
+    <!-- ✅ 루미 + 갈매기 그룹: 초기 visible=false (선택 전 숨김) -->
     <a-entity
       id="lumi"
       visible="false"
-      gltf-model="#lumi-appear"
+      gltf-model="#lumi-dance"
+      position="0 -10 0"
       rotation="0 0 0"
       scale="3 3 3"
       xrextras-hold-drag="rise-height: 0"
       xrextras-two-finger-rotate
       absolute-pinch-scale
       proximity
-      animation="property: position; from: 0 -10 0; to: 0 5 0; dir: linear; delay: 4000; dur: 8000; loop: false"
-      animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; delay: 4000; dur: 8000; loop: false"
+      animation="property: position; from: 0 -10 0; to: 0 5 0; dir: linear; delay: 200; dur: 1500; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 3 3 3; dir: linear; delay: 200; dur: 1500; loop: false"
       animation-mixer
       shadow="receive: false">
       <a-entity
-        id="butterfly"
-        gltf-model="#butterfly-color"
+        id="seagull"
+        gltf-model="#seagull-fly"
         rotation="0 90 0"
         scale="2 2 2"
         xrextras-hold-drag="rise-height: 0"
@@ -230,23 +231,24 @@
 
     <!-- ✅ 크레비 + 물고기 그룹: 초기 visible=false (선택 전 숨김) -->
     <a-entity
-      id="crabby"
+      id="haeumu"
       visible="false"
-      gltf-model="#crabby-dance"
+      gltf-model="#haemu-idle"
+      position="0 -10 0"
       rotation="0 0 0"
       scale="3 3 3"
       xrextras-hold-drag="rise-height: 0"
       xrextras-two-finger-rotate
       absolute-pinch-scale
       proximity
-      animation="property: position; from: 0 -10 0; to: 0 8 0; dir: linear; delay: 4000; dur: 8000; loop: false"
-      animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; delay: 4000; dur: 8000; loop: false"
+      animation="property: position; from: 0 -10 0; to: 0 8 0; dir: linear; delay: 200; dur: 1500; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 3 3 3; dir: linear; delay: 200; dur: 1500; loop: false"
       animation-mixer
       shadow="receive: false">
       <!-- ✅ id 중복 수정: car → fish -->
       <a-entity
         id="fish"
-        gltf-model="#tropical-fish"
+        gltf-model="#cloud-storm"
         rotation="0 0 0"
         scale="2 2 2"
         xrextras-hold-drag="rise-height: 0"
