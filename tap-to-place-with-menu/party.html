@@ -350,7 +350,8 @@
             newElement.setAttribute('scale', '0.0001 0.0001 0.0001')
             newElement.setAttribute('shadow', {receive: false})
             newElement.setAttribute('class', 'cantap')
-
+             newElement.setAttribute('animation-mixer', '')
+            
             scene.appendChild(newElement)
             newElement.addEventListener('model-loaded', () => {
               newElement.setAttribute('visible', 'true')
