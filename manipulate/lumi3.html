@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!-- <head> 안에 추가 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>8th Wall Web: Manipulate</title>
+
+  <script src="//cdn.8thwall.com/web/aframe/8frame-1.4.1.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+    }
+
+#container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;        /* ✅ 모바일 동적 뷰포트 대응 */
+    background-color: #edf6f5;
+    z-index: 999999;
+    pointer-events: auto;
+    overflow-y: auto;           /* ✅ 스크롤 보장 */
+    -webkit-overflow-scrolling: touch;  /* ✅ iOS 부드러운 스크롤 */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 20px 15px 60px;    /* ✅ 하단 패딩 확보 — 마지막 버튼이 화면 끝에 붙지 않게 */
+    box-sizing: border-box;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+#start_area {
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
+    background: #ffffff;
+    padding: 35px 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(65, 156, 146, 0.06);
+    border: 1px solid #d3eae7;
+    margin-bottom: 20px;        /* ✅ 추가: 스크롤 시 하단 여유 */
+}
+
+/* 이미지 크기를 화면 비율에 맞게 축소 — 모바일에서 과도하게 큰 이미지가 공간을 차지하는 것 방지 */
+.main-guide-img {
+    margin-bottom: 15px;
+    display: inline-block;
+    height: auto;
+    max-width: 60%;             /* ✅ 추가: 작은 화면에서 비율 제한 */
+}
+
+    .guide-text {
+        color: #245752;
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        word-break: keep-all;
+    }
+
+    .photozone-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .photozone-card {
+        background: #fafdfd;
+        border: 1px solid #e1f0ee;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .photozone-card:active {
+        transform: scale(0.98);
+        border-color: #419c92;
+    }
+
+.photozone-card img {
+    max-width: 70%;             /* ✅ 100% → 70%로 축소: 카드 두 개가 한 화면에 들어오기 쉽게 */
+    height: auto;
+    margin-bottom: 15px;
+    border-radius: 8px;
+}
+
+    .photozone-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #35877e;
+        margin-bottom: 12px;
+    }
+
+    .start-zone-btn {
+        width: 100%;
+        max-width: 200px;
+        height: 44px;
+        background: linear-gradient(to right, #79cb83, #3ca89e);
+        color: #ffffff;
+        border: none;
+        border-radius: 22px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(60, 168, 158, 0.2);
+        transition: opacity 0.2s;
+    }
+    .start-zone-btn:hover {
+        opacity: 0.95;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ✅ container를 body 안으로 이동 -->
+  <div id="container">
+    <div id="start_area">
+      <img src="./photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
+
+      <p class="guide-text">
+        등대를 배경으로 <br>
+        아래의 2개 AR포토존 중 하나를 선택해서<br>
+        사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
+      </p>
+
+      <div class="photozone-container">
+        <div class="photozone-card">
+          <div class="photozone-title">✨ AR 루미와 어선 포토존</div>
+          <img src="./lumi-boat-300.png" alt="AR 루미" width="200">
+          <button class="start-zone-btn" onclick="startNavigation('lumi')">포토존 시작</button>
+          <!-- ✅ zoneType을 entity id와 동일하게 'lumi' 로 통일 -->
+        </div>
+
+        <div class="photozone-card">
+          <div class="photozone-title">🌍 AR 최고의 칭찬</div>
+          <img src="./text-best-300.png" alt="AR Best" width="200">
+          <button class="start-zone-btn" onclick="startNavigation('text')">포토존 시작</button>
+          <!-- ✅ zoneType을 entity id와 동일하게 'crabby' 로 통일 -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a-scene
+    xrextras-gesture-detector
+    landing-page
+    xrextras-loading
+    xrextras-runtime-error
+    renderer="colorManagement: true"
+    xrweb="allowedDevices: any">
+
+    <a-assets>
+      <a-asset-item id="lumi-telescope"     src="./lumi-telescope-ani.glb"></a-asset-item>
+      <a-asset-item id="boat-circle" src="./boat-circle-ani.glb"></a-asset-item>
+      <a-asset-item id="text-best"    src="./text-best-ani.glb"></a-asset-item>
+      <a-asset-item id="heart-balloon"   src="./heart-balloon-color-loop"></a-asset-item>
+    </a-assets>
+
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+
+    <a-camera
+      id="camera"
+      position="0 8 16"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+
+    <a-entity
+      light="
+        type: directional;
+        intensity: 0.8;
+        castShadow: true;
+        shadowMapHeight:2048;
+        shadowMapWidth:2048;
+        shadowCameraTop: 10;
+        target: #model;"
+      xrextras-attach="target: model; offset: 1 15 3;"
+      shadow>
+    </a-entity>
+
+    <a-light type="ambient" intensity="0.7"></a-light>
+
+    <!-- ✅ 루미 + 나비 그룹: 초기 visible=false (선택 전 숨김) -->
+    <a-entity
+      id="lumi"
+      visible="false"
+      gltf-model="#lumi-telescope"
+      rotation="0 0 0"
+      scale="3 3 3"
+      xrextras-hold-drag="rise-height: 0"
+      xrextras-two-finger-rotate
+      absolute-pinch-scale
+      proximity
+      animation="property: position; from: 0 -10 0; to: 0 5 0; dir: linear; delay: 4000; dur: 8000; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; delay: 4000; dur: 8000; loop: false"
+      animation-mixer
+      shadow="receive: false">
+      <a-entity
+        id="boat"
+        gltf-model="#baot-circle"
+        rotation="0 90 0"
+        scale="2 2 2"
+        xrextras-hold-drag="rise-height: 0"
+        xrextras-two-finger-rotate
+        absolute-pinch-scale
+        proximity
+        animation-mixer
+        shadow="receive: false">
+      </a-entity>
+    </a-entity>
+
+    <!-- ✅ 크레비 + 물고기 그룹: 초기 visible=false (선택 전 숨김) -->
+    <a-entity
+      id="text"
+      visible="false"
+      gltf-model="#text-best"
+      rotation="0 0 0"
+      scale="3 3 3"
+      xrextras-hold-drag="rise-height: 0"
+      xrextras-two-finger-rotate
+      absolute-pinch-scale
+      proximity
+      animation="property: position; from: 0 -10 0; to: 0 8 0; dir: linear; delay: 4000; dur: 8000; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; delay: 4000; dur: 8000; loop: false"
+      animation-mixer
+      shadow="receive: false">
+      <!-- ✅ id 중복 수정: car → fish -->
+      <a-entity
+        id="heart"
+        gltf-model="#heart-balloon"
+        rotation="0 0 0"
+        scale="2 2 2"
+        xrextras-hold-drag="rise-height: 0"
+        xrextras-two-finger-rotate
+        absolute-pinch-scale
+        proximity
+        animation-mixer
+        shadow="receive: false">
+      </a-entity>
+    </a-entity>
+
+    <a-plane
+      id="ground"
+      rotation="-90 0 0"
+      width="1000"
+      height="1000"
+      material="shader: shadow"
+      shadow>
+    </a-plane>
+  </a-scene>
+
+  <script>
+    // ✅ 버튼의 zoneType과 동일한 id를 가진 엔티티만 표시,
+    //    나머지 등록된 zone 엔티티는 모두 숨김
+    const zoneIds = ['lumi', 'text'];
+
+    function startNavigation(zoneType) {
+      console.log("선택된 포토존 형태: " + zoneType);
+
+      // 시작 UI 페이드아웃 후 숨김
+      const uiContainer = document.getElementById('container');
+      if (uiContainer) {
+        uiContainer.style.opacity = '0';
+        setTimeout(() => {
+          uiContainer.style.visibility = 'hidden';
+          uiContainer.style.display = 'none';
+        }, 400);
+      }
+
+      // ✅ zoneType과 일치하는 entity만 visible=true, 나머지는 false
+      zoneIds.forEach((id) => {
+        const entity = document.getElementById(id);
+        if (entity) {
+          entity.setAttribute('visible', id === zoneType);
+        }
+      });
+    }
+  </script>
+</body>
+</html>
