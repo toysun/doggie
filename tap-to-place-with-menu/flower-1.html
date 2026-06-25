@@ -197,6 +197,28 @@
   </a-box>
 </a-scene>
 <script>
+    // ✅ 시작 버튼 클릭 시 팝업 닫기
+  window.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start_btn')
+    if (startBtn) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        startBtn.addEventListener(eventType, (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          const startArea = document.getElementById('start_area')
+          if (startArea) {
+            startArea.classList.add('hide')
+            setTimeout(() => {
+              startArea.style.display = 'none'
+            }, 300)
+          }
+          // 메뉴 컨테이너 터치 가능하도록 활성화
+          const container = document.getElementById('container')
+          if (container) container.style.pointerEvents = 'auto'
+        }, { passive: false })
+      })
+    }
+  })
   // ✅ export 제거, AFRAME.registerComponent로 등록
   AFRAME.registerComponent('selection-place-1', {
     init() {
