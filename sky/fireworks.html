@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="8thwall:package" content="@8thwall.xrextras" />
+    <title>Sky Effects</title>
+
+    <!-- We've included a slightly modified version of A-Frame, which fixes some polish concerns -->
+    <script src="./../xr_st/8frame-1.4.1.min.js"></script>
+
+    <!-- XR Extras - provides utilities like load screen, almost there, and error handling.
+         See github.com/8thwall/web/tree/master/xrextras -->
+    <script src="./../xr_st/xrextras.js"></script>
+
+    <!-- Landing Pages - see https://www.8thwall.com/docs/web/#landing-pages -->
+    <script src='./../xr_st/landing-page.js'></script>
+
+    <!-- Coaching Overlay - see https://www.8thwall.com/docs/web/#sky-effects-coaching-overlay -->
+    <script src='./../xr_st/coaching-overlay.js'></script>
+
+    <!-- 8th Wall Web - Replace the app key here with your own app key -->
+    <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+    <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+    <script src="./sky-recenter.js"></script>
+    <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      position: relative !important;
+    }
+
+    /* ── 시작 안내 팝업 ── */
+    #start_area {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.55) !important;
+      z-index: 99999 !important;
+      display: block !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .start-card {
+      position: fixed !important;
+      top: 15px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      background: #ffffff !important;
+      padding: 22px 15px !important;
+      border-radius: 20px !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+      border: 1px solid #d3eae7 !important;
+      width: 90% !important;
+      max-width: 380px !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      pointer-events: auto !important;
+      text-align: center;
+    }
+
+    .img-wrapper {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 10px !important;
+      margin-bottom: 15px !important;
+    }
+
+    .img-wrapper img {
+      width: 38% !important;
+      max-width: 110px !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+
+    .start-card p {
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      color: #245752 !important;
+      font-weight: 700 !important;
+      word-break: keep-all !important;
+    }
+
+    #start_btn {
+      width: 100% !important;
+      max-width: 220px !important;
+      height: 46px !important;
+      font-size: 15px !important;
+      font-weight: bold !important;
+      background: linear-gradient(to right, #79cb83, #3ca89e) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 23px !important;
+      margin-top: 18px !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25) !important;
+    }
+
+    #start_area.hide {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+</style>
+  </head>
+
+  <body>
+    <div id="start_area">
+    <div class="start-card">
+      <div class="img-wrapper">
+        <img src="./photo-auth.png" alt="AR 포토존" width="200">
+        <img src="./lh-fireworks-300.png" alt="AR 하늘인식 불꽃놀이" width="200">
+      </div>
+      <p>
+        등대를 배경으로 <br>
+        하늘을 비춰서 화려한 불꽃놀이를 감상 하세요,<br>
+        인증샷을 올리면 최종 인증이 완료됩니다.
+      </p>
+      <button id="start_btn">포토존 시작</button>
+    </div>
+  </div>
+    <a-scene 
+        xrextras-loading
+        xrextras-runtime-error
+        landing-page
+        sky-coaching-overlay
+        sky-recenter
+        renderer="colorManagement: true"
+        xrlayers>
+        
+      <a-assets>
+        <a-asset-item id="legoModel" src="./colorful-fireworks.glb"></a-asset-item>
+        <a-asset-item id="legoModel-1" src="./fireworks-color_x2.glb"></a-asset-item>
+        <a-asset-item id="legoModel-2" src="./fireworks_red.glb"></a-asset-item>
+        <a-asset-item id="legoModel-3" src="./fireworks_orange.glb"></a-asset-item>
+        <img id="skyTexture" src='./space.png'>
+      </a-assets>
+
+        <a-camera position="0 3 0"></a-camera>
+        
+        <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
+            <a-sky material="src: #skyTexture; transparent: true; opacity: 1;"></a-sky>
+
+            <a-entity
+               id="model"
+               gltf-model="#legoModel"
+               position="0 -10 -20"
+               scale="100 100 100"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+            <a-entity
+               id="model"
+               gltf-model="#legoModel"
+               position="-10 -2 -25"
+               scale="100 100 100"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+                      <a-entity
+               id="model"
+               gltf-model="#legoModel"
+               position="8 -5 -30"
+               scale="100 100 100"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+                      <a-entity
+               id="model"
+               gltf-model="#legoModel-1"
+               position="0 -10 -20"
+               scale="1 1 1"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+            <a-entity
+               id="model"
+               gltf-model="#legoModel-2"
+               position="-10 -2 -25"
+               scale="1 1 1"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+                      <a-entity
+               id="model"
+               gltf-model="#legoModel-3"
+               position="8 -5 -30"
+               scale="1 1 1"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+            <!--a-box 
+                position="0 10 -10"
+                scale="5 5 5"
+                material="
+                color: #AD50FF; shader: flat; 
+                src: https://cdn.8thwall.com/web/assets/cube-texture.png"
+                shadow>
+            </a-box-->
+            <a-entity light="type: ambient; intensity: 1;"></a-entity>
+        </sky-scene>
+    </a-scene>
+    <script>
+        // 시작 버튼 클릭 시 팝업 제어 및 메뉴 잠금 해제
+  window.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start_btn')
+    if (startBtn) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        startBtn.addEventListener(eventType, (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          const startArea = document.getElementById('start_area')
+          if (startArea) {
+            startArea.classList.add('hide')
+            setTimeout(() => {
+              startArea.style.display = 'none'
+            }, 300)
+          }
+          // 🛠️ 변동된 고유 ID 타겟팅 활성화
+          const container = document.getElementById('ar-menu-container')
+          if (container) container.style.pointerEvents = 'auto'
+        }, { passive: false })
+      })
+    }
+  })
+    </script>
+  </body>
+</html>
