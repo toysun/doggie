@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <title>tap-to-place-with-menu</title>
+
+  <script src="./../xr_st/8frame-1.4.1.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>  
+
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <link rel="stylesheet" href="./index.css">
+
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      position: relative !important;
+    }
+
+    /* ── 시작 안내 팝업 ── */
+    #start_area {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.55) !important;
+      z-index: 99999 !important;
+      display: block !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .start-card {
+      position: fixed !important;
+      top: 15px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      background: #ffffff !important;
+      padding: 22px 15px !important;
+      border-radius: 20px !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+      border: 1px solid #d3eae7 !important;
+      width: 90% !important;
+      max-width: 380px !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      pointer-events: auto !important;
+      text-align: center;
+    }
+
+    .img-wrapper {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 10px !important;
+      margin-bottom: 15px !important;
+    }
+
+    .img-wrapper img {
+      width: 38% !important;
+      max-width: 110px !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+
+    .start-card p {
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      color: #245752 !important;
+      font-weight: 700 !important;
+      word-break: keep-all !important;
+    }
+
+    #start_btn {
+      width: 100% !important;
+      max-width: 220px !important;
+      height: 46px !important;
+      font-size: 15px !important;
+      font-weight: bold !important;
+      background: linear-gradient(to right, #79cb83, #3ca89e) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 23px !important;
+      margin-top: 18px !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25) !important;
+    }
+
+    #start_area.hide {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    /* ── 🛠️ 메뉴 컨테이너 고유 ID 변경 및 우측 하단 고정 ── */
+    #ar-menu-container {
+      position: fixed !important;
+      right: 16px !important;
+      bottom: 95px !important;        /* 우측 하단 캡처 버튼 영역 위로 정밀 배치 */
+      display: flex !important;
+      flex-direction: column !important; /* 세로 배열 */
+      align-items: center !important;
+      gap: 14px !important;
+      z-index: 9998 !important;
+      width: auto !important;
+      height: auto !important;
+      pointer-events: none;           /* 초기 구동 전 터치 레이어 무력화 */
+    }
+
+    /* ── 🛠️ 메뉴 버튼 찌그러짐 방지 및 규격화 ── */
+    .carousel {
+      width: 56px !important;
+      height: 56px !important;
+      min-width: 56px !important;      /* 반사 압축 차단 */
+      min-height: 56px !important;     /* 반사 압축 차단 */
+      flex-shrink: 0 !important;       /* 가로세로 정원 유지 (찌그러짐 버그 원천 해결) */
+      border-radius: 50% !important;
+      border: 3px solid #ffffff !important;
+      background-color: #111111 !important;
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35) !important;
+      transition: transform 0.15s, border-color 0.15s !important;
+      padding: 0 !important;
+    }
+
+    .carousel:hover {
+      transform: scale(1.06) !important;
+      border-color: #cceeff !important;
+    }
+
+    .carousel.focused {
+      border-color: #00e5ff !important;
+      transform: scale(1.12) !important;
+      box-shadow: 0 0 0 2px #00e5ff, 0 4px 14px rgba(0,0,0,0.45) !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="ar-menu-container"></div>
+
+  <div id="start_area">
+    <div class="start-card">
+      <div class="img-wrapper">
+        <img src="./assets/icons/photo-auth.png" alt="AR 포토존" width="200">
+        <img src="./assets/icons/tap2place-300.png" alt="AR 플레이" width="200">
+      </div>
+      <p>
+        등대 주변에서 화면의 메뉴를 골라<br>
+        바닥을 터치해서 등대 주변을 꾸며주세요,<br>
+        인증샷을 올리면 최종 인증이 완료됩니다.
+      </p>
+      <button id="start_btn">포토존 시작</button>
+    </div>
+  </div>
+
+  <a-scene
+    responsive-immersive
+    landing-page
+    xrextras-gesture-detector
+    xrextras-loading
+    xrextras-runtime-error
+    renderer="colorManagement: true"
+    xrweb="
+      allowedDevices: any;
+      defaultEnvironmentFogIntensity: 0.5; 
+      defaultEnvironmentFloorTexture: #groundTex; 
+      defaultEnvironmentFloorColor: #FFF;
+      defaultEnvironmentSkyBottomColor: #B4C4CC; 
+      defaultEnvironmentSkyTopColor: #5ac8fa;
+      defaultEnvironmentSkyGradientStrength: 0.5;">
+      
+    <a-assets>
+      <a-asset-item id="narcissusModel" src="./assets/models/sea-bubble-cute-loop.glb"></a-asset-item>
+      <a-asset-item id="tulipModel" src="./assets/models/star-balloon-confetti.glb"></a-asset-item>
+      <a-asset-item id="margaritaModel" src="./assets/models/glitter-confetti.glb"></a-asset-item>
+    </a-assets>
+
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+
+    <a-camera
+      id="camera"
+      position="0 4 4"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+
+    <a-entity
+      light="
+        type: directional;
+        intensity: 0.8;
+        castShadow: true;
+        shadowMapHeight:2048;
+        shadowMapWidth:2048;
+        shadowCameraTop: 40;
+        shadowCameraBottom: -40;
+        shadowCameraRight: 40;
+        shadowCameraLeft: -40;
+        target: #camera"
+      xrextras-attach="target: camera; offset: 8 15 4"
+      position="1 4.3 2.5"
+      shadow>
+    </a-entity>
+
+    <a-light type="ambient" intensity="0.5"></a-light>
+
+    <a-entity selection-place-1></a-entity>
+
+    <a-box
+      id="ground"
+      class="cantap"
+      scale="1000 2 1000"
+      position="0 -0.99 0"
+      material="shader: shadow; transparent: true; opacity: 0.4"
+      shadow>
+    </a-box>
+  </a-scene>
+
+<script>
+  // 시작 버튼 클릭 시 팝업 제어 및 메뉴 잠금 해제
+  window.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start_btn')
+    if (startBtn) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        startBtn.addEventListener(eventType, (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          const startArea = document.getElementById('start_area')
+          if (startArea) {
+            startArea.classList.add('hide')
+            setTimeout(() => {
+              startArea.style.display = 'none'
+            }, 300)
+          }
+          // 🛠️ 변동된 고유 ID 타겟팅 활성화
+          const container = document.getElementById('ar-menu-container')
+          if (container) container.style.pointerEvents = 'auto'
+        }, { passive: false })
+      })
+    }
+  })
+
+  // A-Frame 컴포넌트 로직 연동
+  AFRAME.registerComponent('selection-place-1', {
+    init() {
+      // 🛠️ DOM 타겟 ID 수정
+      const container = document.getElementById('ar-menu-container')
+      const ground = document.getElementById('ground')
+      const scene = document.querySelector('a-scene')
+      
+      const entries = [
+        {id: '#narcissusModel', img: './assets/icons/narcissus.jpg'},
+        {id: '#tulipModel', img: './assets/icons/tulip.jpg'},
+        {id: '#margaritaModel', img: './assets/icons/chineserose.jpg'},
+        {id: 'eraser', img: './assets/icons/eraser.jpg'},
+      ]
+
+      let currentEntry = null
+      let focusedButton = null
+      let isErasing = false
+      let canCreateObject = true
+
+      function setEntry(index, button) {
+        currentEntry = index
+        isErasing = entries[index].id === 'eraser'
+        if (focusedButton) {
+          focusedButton.classList.remove('focused')
+        }
+        focusedButton = button
+        focusedButton.classList.add('focused')
+      }
+
+      entries.forEach((entry, index) => {
+        const videoButton = document.createElement('button')
+        videoButton.classList.add('carousel')
+        videoButton.style.backgroundImage = `url(${entry.img})`
+        videoButton.addEventListener('click', (event) => {
+          event.preventDefault()
+          setEntry(index, videoButton)
+        })
+
+        container.appendChild(videoButton)
+      })
+
+      // 🛠️ 수정: 조건식 타겟 ID 변경 반영
+      if (entries.length >= 5) {
+        container.style.pointerEvents = 'auto'
+      }
+
+      document.addEventListener('click', (event) => {
+        if (!event.target.closest('.carousel')) {
+          if (focusedButton) {
+            event.preventDefault()
+            focusedButton.focus()
+          }
+        }
+      })
+
+      scene.addEventListener('click', (event) => {
+        if (!canCreateObject) return
+        const {intersectedEl} = event.detail
+
+        if (isErasing) {
+          if (intersectedEl && intersectedEl !== ground && intersectedEl.classList.contains('cantap')) {
+            intersectedEl.setAttribute('animation', {
+              property: 'scale',
+              to: '0.0001 0.0001 0.0001',
+              easing: 'easeInQuad',
+              dur: 300,
+            })
+
+            setTimeout(() => {
+              if (intersectedEl.parentNode) {
+                intersectedEl.parentNode.removeChild(intersectedEl)
+              }
+            }, 300)
+          }
+        } else if (entries[currentEntry] && entries[currentEntry].id !== 'eraser') {
+          const {intersection} = event.detail
+          if (intersection && intersection.point) {
+            const newElement = document.createElement('a-entity')
+            newElement.setAttribute('position', intersection.point)
+            newElement.setAttribute('gltf-model', entries[currentEntry].id)
+            newElement.setAttribute('visible', 'false')
+            newElement.setAttribute('scale', '0.0001 0.0001 0.0001')
+            newElement.setAttribute('shadow', {receive: false})
+            newElement.setAttribute('class', 'cantap')
+
+            scene.appendChild(newElement)
+            newElement.addEventListener('model-loaded', () => {
+              newElement.setAttribute('visible', 'true')
+              newElement.setAttribute('animation', {
+                property: 'scale',
+                to: '1 1 1',
+                easing: 'easeOutElastic',
+                dur: 800,
+              })
+            })
+            console.log('Made one')
+
+            canCreateObject = false
+            setTimeout(() => {
+              canCreateObject = true
+            }, 200)
+          }
+        }
+      })
+    },
+  })
+</script>
+</body>
+</html>
