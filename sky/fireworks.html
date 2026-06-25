@@ -155,7 +155,8 @@
         <a-asset-item id="legoModel-3" src="./fireworks_orange.glb"></a-asset-item>
         <img id="skyTexture" src='./space.png'>
       </a-assets>
-
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
         <a-camera position="0 3 0"></a-camera>
         
         <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
@@ -172,7 +173,7 @@
             <a-entity
                id="model"
                gltf-model="#legoModel"
-               position="-10 -2 -25"
+               position="0 -10 -20"
                scale="100 100 100"
                shadow="receive: false"
                animation-mixer>
