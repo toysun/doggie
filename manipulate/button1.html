@@ -199,7 +199,7 @@
 (function () {
   function registerComponents () {
 
-    // 0. 금속 재질 픽스 컴포넌트 (위치 이동)
+    // 0. 금속 재질 픽스 컴포넌트
     AFRAME.registerComponent('fix-metal-material', {
       init: function () {
         this.el.addEventListener('model-loaded', (evt) => {
@@ -214,21 +214,7 @@
         });
       }
     });
-  // 시작 버튼 클릭 시 팝업 제어 및 메뉴 잠금 해제
-  window.addEventListener('DOMContentLoaded', () => {
-    const startBtn = document.getElementById('start_btn')
-    if (startBtn) {
-      ['click', 'touchstart'].forEach((eventType) => {
-        startBtn.addEventListener(eventType, (e) => {
-          e.preventDefault()
-          e.stopPropagation()
-          const startArea = document.getElementById('start_area')
-          if (startArea) {
-            startArea.classList.add('hide')
-            setTimeout(() => {
-              startArea.style.display = 'none'
-            }, 300)
-          }
+
     // 1. 컨페티 1회 재생 및 자동 숨김 컴포넌트
     AFRAME.registerComponent('confetti-once', {
       init () {
@@ -246,7 +232,7 @@
           action.setLoop(THREE.LoopOnce, 1);
           action.clampWhenFinished = true;
           this._action = action;
-          
+
           this.mixer.addEventListener('finished', () => {
             this.el.setAttribute('visible', false);
           });
@@ -272,7 +258,7 @@
           const model = evt.detail.model;
 
           this.mixer = new THREE.AnimationMixer(model);
-          
+
           (model.animations || []).forEach(c => {
             const action = this.mixer.clipAction(c);
             action.setLoop(THREE.LoopOnce, 1);
@@ -305,7 +291,7 @@
 
         Object.values(this.actions).forEach(a => a.stop());
         action.reset();
-        action.weight = 1; 
+        action.weight = 1;
         action.play();
       },
 
@@ -333,7 +319,7 @@
             console.warn('키패드 컨트롤러를 찾을 수 없습니다.');
             return;
           }
-          
+
           ctrl.playTake(this.data.idx + 1);
           ctrl.triggerConfetti(this.data.idx);
         });
@@ -344,6 +330,26 @@
   window.XR8
     ? registerComponents()
     : window.addEventListener('xrloaded', registerComponents);
+
+  // ✅ 시작 버튼 클릭 핸들러를 별도로 분리, 정상적으로 닫음
+  window.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start_btn');
+    if (startBtn) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        startBtn.addEventListener(eventType, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const startArea = document.getElementById('start_area');
+          if (startArea) {
+            startArea.classList.add('hide');
+            setTimeout(() => {
+              startArea.style.display = 'none';
+            }, 300);
+          }
+        }, { passive: false });
+      });
+    }
+  });
 })();
 </script>
   </body>
