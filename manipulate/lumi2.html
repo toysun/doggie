@@ -158,24 +158,20 @@
       </div>
     </div>
   </div>
- <!-- ✅ AR 씬이 삽입될 빈 컨테이너 (버튼 클릭 전까지 비어있음) -->
-  <div id="ar-container"></div>
- 
-  <!-- ✅ <a-scene> 마크업을 template 안에 보관 (DOM에 즉시 파싱되지 않음) -->
-  <template id="ar-scene-template">
-<a-scene
-  xrextras-gesture-detector
-  landing-page
-  xrextras-loading
-  xrextras-runtime-error
-  renderer="colorManagement: true"
-  xrweb="allowedDevices: any">
+
+  <a-scene
+    xrextras-gesture-detector
+    landing-page
+    xrextras-loading
+    xrextras-runtime-error
+    renderer="colorManagement: true"
+    xrweb="allowedDevices: any">
 
     <a-assets>
-      <a-asset-item id="lumi-appear"     src="./lumi-photo-ani.glb"></a-asset-item>
-      <a-asset-item id="butterfly-color" src="./butterfly-color-loop.glb"></a-asset-item>
-      <a-asset-item id="crabby-dance"    src="./crabby-dance.glb"></a-asset-item>
-      <a-asset-item id="tropical-fish"   src="./tropical-fish-loop.glb"></a-asset-item>
+      <a-asset-item id="lumi-appear"     src="./lumi-dance-5.glb"></a-asset-item>
+      <a-asset-item id="butterfly-color" src="./seagull-fly-loop.glb"></a-asset-item>
+      <a-asset-item id="crabby-dance"    src="./haemu-idle.glb"></a-asset-item>
+      <a-asset-item id="tropical-fish"   src="./cloud-storm-loop.glb"></a-asset-item>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -209,7 +205,7 @@
       visible="false"
       gltf-model="#lumi-appear"
       rotation="0 0 0"
-      scale="2 2 2"
+      scale="3 3 3"
       xrextras-hold-drag="rise-height: 0"
       xrextras-two-finger-rotate
       absolute-pinch-scale
@@ -221,7 +217,7 @@
       <a-entity
         id="butterfly"
         gltf-model="#butterfly-color"
-        rotation="0 0 0"
+        rotation="0 90 0"
         scale="2 2 2"
         xrextras-hold-drag="rise-height: 0"
         xrextras-two-finger-rotate
@@ -238,12 +234,12 @@
       visible="false"
       gltf-model="#crabby-dance"
       rotation="0 0 0"
-      scale="2 2 2"
+      scale="3 3 3"
       xrextras-hold-drag="rise-height: 0"
       xrextras-two-finger-rotate
       absolute-pinch-scale
       proximity
-      animation="property: position; from: 0 -10 0; to: 0 5 0; dir: linear; delay: 4000; dur: 8000; loop: false"
+      animation="property: position; from: 0 -10 0; to: 0 8 0; dir: linear; delay: 4000; dur: 8000; loop: false"
       animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; delay: 4000; dur: 8000; loop: false"
       animation-mixer
       shadow="receive: false">
@@ -271,7 +267,7 @@
       shadow>
     </a-plane>
   </a-scene>
-</template>
+
   <script>
     // ✅ 버튼의 zoneType과 동일한 id를 가진 엔티티만 표시,
     //    나머지 등록된 zone 엔티티는 모두 숨김
@@ -298,7 +294,6 @@
         }
       });
     }
-</script>
-  
+  </script>
 </body>
 </html>
