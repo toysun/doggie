@@ -282,6 +282,21 @@
   </a-scene>
 
   <script>
+    // 0. 금속 재질 픽스 컴포넌트
+    AFRAME.registerComponent('fix-metal-material', {
+      init: function () {
+        this.el.addEventListener('model-loaded', (evt) => {
+          const model = evt.detail.model;
+          model.traverse((node) => {
+            if (node.isMesh && node.material) {
+              node.material.metalness = 0.3;
+              node.material.roughness = 0.5;
+              node.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    });
     // ✅ 버튼의 zoneType과 동일한 id를 가진 엔티티만 표시,
     //    나머지 등록된 zone 엔티티는 모두 숨김
     const zoneIds = ['lumi', 'text'];
