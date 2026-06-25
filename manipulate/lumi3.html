@@ -170,8 +170,9 @@
     <a-assets>
       <a-asset-item id="lumi-telescope"     src="./lumi-telescope-ani.glb"></a-asset-item>
       <a-asset-item id="boat-circle" src="./boat-circle-ani.glb"></a-asset-item>
+      <a-asset-item id="seagull-fly" src="./seagull-fly-loop.glb"></a-asset-item>
       <a-asset-item id="text-best"    src="./text-best-ani.glb"></a-asset-item>
-      <a-asset-item id="heart-balloon"   src="./heart-balloons-confetti"></a-asset-item>
+      <a-asset-item id="heart-balloon"   src="./heart-balloon-color-confetti.glb"></a-asset-item>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -217,6 +218,18 @@
       <a-entity
         id="boat"
         gltf-model="#boat-circle"
+        rotation="0 90 0"
+        scale="2 2 2"
+        xrextras-hold-drag="rise-height: 0"
+        xrextras-two-finger-rotate
+        absolute-pinch-scale
+        proximity
+        animation-mixer
+        shadow="receive: false">
+      </a-entity>
+            <a-entity
+        id="seagull"
+        gltf-model="#seagull-fly"
         rotation="0 90 0"
         scale="2 2 2"
         xrextras-hold-drag="rise-height: 0"
