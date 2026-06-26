@@ -133,7 +133,7 @@
       </div>
       <p>
         등대를 배경으로 <br>
-        하늘을 비춰서 화려한 불꽃놀이를 감상 하세요,<br>
+        하늘을 비춰서 밤하늘의 별과 구름을 감상 하세요,<br>
         인증샷을 올리면 최종 인증이 완료됩니다.
       </p>
       <button id="start_btn">포토존 시작</button>
@@ -149,8 +149,8 @@
         xrlayers>
         
       <a-assets>
-        <a-asset-item id="fireworks-color" src="./colorful-fireworks.glb"></a-asset-item>
-        <a-asset-item id="fireworks-color1" src="./fireworks-color-x2.glb"></a-asset-item>
+        <!--a-asset-item id="fireworks-color" src="./colorful-fireworks.glb"></a-asset-item>
+        <a-asset-item id="fireworks-color1" src="./fireworks-color-x2.glb"></a-asset-item-->
         <a-asset-item id="star" src="./star-colorx3-confetti-100.glb"></a-asset-item>
         <a-asset-item id="cloud" src="./cloud-circle-loop.glb"></a-asset-item>
         <img id="skyTexture" src='./fantasy-starry-sky-constellations.jpg'>
@@ -161,29 +161,13 @@
         <a-camera position="0 3 0"></a-camera>
         
         <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
-            <a-sky material="src: #skyTexture; transparent: true; opacity: 1;"></a-sky>
+            <a-sky material="src: #skyTexture; transparent: true; opacity: 0.5;"></a-sky>
 
-            <a-entity
-               id="model"
-               gltf-model="#fireworks-color"
-               position="0 -10 -20"
-               scale="100 100 100"
-               shadow="receive: false"
-               animation-mixer>
-            </a-entity>
-                      <a-entity
-               id="model"
-               gltf-model="#fireworks-color1"
-               position="0 -5 -15"
-               scale="10 10 10"
-               shadow="receive: false"
-               animation-mixer>
-            </a-entity>
             <a-entity
                id="model"
                gltf-model="#star"
                position="1.8 6 -13"
-               scale="2 2 2"
+               scale="1 1 1"
                shadow="receive: false"
                animation-mixer>
             </a-entity>
@@ -191,7 +175,7 @@
                id="model"
                gltf-model="#cloud"
                position="1.8 6 -13"
-               scale="2 2 2"
+               scale="1 1 1"
                shadow="receive: false"
                animation-mixer>
             </a-entity>
