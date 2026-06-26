@@ -278,9 +278,9 @@
       defaultEnvironmentSkyGradientStrength: 0.5;">
       
     <a-assets>
-      <a-asset-item id="narcissusModel" src="./assets/models/lumi-dance-6-ani.glb"></a-asset-item>
-      <a-asset-item id="tulipModel"     src="./assets/models/haemu-balloon-ani.glb"></a-asset-item>
-      <a-asset-item id="margaritaModel" src="./assets/models/confetti_fbx.glb"></a-asset-item>
+      <a-asset-item id="lumiModel" src="./assets/models/lumi-dance-6-ani.glb"></a-asset-item>
+      <a-asset-item id="haemuModel"     src="./assets/models/haemu-balloon-ani.glb"></a-asset-item>
+      <a-asset-item id="confettiModel" src="./assets/models/confetti_fbx.glb"></a-asset-item>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -304,8 +304,8 @@
         shadowCameraBottom: -40;
         shadowCameraRight: 40;
         shadowCameraLeft: -40;
-        target: #camera"
-      xrextras-attach="target: camera; offset: 8 15 4"
+        target: #ground"
+      xrextras-attach="target: ground; offset: 8 15 4"
       position="1 4.3 2.5"
       shadow>
     </a-entity>
@@ -360,9 +360,9 @@
       const scene = document.querySelector('a-scene')
       
       const entries = [
-        {id: '#narcissusModel', img: './assets/icons/lumi-t.png'},
-        {id: '#tulipModel', img: './assets/icons/haemu-t.png'},
-        {id: '#margaritaModel', img: './assets/icons/confetti.png'},
+        {id: '#lumiModel', img: './assets/icons/lumi-t.png'},
+        {id: '#haemuModel', img: './assets/icons/haemu-t.png'},
+        {id: '#confettiModel', img: './assets/icons/confetti.png'},
         {id: 'eraser', img: './assets/icons/erase.png'},
       ]
 
