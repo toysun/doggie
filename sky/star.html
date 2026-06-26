@@ -149,11 +149,12 @@
         xrlayers>
         
       <a-assets>
-        <a-asset-item id="legoModel" src="./colorful-fireworks.glb"></a-asset-item>
-        <a-asset-item id="legoModel-1" src="./fireworks-color-x2.glb"></a-asset-item>
-        <a-asset-item id="legoModel-2" src="./fireworks_red.glb"></a-asset-item>
-        <a-asset-item id="legoModel-3" src="./fireworks_orange.glb"></a-asset-item>
-        <img id="skyTexture" src='./space.png'>
+        <a-asset-item id="fireworks-color" src="./colorful-fireworks.glb"></a-asset-item>
+        <a-asset-item id="fireworks-color1" src="./fireworks-color-x2.glb"></a-asset-item>
+        <a-asset-item id="star" src="./star-colorx3-confetti-100.glb"></a-asset-item>
+        <a-asset-item id="cloud" src="./cloud-cirle-loop.glb"></a-asset-item>
+        <img id="skyTexture" src='./fantasy-starry-sky-constellations.jpg'>
+        <!--img id="skyTexture" src='./space.png'-->
       </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
@@ -164,47 +165,23 @@
 
             <a-entity
                id="model"
-               gltf-model="#legoModel"
+               gltf-model="#fireworks-color"
                position="0 -10 -20"
                scale="100 100 100"
                shadow="receive: false"
                animation-mixer>
             </a-entity>
-            <a-entity
-               id="model"
-               gltf-model="#legoModel"
-               position="0 5 -10"
-               scale="100 100 100"
-               shadow="receive: false"
-               animation-mixer>
-            </a-entity>
                       <a-entity
                id="model"
-               gltf-model="#legoModel"
-               position="8 -5 -30"
-               scale="100 100 100"
-               shadow="receive: false"
-               animation-mixer>
-            </a-entity>
-                      <a-entity
-               id="model"
-               gltf-model="#legoModel-1"
+               gltf-model="#fireworks-color1"
                position="0 -5 -15"
                scale="10 10 10"
                shadow="receive: false"
                animation-mixer>
             </a-entity>
-             <a-entity
-               id="model"
-               gltf-model="#legoModel-1"
-               position="8 -10 -20"
-               scale="10 10 10"
-               shadow="receive: false"
-               animation-mixer>
-            </a-entity>
             <a-entity
                id="model"
-               gltf-model="#legoModel-2"
+               gltf-model="#star"
                position="-10 -2 -25"
                scale="10 10 10"
                shadow="receive: false"
@@ -212,7 +189,7 @@
             </a-entity>
                       <a-entity
                id="model"
-               gltf-model="#legoModel-3"
+               gltf-model="#cloud"
                position="8 -5 -30"
                scale="10 10 10"
                shadow="receive: false"
