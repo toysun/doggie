@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
@@ -20,6 +20,16 @@
         font-family: "Pretendard Variable", Pretendard, sans-serif;
     }
 
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      position: relative !important;
+    }
+
+    /* 시작 선택 팝업 레이어 */
     #container {
         position: fixed;
         top: 0;
@@ -124,10 +134,94 @@
     .start-zone-btn:hover {
         opacity: 0.95;
     }
+
+    /* ── 🛠️ 추가: 실시간 AR 화면 터치 유도 가이드 UI 디자인 ── */
+    #ar-touch-guide {
+      position: fixed !important;
+      top: 50% !important;
+      left: 50% !important;
+      transform: translate(-50%, -50%) !important;
+      z-index: 9999 !important; /* AR 화면보다는 위, 시작 팝업보다는 아래 배치 */
+      
+      /* ⭐ 핵심: 가이드 박스가 생성되어도 뒤쪽 바닥 터치가 그대로 관통되도록 설정 */
+      pointer-events: none !important; 
+      
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
+      text-align: center !important;
+      width: 85% !important;
+      max-width: 300px !important;
+      background: rgba(36, 87, 82, 0.88) !important; /* 민트 스크린 매칭 딥 청록 불투명 레이어 */
+      padding: 24px 20px !important;
+      border-radius: 18px !important;
+      border: 1px solid #d3eae7 !important;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+      
+      /* 초기 상태는 완전히 숨김 (포토존 선택 전까지 미노출) */
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease !important;
+    }
+
+    /* 활성화 시 부드럽게 나타날 클래스 */
+    #ar-touch-guide.show {
+      opacity: 1 !important;
+      visibility: visible !important;
+    }
+
+    /* 보내주신 터치 아이콘 애니메이션 규격화 */
+    #ar-touch-guide img {
+      width: 52px !important;
+      height: auto !important;
+      margin-bottom: 12px !important;
+      animation: pulseMotion 1.4s infinite ease-in-out !important; /* 팝핑 애니메이션 */
+    }
+
+    #ar-touch-guide p {
+      color: #ffffff !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      line-height: 1.5 !important;
+      word-break: keep-all !important;
+    }
+
+    /* 손가락 펄스 모션 키프레임 */
+    @keyframes pulseMotion {
+      0% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); opacity: 0.8; }
+    }
   </style>
+
+  <script>
+    AFRAME.registerComponent('fix-metal-material', {
+      init: function () {
+        this.el.addEventListener('model-loaded', (evt) => {
+          const model = evt.detail.model;
+          model.traverse((node) => {
+            if (node.isMesh && node.material) {
+              const materials = Array.isArray(node.material) ? node.material : [node.material];
+              materials.forEach((mat) => {
+                mat.metalness = 0.95;    
+                mat.roughness = 0.1;     
+                mat.needsUpdate = true;  
+              });
+            }
+          });
+        });
+      }
+    });
+  </script>
 </head>
 
 <body>
+
+  <div id="ar-touch-guide">
+    <img src="./touch.png" alt="터치 안내 아이콘">
+    <p>우측 메뉴를 선택 후 바닥을 터치하면 AR 효과가 나타납니다.</p>
+  </div>
 
   <div id="container">
     <div id="start_area">
@@ -279,29 +373,9 @@
   </a-scene>
 
   <script>
-    // 0. 금속 재질 픽스 컴포넌트 (풍선 질감에 맞게 내부 수치 고도화)
-    AFRAME.registerComponent('fix-metal-material', {
-      init: function () {
-        this.el.addEventListener('model-loaded', (evt) => {
-          const model = evt.detail.model;
-          model.traverse((node) => {
-            if (node.isMesh && node.material) {
-              // 원래 복수 재질 구조일 경우를 대응
-              const materials = Array.isArray(node.material) ? node.material : [node.material];
-              
-              materials.forEach((mat) => {
-                mat.metalness = 0.9;     /* 0.3 -> 0.9 번쩍이는 알루미늄 은박 느낌 강제 수용 */
-                mat.roughness = 0.15;    /* 0.5 -> 0.15 표면을 매끄럽게 깎아 주변 반사 왜곡 극대화 */
-                mat.needsUpdate = true;
-              });
-            }
-          });
-        });
-      }
-    });
-
     const zoneIds = ['lumi', 'text'];
 
+    // 포토존 선택 및 진입 로직
     function startNavigation(zoneType) {
       console.log("선택된 포토존 형태: " + zoneType);
 
@@ -311,6 +385,10 @@
         setTimeout(() => {
           uiContainer.style.visibility = 'hidden';
           uiContainer.style.display = 'none';
+          
+          // 🛠️ 추가: 메인 선택창이 완전히 꺼진 직후 터치 유도 가이드 노출
+          const touchGuide = document.getElementById('ar-touch-guide');
+          if (touchGuide) touchGuide.classList.add('show');
         }, 400);
       }
 
@@ -321,6 +399,30 @@
         }
       });
     }
+
+    // ── 🛠️ 추가: 사용자가 화면(바닥)을 클릭/터치 시 가이드를 사라지게 하는 전역 리스너 ──
+    window.addEventListener('DOMContentLoaded', () => {
+      const scene = document.querySelector('a-scene');
+      
+      if (scene) {
+        // 모바일 터치(touchstart)와 PC 마우스 클릭(click)에 모두 대응
+        ['click', 'touchstart'].forEach(eventType => {
+          scene.addEventListener(eventType, () => {
+            const touchGuide = document.getElementById('ar-touch-guide');
+            
+            // 가이드가 켜져 있는 상태(show 클래스 보유 시)에만 작동
+            if (touchGuide && touchGuide.classList.contains('show')) {
+              console.log("화면 터치가 감지되어 실시간 안내 가이드를 소멸합니다.");
+              touchGuide.classList.remove('show'); // 페이드아웃 효과 발동
+              
+              setTimeout(() => {
+                touchGuide.style.display = 'none'; // DOM 레이아웃에서 완전 삭제
+              }, 400);
+            }
+          });
+        });
+      }
+    });
   </script>
 </body>
 </html>
