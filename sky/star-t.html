@@ -186,6 +186,7 @@
       <a-assets>
         <a-asset-item id="star" src="./star-colorx3-confetti-100.glb"></a-asset-item>
         <a-asset-item id="cloud" src="./clouds-ani.glb"></a-asset-item>
+        <a-asset-item id="whale" src="./blue-whale-loop.glb"></a-asset-item>
         <img id="skyTexture" src='./fantasy-starry-sky-constellations.jpg'>
         </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
@@ -194,7 +195,14 @@
         
         <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
             <a-sky material="src: #skyTexture; transparent: true; opacity: 0.5;"></a-sky>
-
+            <a-entity
+               id="whale"
+               gltf-model="#cloud"
+               position="0 3 -10"
+               scale="1 1 1"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
             <a-entity
                id="model-star"
                gltf-model="#star"
