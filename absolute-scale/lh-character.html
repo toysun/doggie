@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta charset="UTF-8">
-  <title>car-absolute-scale</title>
+  <title>tap-to-place-with-menu</title>
 
   <script src="./../xr_st/8frame-1.5.0.min.js"></script>
   <script src="./../xr_st/xrextras.js"></script>
@@ -15,8 +15,8 @@
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script type="module" src="./app1.js" defer></script>
   <link rel="stylesheet" href="./index.css">
+  
   <style>
-    <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 
     *, *::before, *::after {
@@ -26,7 +26,6 @@
         font-family: "Pretendard Variable", Pretendard, sans-serif;
     }
 
-    /* ✅ html, body 자체 정렬 영향 차단 */
     html, body {
       margin: 0 !important;
       padding: 0 !important;
@@ -60,7 +59,6 @@
       top: 15px !important;
       left: 50% !important;
       transform: translateX(-50%) !important;
-
       background: #ffffff !important;
       padding: 22px 15px !important;
       border-radius: 20px !important;
@@ -118,12 +116,65 @@
       pointer-events: none !important;
     }
 
+    /* ── 🛠️ 추가: 우측 하단 세로형 메뉴 컨테이너 디자인 ── */
+    #ar-menu-container {
+      position: fixed !important;
+      right: 16px !important;
+      bottom: 95px !important;        /* 하단 캡처 버튼 레이어 위 공간 확보 */
+      display: flex !important;
+      flex-direction: column !important; /* 세로 정렬 */
+      align-items: center !important;
+      gap: 12px !important;
+      z-index: 9998 !important;
+      width: auto !important;
+      height: auto !important;
+      pointer-events: none;           /* 시작 전에는 클릭 무력화 */
+    }
+
+    /* ── 🛠️ 추가: 캐릭터 변경 원형 버튼 공통 스타일 ── */
+    .carousel {
+      width: 56px !important;
+      height: 56px !important;
+      min-width: 56px !important;
+      min-height: 56px !important;
+      flex-shrink: 0 !important;       /* 모바일 압축에 의한 찌그러짐 현상 원천 방지 */
+      border-radius: 50% !important;
+      border: 3px solid #ffffff !important;
+      background-color: #2c537e !important; /* 아이콘 이미지 공백 시 베이스 배경색 */
+      background-size: cover !important;
+      background-position: center !important;
+      background-repeat: no-repeat !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35) !important;
+      transition: transform 0.15s, border-color 0.15s !important;
+      
+      /* 직관적인 구별을 위한 텍스트 디자인 */
+      color: #ffffff !important;
+      font-size: 11px !important;
+      font-weight: 800 !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+    }
+
+    .carousel:hover {
+      transform: scale(1.06) !important;
+      border-color: #cceeff !important;
+    }
+
+    /* 현재 선택된 캐릭터 강조 표시 */
+    .carousel.focused {
+      border-color: #00e5ff !important;
+      transform: scale(1.12) !important;
+      box-shadow: 0 0 0 2px #00e5ff, 0 4px 14px rgba(0,0,0,0.45) !important;
+    }
   </style>
 </head>
 
 <body>
-<div id="container"></div>
-  <!-- ✅ 서비스 안내 팝업 -->
+
+  <div id="ar-menu-container"></div>
+
   <div id="start_area">
     <div class="start-card">
       <div class="img-wrapper">
@@ -132,93 +183,95 @@
       </div>
       <p>
         화면의 지시에 따라 앞뒤로 움직이면 루미가 나타나고 <br>
-        루미를 원하는 크기와 위치로 배치할 합니다.<br>
+        루미를 원하는 크기와 위치로 배치할 수 있습니다.<br>
         (터치한 상태로 이동, 엄지와 검지로 크기를 조정)<br><br>
-        루미와 함꼐 등대를 배경으로 한컷!,<br>
+        루미와 함께 등대를 배경으로 한컷!,<br>
         인증샷을 올리면 최종 인증이 완료됩니다.
       </p>
       <button id="start_btn">포토존 시작</button>
     </div>
   </div>
-<a-scene
-  responsive-immersive
-  coaching-overlay
-  landing-page
-  xrextras-gesture-detector
-  xrextras-loading
-  xrextras-runtime-error
-  gltf-model="dracoDecoderPath: https://cdn.8thwall.com/web/aframe/draco-decoder/"
-  renderer="colorManagement: true"
-  xrweb="allowedDevices: any;
-    defaultEnvironmentFogIntensity: 0.5; 
-    defaultEnvironmentFloorTexture: #groundTex; 
-    defaultEnvironmentFloorColor: #FFF;
-    defaultEnvironmentSkyBottomColor: #B4C4CC; 
-    defaultEnvironmentSkyTopColor: #5ac8fa;
-    defaultEnvironmentSkyGradientStrength: 0.5;
-    scale: absolute">
 
-  <a-assets>
-    <a-asset-item id="carModel" src="./assets/lumi-dance-6-ani.glb"></a-asset-item>
-    <a-asset-item id="carModel-1" src="./assets/crabby-dance.glb"></a-asset-item>
-    <a-asset-item id="carModel-2" src="./assets/haemu-balloon-ani.glb"></a-asset-item>
-    <img id="groundTex" src="assets/textures/concrete.jpg">
-  </a-assets>
+  <a-scene
+    responsive-immersive
+    coaching-overlay
+    landing-page
+    xrextras-gesture-detector
+    xrextras-loading
+    xrextras-runtime-error
+    gltf-model="dracoDecoderPath: https://cdn.8thwall.com/web/aframe/draco-decoder/"
+    renderer="colorManagement: true"
+    xrweb="allowedDevices: any;
+      defaultEnvironmentFogIntensity: 0.5; 
+      defaultEnvironmentFloorTexture: #groundTex; 
+      defaultEnvironmentFloorColor: #FFF;
+      defaultEnvironmentSkyBottomColor: #B4C4CC; 
+      defaultEnvironmentSkyTopColor: #5ac8fa;
+      defaultEnvironmentSkyGradientStrength: 0.5;
+      scale: absolute">
+
+    <a-assets>
+      <a-asset-item id="carModel" src="./assets/lumi-dance-6-ani.glb"></a-asset-item>
+      <a-asset-item id="carModel-1" src="./assets/crabby-dance.glb"></a-asset-item>
+      <a-asset-item id="carModel-2" src="./assets/haemu-balloon-ani.glb"></a-asset-item>
+      <img id="groundTex" src="assets/textures/concrete.jpg">
+    </a-assets>
+
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
-  <a-camera
-    id="camera"
-    position="0 1.75 12"
-    raycaster="objects: .cantap"
-    cursor="fuse: false; rayOrigin: mouse;">
-  </a-camera>
-  
-  <a-entity
-    xr-light
-    light="type: directional;
-      castShadow: true;
-      shadowMapHeight:2048;
-      shadowMapWidth:2048;
-      shadowCameraTop: 20;
-      shadowCameraBottom: -20;
-      shadowCameraLeft: -20;
-      shadowCameraRight: 20;
-      target: #car;
-      shadowRadius: 3"
-    xrextras-attach="target: car; offset: 0 15 0;"
-    shadow>
-  </a-entity>
-  
-  <a-light
-    xr-light="max: 0.5"
-    type="ambient">
-  </a-light>
 
-  <a-entity
-    id="car"
-    gltf-model="#carModel"
-    rotation="0 10 0"
-    scale="1 1 1"
-    xrextras-hold-drag="rise-height: 0"
-    xrextras-two-finger-rotate
-    absolute-pinch-scale
-    proximity
-    animation="property: position; from: 0 -10 0; to: 0 0 0; dir: linear; dur: 1000; loop: false"
-    animation__1="property: scale; from: 0 0 0; to: 1 1 1; dir: linear; dur: 100; loop: false"
-    animation-mixer
-    shadow="receive: false">
-  </a-entity>
-  <a-plane
-    id="ground"
-    rotation="-90 0 0"
-    width="100"
-    height="100"
-    material="shader: shadow; opacity: 0.5;"
-    shadow
-  ></a-plane>
-</a-scene>
+    <a-camera
+      id="camera"
+      position="0 1.75 12"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+    
+    <a-entity
+      xr-light
+      light="type: directional;
+        castShadow: true;
+        shadowMapHeight:2048;
+        shadowMapWidth:2048;
+        shadowCameraTop: 20;
+        shadowCameraBottom: -20;
+        shadowCameraLeft: -20;
+        shadowCameraRight: 20;
+        target: #car;
+        shadowRadius: 3"
+      xrextras-attach="target: car; offset: 0 15 0;"
+      shadow>
+    </a-entity>
+    
+    <a-light xr-light="max: 0.5" type="ambient"></a-light>
+
+    <a-entity
+      id="car"
+      gltf-model="#carModel"
+      rotation="0 10 0"
+      scale="1 1 1"
+      xrextras-hold-drag="rise-height: 0"
+      xrextras-two-finger-rotate
+      absolute-pinch-scale
+      proximity
+      animation="property: position; from: 0 -10 0; to: 0 0 0; dir: linear; dur: 1000; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 1 1 1; dir: linear; dur: 100; loop: false"
+      animation-mixer
+      shadow="receive: false">
+    </a-entity>
+
+    <a-plane
+      id="ground"
+      rotation="-90 0 0"
+      width="100"
+      height="100"
+      material="shader: shadow; opacity: 0.5;"
+      shadow>
+    </a-plane>
+  </a-scene>
+
   <script>
-    // ✅ 시작 버튼: 팝업 닫기
+    // 시작 버튼: 팝업 닫기
     window.addEventListener('DOMContentLoaded', () => {
       const startBtn = document.getElementById('start_btn');
       if (startBtn) {
@@ -230,6 +283,61 @@
           }, { passive: false });
         });
       }
+
+      // ── 🛠️ 추가: 3D 모델 교체 인터랙션 제어 자바스크립트 엔진 빌드 ──
+      const menuContainer = document.getElementById('ar-menu-container');
+      const carEntity = document.getElementById('car');
+
+      // 변경 타겟 데이터 세트 (이름, 에셋 매칭 ID, 테마 색상)
+      const modelData = [
+        { name: '루미', assetId: '#carModel', themeColor: '#3ca89e', bgImg: './assets/icons/lumi-t.png' },
+        { name: '크래비', assetId: '#carModel-1', themeColor: '#e06c6c', bgImg: './assets/icons/crabby-t.png' },
+        { name: '해무', assetId: '#carModel-2', themeColor: '#419c92', bgImg: './assets/icons/haemu-t.png' }
+      ];
+
+      let focusedButton = null;
+
+      modelData.forEach((model, index) => {
+        const btn = document.createElement('button');
+        btn.classList.add('carousel');
+        btn.innerText = model.name;
+        btn.style.backgroundColor = model.themeColor;
+        
+        // 💡 팁: 실제 아이콘 폴더 구조에 맞게 배경 경로가 유효하다면 아래 주석을 풀어 적용하세요.
+        // btn.style.backgroundImage = `url(${model.bgImg})`;
+
+        // 모바일 터치 및 클릭 반응 속도 극대화 연동
+        ['click', 'touchstart'].forEach(eventType => {
+          btn.addEventListener(eventType, (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            if (carEntity) {
+              // 1. 핵심: gltf-model 속성을 실시간 교체
+              carEntity.setAttribute('gltf-model', model.assetId);
+              
+              // 2. 애니메이션 믹서 리프레시 (Glb 내장 애니메이션 클립 싱크 초기화)
+              carEntity.removeAttribute('animation-mixer');
+              setTimeout(() => {
+                carEntity.setAttribute('animation-mixer', '');
+              }, 15);
+            }
+
+            // 포커스 클래스 제어
+            if (focusedButton) focusedButton.classList.remove('focused');
+            focusedButton = btn;
+            focusedButton.classList.add('focused');
+          }, { passive: false });
+        });
+
+        menuContainer.appendChild(btn);
+
+        // 첫 번째 루미 모델 기본 활성화 처리
+        if (index === 0) {
+          focusedButton = btn;
+          btn.classList.add('focused');
+        }
+      });
     });
 
     function executeStart() {
@@ -238,10 +346,13 @@
         startArea.classList.add('hide');
         setTimeout(() => {
           startArea.style.display = 'none';
+          
+          // 🛠️ 추가: 안내 팝업창이完全に 닫힌 뒤 우측 하단 메뉴 터치 잠금 해제
+          const menuContainer = document.getElementById('ar-menu-container');
+          if (menuContainer) menuContainer.style.pointerEvents = 'auto';
         }, 300);
       }
 
-      // 포털 비디오 재생 트리거 (모바일 자동재생 제약 대응)
       const portalVid = document.getElementById('portal-video');
       if (portalVid) {
         portalVid.play().catch(err => console.log("비디오 재생 대기:", err));
