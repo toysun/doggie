@@ -30,38 +30,45 @@
       position: relative !important;
     }
 
-    /* 배경 오버레이 레이어 */
+    /* ── 🛠️ 수정 1: 부모 레이어에 완전한 수직 Flex Flow 주입 (스크롤 활성화의 핵심) ── */
     #container {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
+        height: 100dvh !important;       /* 모바일 동적 뷰포트 완벽 대응 */
         background-color: #edf6f5 !important;
         z-index: 999999 !important;
-        pointer-events: auto !important;
-        overflow-y: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        display: block !important; 
+        
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important; /* 상단부터 차곡차곡 정렬 */
+        
+        overflow-y: auto !important;      /* 내부에 반응형 세로 스크롤바 강제 생성 */
+        -webkit-overflow-scrolling: touch !important; /* iOS 부드러운 스크롤 */
+        padding: 20px 15px 80px !important; /* 하단 컴포넌트 마진 배려 패딩 */
         box-sizing: border-box !important;
         transition: opacity 0.4s ease, visibility 0.4s ease;
+        pointer-events: auto;
     }
 
-    /* 팝업창 중앙 정렬 최적화 수식 */
+    /* ── 🛠️ 수정 2: 절대 좌표(absolute)를 해제하여 부모가 높이를 인식하도록 처리 ── */
     #start_area {
-        position: absolute !important;
-        top: 20px !important;
-        left: 50% !important;
-        transform: translateX(-50%) !important;
-        width: 92% !important;
-        max-width: 450px !important;
+        position: relative !important;    /* 흐름에 포함시켜 하단 스크롤 트리거 활성화 */
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        width: 100%;
+        max-width: 450px;
         text-align: center;
         background: #ffffff;
         padding: 35px 25px;
         border-radius: 20px;
         box-shadow: 0 10px 30px rgba(65, 156, 146, 0.06);
         border: 1px solid #d3eae7;
-        margin-bottom: 20px;
+        margin: 10px auto !important;    /* 브라우저 정중앙 배치 */
     }
 
     .main-guide-img {
@@ -129,6 +136,10 @@
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 4px 10px rgba(60, 168, 158, 0.2);
+        transition: opacity 0.2s;
+    }
+    .start-zone-btn:hover {
+        opacity: 0.95;
     }
 
     /* 화면 좌측 하단 음악 제어 원형 버튼 */
@@ -151,22 +162,19 @@
       transition: transform 0.1s ease, background-color 0.2s ease !important;
       padding: 0 !important;
     }
-    #audio-toggle-btn:active {
-      transform: scale(0.92) !important;
-    }
 
-    /* ── 🛠️ 추가: 음성 버튼 하단에 안착할 처음으로(초기화) 버튼 디자인 ── */
+    /* 초기화(🔄) 버튼 디자인 - 음성 버튼 하단에 정밀 밀착 고정 */
     #ar-reset-btn {
       position: fixed !important;
       left: 16px !important;
-      bottom: 25px !important;         /* 음성 버튼(95px) 아래에 정밀 배치 */
+      bottom: 25px !important;         
       width: 54px !important;
       height: 54px !important;
       border-radius: 50% !important;
       border: 3px solid #ffffff !important;
       background-color: #ffffff !important;
       font-size: 20px !important;
-      display: none;                  /* 초기 메인 팝업 상태에서는 숨김 */
+      display: none;                  
       justify-content: center !important;
       align-items: center !important;
       cursor: pointer !important;
@@ -175,7 +183,7 @@
       transition: transform 0.1s ease !important;
       padding: 0 !important;
     }
-    #ar-reset-btn:active {
+    #audio-toggle-btn:active, #ar-reset-btn:active {
       transform: scale(0.92) !important;
     }
   </style>
@@ -186,7 +194,6 @@
   <audio id="bgm" src="./Candy_Cart_Pursuit.mp3" loop></audio>
 
   <button id="audio-toggle-btn" aria-label="음악 끄기 및 켜기">🎵</button>
-
   <button id="ar-reset-btn" aria-label="처음으로 돌아가기">🔄</button>
 
   <div id="container">
@@ -195,7 +202,7 @@
 
       <p class="guide-text">
         등대를 배경으로 <br>
-        A래의 2개 AR포토존 중 하나를 선택해서<br>
+        아래의 2개 AR포토존 중 하나를 선택해서<br>
         사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
       </p>
 
@@ -232,7 +239,7 @@
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
-    <xrextras-capture-preview></xrextras-preview>
+    <xrextras-capture-preview></xrextras-capture-preview>
 
     <a-camera
       id="camera"
@@ -324,7 +331,7 @@
       const uiContainer = document.getElementById('container');
       const startArea = document.getElementById('start_area');
 
-      // 음악 토글 버튼 이벤트
+      // 오디오 음성 제어 토글 리스너
       if (audioBtn && bgm) {
         ['click', 'touchstart'].forEach(eventType => {
           audioBtn.addEventListener(eventType, (e) => {
@@ -344,16 +351,16 @@
         });
       }
 
-      // ── 🛠️ 추가: 처음으로 리셋 버튼클릭 상호작용 스크립트 빌드 ──
+      // 초기화(🔄) 버튼 상호작용 및 복구 통합 제어
       if (resetBtn && uiContainer && bgm) {
         ['click', 'touchstart'].forEach(eventType => {
           resetBtn.addEventListener(eventType, (e) => {
             e.preventDefault();
             e.stopPropagation();
 
-            console.log("초기화 버튼 클릭 - 메인화면으로 복귀합니다.");
+            console.log("메인 분기 화면으로 안전하게 초기화 복귀합니다.");
 
-            // 1. 오디오 정지 및 재생 포인터 영점 초기화
+            // 1. 사운드 리셋 조치
             bgm.pause();
             bgm.currentTime = 0;
             if (audioBtn) {
@@ -361,22 +368,22 @@
               audioBtn.style.backgroundColor = '#ffffff';
             }
 
-            // 2. 구동 중인 AR 캐릭터 완전 숨김 및 애니메이션용 스케일 초기화
+            // 2. 가상 세계 AR 3D 오브젝트 클리어 및 스케일 리셋
             zoneIds.forEach((id) => {
               const entity = document.getElementById(id);
               if (entity) {
                 entity.setAttribute('visible', 'false');
-                entity.setAttribute('scale', '0 0 0'); // 다시 들어올 때 애니메이션 연출 보장
+                entity.setAttribute('scale', '0 0 0');
               }
             });
 
-            // 3. 제어 플로팅 버튼들 임시 숨김 처리
+            // 3. 인게임 버튼 세트 임시 언로드
             if (audioBtn) audioBtn.style.display = 'none';
             resetBtn.style.display = 'none';
 
-            // 4. 메인 팝업 레이어 재노출 (페이드인 효과 연출)
+            // 4. 🛠️ 수정: 복귀 시 display를 block이 아니라 flex로 선언해야 레이아웃 왜곡 차단됨
             if (startArea) startArea.style.display = 'block';
-            uiContainer.style.display = 'block';
+            uiContainer.style.display = 'flex'; 
             uiContainer.style.visibility = 'visible';
             setTimeout(() => {
               uiContainer.style.opacity = '1';
@@ -386,7 +393,7 @@
       }
     });
 
-    // 포토존 선택 후 시작 핸들러
+    // 포토존 분기 스타트 처리 핸들러
     function startNavigation(zoneType) {
       console.log("선택된 포토존 형태: " + zoneType);
 
@@ -400,29 +407,29 @@
           uiContainer.style.visibility = 'hidden';
           uiContainer.style.display = 'none';
 
-          // AR 모드 진입 시 음악 버튼과 리셋 버튼 함께 동시 노출
+          // AR 모드 전환 시 하단 기능 컨트롤러 팝업 개방
           const audioBtn = document.getElementById('audio-toggle-btn');
           const resetBtn = document.getElementById('ar-reset-btn');
           if (audioBtn) audioBtn.style.display = 'flex';
           if (resetBtn) resetBtn.style.display = 'flex';
 
-          // 캐릭터 호출 및 위로 솟아오르는 애니메이션 스타트 이벤트 송출
+          // 지정된 ID 캐릭터 개체 가시성 변경 및 연출 트랙 가동
           const activeEntity = document.getElementById(zoneType);
           if (activeEntity) {
             activeEntity.setAttribute('visible', 'true');
             activeEntity.emit('ar-start');
-            console.log(zoneType + " 애니메이션 구동 완료");
+            console.log(zoneType + " 애니메이션 시퀀스 개시");
           }
         }, 400);
       }
 
-      // 오디오 강제 재생 트리거 (사용자 액션 유효 판정 대응)
+      // 사운드 시퀀스 강제 스타트
       const bgm = document.getElementById('bgm');
       if (bgm) {
-        bgm.play().catch(err => console.log("BGM 재생 대기:", err));
+        bgm.play().catch(err => console.log("BGM 오토 플레이 정책 핸들링:", err));
       }
 
-      // 타겟 뷰 포트 가시성 동기화
+      // 비활성화 타겟 개체 상태 격리
       zoneIds.forEach((id) => {
         const entity = document.getElementById(id);
         if (entity && id !== zoneType) {
