@@ -259,8 +259,8 @@
         shadowMapHeight:2048;
         shadowMapWidth:2048;
         shadowCameraTop: 10;
-        target: #ground;"
-      xrextras-attach="target: ground; offset: 1 15 3;"
+        target: #model;"
+      xrextras-attach="target: model; offset: 1 15 3;"
       shadow>
     </a-entity>
 
@@ -277,8 +277,8 @@
       xrextras-two-finger-rotate
       absolute-pinch-scale
       proximity
-      animation="property: position; from: 0 -10 -4; to: 0 5 -4; dir: linear; dur: 2000; loop: false"
-      animation__1="property: scale; from: 0 0 0; to: 3 3 3; dir: linear; dur: 2000; loop: false"
+      animation="property: position; from: 0 -10 -4; to: 0 5 -4; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 3 3 3; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
       animation-mixer
       shadow="receive: false">
       <a-entity
@@ -302,8 +302,8 @@
       xrextras-two-finger-rotate
       absolute-pinch-scale
       proximity
-      animation="property: position; from: 0 -10 -4; to: 0 8 -4; dir: linear; dur: 2000; loop: false"
-      animation__1="property: scale; from: 0 0 0; to: 3 3 3; dir: linear; dur: 2000; loop: false"
+      animation="property: position; from: 0 -10 -4; to: 0 8 -4; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 3 3 3; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
       animation-mixer
       shadow="receive: false">
       <!-- ✅ id 중복 수정: car → fish -->
