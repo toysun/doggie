@@ -35,18 +35,15 @@
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        width: 100%;
-        height: 100%;
-        min-height: 100vh;
-        min-height: 100dvh;
-        background-color: #edf6f5;
-        z-index: 999999;
-        pointer-events: auto;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        display: block !important; /* 엔진 정렬 충돌 차단을 위해 block 고정 */
-        padding: 20px 15px 60px;
-        box-sizing: border-box;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: #edf6f5 !important;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: block !important; 
+        box-sizing: border-box !important;
         transition: opacity 0.4s ease, visibility 0.4s ease;
     }
 
@@ -132,33 +129,53 @@
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 4px 10px rgba(60, 168, 158, 0.2);
-        transition: opacity 0.2s;
-    }
-    .start-zone-btn:hover {
-        opacity: 0.95;
     }
 
-    /* ── 🛠️ 추가: 화면 좌측 하단 음악 제어 원형 버튼 디자인 ── */
+    /* 화면 좌측 하단 음악 제어 원형 버튼 */
     #audio-toggle-btn {
       position: fixed !important;
       left: 16px !important;
-      bottom: 95px !important;        /* 우측 하단 캡처 관련 UI들과 완벽 수평 대칭 정렬 */
+      bottom: 95px !important;        
       width: 54px !important;
       height: 54px !important;
       border-radius: 50% !important;
       border: 3px solid #ffffff !important;
       background-color: #ffffff !important;
       font-size: 20px !important;
-      display: none;                  /* 초기 메인화면 기점에서는 숨김 보관 */
+      display: none;                  
       justify-content: center !important;
       align-items: center !important;
       cursor: pointer !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-      z-index: 9990 !important;       /* AR 화면 컴포넌트 위로 격리 배치 */
+      z-index: 9990 !important;       
       transition: transform 0.1s ease, background-color 0.2s ease !important;
       padding: 0 !important;
     }
     #audio-toggle-btn:active {
+      transform: scale(0.92) !important;
+    }
+
+    /* ── 🛠️ 추가: 음성 버튼 하단에 안착할 처음으로(초기화) 버튼 디자인 ── */
+    #ar-reset-btn {
+      position: fixed !important;
+      left: 16px !important;
+      bottom: 25px !important;         /* 음성 버튼(95px) 아래에 정밀 배치 */
+      width: 54px !important;
+      height: 54px !important;
+      border-radius: 50% !important;
+      border: 3px solid #ffffff !important;
+      background-color: #ffffff !important;
+      font-size: 20px !important;
+      display: none;                  /* 초기 메인 팝업 상태에서는 숨김 */
+      justify-content: center !important;
+      align-items: center !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+      z-index: 9990 !important;
+      transition: transform 0.1s ease !important;
+      padding: 0 !important;
+    }
+    #ar-reset-btn:active {
       transform: scale(0.92) !important;
     }
   </style>
@@ -170,13 +187,15 @@
 
   <button id="audio-toggle-btn" aria-label="음악 끄기 및 켜기">🎵</button>
 
+  <button id="ar-reset-btn" aria-label="처음으로 돌아가기">🔄</button>
+
   <div id="container">
     <div id="start_area">
       <img src="./photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
 
       <p class="guide-text">
         등대를 배경으로 <br>
-        아래의 2개 AR포토존 중 하나를 선택해서<br>
+        A래의 2개 AR포토존 중 하나를 선택해서<br>
         사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
       </p>
 
@@ -213,7 +232,7 @@
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
-    <xrextras-capture-preview></xrextras-capture-preview>
+    <xrextras-capture-preview></xrextras-preview>
 
     <a-camera
       id="camera"
@@ -242,36 +261,20 @@
       visible="false"
       gltf-model="#lumi-appear"
       rotation="0 0 0"
-      scale="5 5 5"
+      scale="0 0 0"
       xrextras-hold-drag="rise-height: 0"
       xrextras-two-finger-rotate
       absolute-pinch-scale
       proximity
-      animation="property: position; from: 0 -10 0; to: 0 5 0; dir: linear; delay: 200; dur: 8000; loop: false"
-      animation__1="property: scale; from: 0 0 0; to: 5 5 5; dir: linear; delay: 200; dur: 8000; loop: false"
+      animation="property: position; from: 0 -10 -4; to: 0 5 -4; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
       animation-mixer
       shadow="receive: false">
       <a-entity
         id="butterfly"
         gltf-model="#butterfly-color"
-        rotation="0 0 0"
+        rotation="0 90 0"
         scale="2 2 2"
-        xrextras-hold-drag="rise-height: 0"
-        xrextras-two-finger-rotate
-        absolute-pinch-scale
-        proximity
-        animation-mixer
-        shadow="receive: false">
-      </a-entity>
-           <a-entity
-        id="butterfly1"
-        gltf-model="#butterfly-color"
-        rotation="90 0 0"
-        scale="2 2 2"
-        xrextras-hold-drag="rise-height: 0"
-        xrextras-two-finger-rotate
-        absolute-pinch-scale
-        proximity
         animation-mixer
         shadow="receive: false">
       </a-entity>
@@ -282,13 +285,13 @@
       visible="false"
       gltf-model="#crabby-dance"
       rotation="0 -180 0"
-      scale="3 3 3"
+      scale="0 0 0"
       xrextras-hold-drag="rise-height: 0"
       xrextras-two-finger-rotate
       absolute-pinch-scale
       proximity
-      animation="property: position; from: 0 -10 0; to: 0 8 0; dir: linear; delay: 200; dur: 8000; loop: false"
-      animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; delay: 200; dur: 8000; loop: false"
+      animation="property: position; from: 0 -10 -4; to: 0 8 -4; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
+      animation__1="property: scale; from: 0 0 0; to: 2 2 2; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
       animation-mixer
       shadow="receive: false">
       <a-entity
@@ -296,10 +299,6 @@
         gltf-model="#tropical-fish"
         rotation="0 0 0"
         scale="2 2 2"
-        xrextras-hold-drag="rise-height: 0"
-        xrextras-two-finger-rotate
-        absolute-pinch-scale
-        proximity
         animation-mixer
         shadow="receive: false">
       </a-entity>
@@ -318,13 +317,15 @@
   <script>
     const zoneIds = ['lumi', 'crabby'];
 
-    // ── 🛠️ 추가 3: 도큐먼트가 준비된 직후 음악 버튼 토글 제어 인터랙션 캡처 바인딩 ──
     window.addEventListener('DOMContentLoaded', () => {
       const audioBtn = document.getElementById('audio-toggle-btn');
+      const resetBtn = document.getElementById('ar-reset-btn');
       const bgm = document.getElementById('bgm');
+      const uiContainer = document.getElementById('container');
+      const startArea = document.getElementById('start_area');
 
+      // 음악 토글 버튼 이벤트
       if (audioBtn && bgm) {
-        // 모바일 터치(touchstart)와 일반 클릭(click) 다중 교차 대응
         ['click', 'touchstart'].forEach(eventType => {
           audioBtn.addEventListener(eventType, (e) => {
             e.preventDefault();
@@ -337,45 +338,96 @@
             } else {
               bgm.pause();
               audioBtn.innerText = '🔇';
-              audioBtn.style.backgroundColor = '#f1f3f2'; // 일시정지 시 버튼 색상 연하게 보정
+              audioBtn.style.backgroundColor = '#f1f3f2';
             }
+          }, { passive: false });
+        });
+      }
+
+      // ── 🛠️ 추가: 처음으로 리셋 버튼클릭 상호작용 스크립트 빌드 ──
+      if (resetBtn && uiContainer && bgm) {
+        ['click', 'touchstart'].forEach(eventType => {
+          resetBtn.addEventListener(eventType, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.log("초기화 버튼 클릭 - 메인화면으로 복귀합니다.");
+
+            // 1. 오디오 정지 및 재생 포인터 영점 초기화
+            bgm.pause();
+            bgm.currentTime = 0;
+            if (audioBtn) {
+              audioBtn.innerText = '🎵';
+              audioBtn.style.backgroundColor = '#ffffff';
+            }
+
+            // 2. 구동 중인 AR 캐릭터 완전 숨김 및 애니메이션용 스케일 초기화
+            zoneIds.forEach((id) => {
+              const entity = document.getElementById(id);
+              if (entity) {
+                entity.setAttribute('visible', 'false');
+                entity.setAttribute('scale', '0 0 0'); // 다시 들어올 때 애니메이션 연출 보장
+              }
+            });
+
+            // 3. 제어 플로팅 버튼들 임시 숨김 처리
+            if (audioBtn) audioBtn.style.display = 'none';
+            resetBtn.style.display = 'none';
+
+            // 4. 메인 팝업 레이어 재노출 (페이드인 효과 연출)
+            if (startArea) startArea.style.display = 'block';
+            uiContainer.style.display = 'block';
+            uiContainer.style.visibility = 'visible';
+            setTimeout(() => {
+              uiContainer.style.opacity = '1';
+            }, 15);
           }, { passive: false });
         });
       }
     });
 
+    // 포토존 선택 후 시작 핸들러
     function startNavigation(zoneType) {
       console.log("선택된 포토존 형태: " + zoneType);
 
-      // 시작 UI 페이드아웃 후 숨김
       const uiContainer = document.getElementById('container');
+      const startArea = document.getElementById('start_area');
+      
       if (uiContainer) {
         uiContainer.style.opacity = '0';
         setTimeout(() => {
+          if (startArea) startArea.style.display = 'none';
           uiContainer.style.visibility = 'hidden';
           uiContainer.style.display = 'none';
 
-          // 🛠️ 추가 4: 메인 안내 팝업이 꺼진 뒤, 좌측 사운드 버튼 노출 처리
+          // AR 모드 진입 시 음악 버튼과 리셋 버튼 함께 동시 노출
           const audioBtn = document.getElementById('audio-toggle-btn');
+          const resetBtn = document.getElementById('ar-reset-btn');
           if (audioBtn) audioBtn.style.display = 'flex';
+          if (resetBtn) resetBtn.style.display = 'flex';
+
+          // 캐릭터 호출 및 위로 솟아오르는 애니메이션 스타트 이벤트 송출
+          const activeEntity = document.getElementById(zoneType);
+          if (activeEntity) {
+            activeEntity.setAttribute('visible', 'true');
+            activeEntity.emit('ar-start');
+            console.log(zoneType + " 애니메이션 구동 완료");
+          }
         }, 400);
       }
 
-      // 🛠️ 추가 5: 사용자 액션 제스처 유효 타이밍을 통해 사운드 엔진 강제 개시 (보안정책 통과)
+      // 오디오 강제 재생 트리거 (사용자 액션 유효 판정 대응)
       const bgm = document.getElementById('bgm');
       if (bgm) {
-        bgm.play().then(() => {
-          console.log("배경 음악 재생 성공");
-        }).catch(err => {
-          console.log("배경 음악 자동 재생 실패 (제스처 제약 체크):", err);
-        });
+        bgm.play().catch(err => console.log("BGM 재생 대기:", err));
       }
 
-      // 선택지 매칭 활성화
+      // 타겟 뷰 포트 가시성 동기화
       zoneIds.forEach((id) => {
         const entity = document.getElementById(id);
-        if (entity) {
-          entity.setAttribute('visible', id === zoneType);
+        if (entity && id !== zoneType) {
+          entity.setAttribute('visible', 'false');
+          entity.setAttribute('scale', '0 0 0');
         }
       });
     }
