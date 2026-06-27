@@ -1,20 +1,15 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta charset="UTF-8">
   <title>8th Wall Web: Manipulate</title>
 
   <script src="//cdn.8thwall.com/web/aframe/8frame-1.4.1.min.js"></script>
   <script src="./../xr_st/xrextras.js"></script>
-  <script src="./../xr_st/landing-page.js"></script>  
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
-  <script src="./../xr_st/coaching-overlay.js"></script>
-  <script src="./CSS2DRenderer.js"></script>
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
-  <script type="module" src="./app1.js" defer></script>
-  <link rel="stylesheet" href="./index.css">
-  
+
   <style>
     @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 
@@ -34,45 +29,66 @@
       position: relative !important;
     }
 
-    /* 시작 안내 팝업 */
+    /* ── 전체 배경 레이어: 외부 flex 설정을 무력화하기 위해 display: block으로 변경 ── */
     #container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        min-height: 100vh;
-        min-height: 100dvh;
-        background-color: #edf6f5;
-        z-index: 999999;
-        pointer-events: auto;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 20px 15px 60px;
-        box-sizing: border-box;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background-color: #edf6f5 !important;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        display: block !important; 
+        box-sizing: border-box !important;
         transition: opacity 0.4s ease, visibility 0.4s ease;
     }
 
+    /* ── 🛠️ 핵심 수정: 좌측 쏠림 및 깨짐 현상을 차단하는 절대 정렬 좌표계 ── */
     #start_area {
-        width: 100%;
-        max-width: 450px;
-        text-align: center;
-        background: #ffffff;
-        padding: 35px 25px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(65, 156, 146, 0.06);
-        border: 1px solid #d3eae7;
-        margin-bottom: 20px;
+        position: absolute !important;
+        top: 20px !important;              /* 화면 상단 고정 위치 */
+        left: 50% !important;              /* 화면 가로 기준 정중앙 정렬 시작점 */
+        transform: translateX(-50%) !important; /* 팝업창 자체 너비의 절반만큼 왼쪽으로 당겨 완벽한 중앙 배치 */
+        
+        width: 92% !important;             /* 모바일 기기별 유연한 대응을 위한 퍼센트 너비 */
+        max-width: 420px !important;       /* 최대 한계 가로폭 제한 */
+        text-align: center !important;
+        background: #ffffff !important;
+        padding: 30px 20px !important;
+        border-radius: 20px !important;
+        box-shadow: 0 10px 30px rgba(65, 156, 146, 0.12) !important;
+        border: 1px solid #d3eae7 !important;
+        box-sizing: border-box !important;
+        margin-bottom: 40px !important;    /* 하단 스크롤 안전 여백 */
     }
 
-    .main-guide-img {
-        margin-bottom: 15px;
-        display: inline-block;
-        height: auto;
-        max-width: 60%;
+    /* ── 🛠️ 핵심 수정: 누락된 이미지 포함, 가로 정렬 컨테이너 ── */
+    .img-wrapper {
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        gap: 12px !important;
+        margin-bottom: 20px !important;
+        width: 100% !important;
+    }
+
+    .img-wrapper img {
+        width: 38% !important;
+        max-width: 110px !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
+
+    .guide-text {
+        color: #245752;
+        font-weight: 700;
+        font-size: 14px !important;
+        line-height: 1.6;
+        margin-bottom: 22px;
+        word-break: keep-all;
     }
 
     #start_btn {
@@ -85,7 +101,7 @@
       color: white;
       border: none;
       border-radius: 23px;
-      margin-top: 18px;
+      margin-top: 5px;
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25);
     }
@@ -194,7 +210,11 @@
 
   <div id="container">
     <div id="start_area">
-      <img src="./photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
+      <div class="img-wrapper">
+        <img src="./photo-auth.png" alt="AR 포토존 인증">
+        <img src="./world-lh-300.png" alt="AR 등대 포털">
+      </div>
+      
       <p class="guide-text">
         화면의 지시에 따라 앞뒤로 움직이면 등대가 나타나고 <br>
         등대를 원하는 크기와 위치로 배치할 수 있습니다.<br>
@@ -336,7 +356,6 @@
           const infoBtn = document.getElementById('lh-info-btn');
           if (infoBtn) infoBtn.style.display = 'block';
 
-          // 🛠️ 수정 2: '포토존 시작' 버튼을 누른 시점에 모델을 켜고, 위로 솟아오르는 애니메이션 신호(ar-start) 송신
           const carEntity = document.getElementById('car');
           if (carEntity) {
             carEntity.setAttribute('visible', 'true');
