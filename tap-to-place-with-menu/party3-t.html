@@ -165,7 +165,9 @@
       left: 50% !important;
       transform: translate(-50%, -50%) !important;
       z-index: 9990 !important; 
+      
       pointer-events: none !important; 
+      
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
@@ -173,11 +175,13 @@
       background: none !important; 
       width: 85% !important;
       max-width: 320px !important;
+      
       opacity: 0;
       visibility: hidden;
       transition: opacity 0.3s ease, visibility 0.3s ease !important;
     }
 
+    /* 가이드 활성화 클래스 */
     #ar-screen-guide.show {
       opacity: 1 !important;
       visibility: visible !important;
@@ -206,6 +210,39 @@
       60% { transform: translateY(12px) scale(0.93); }
       100% { transform: translateY(0) scale(1); }
     }
+
+    /* ── ✅ 추가: 좌측 하단 음악 및 리로드 버튼 레이아웃 스타일 ── */
+    #ar-control-container {
+      position: fixed !important;
+      left: 16px !important;
+      bottom: 24px !important;
+      display: flex !important;
+      gap: 12px !important;
+      z-index: 9995 !important; /* 시작 안내 레이어(99999)보단 아래, 가이드보단 위 배치 */
+      pointer-events: auto !important;
+    }
+
+    .control-btn {
+      width: 56px !important;
+      height: 56px !important;
+      border-radius: 50% !important;
+      border: 3px solid #ffffff !important;
+      background-color: rgba(17, 17, 17, 0.85) !important;
+      color: #ffffff !important;
+      font-size: 20px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35) !important;
+      transition: transform 0.15s !important;
+      padding: 0 !important;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .control-btn:active {
+      transform: scale(0.92) !important;
+    }
   </style>
 
   <script>
@@ -229,6 +266,13 @@
   </script>
 </head>
 <body>
+
+  <audio id="bgm" src="./Morning_At_The_Glade.mp3" loop></audio>
+
+  <div id="ar-control-container">
+    <button id="audio_toggle_btn" class="control-btn" title="음악 멈춤/재생">🔊</button>
+    <button id="reload_btn" class="control-btn" title="처음으로 돌아가기">🔄</button>
+  </div>
 
   <div id="ar-menu-container"></div>
 
@@ -269,9 +313,9 @@
       defaultEnvironmentSkyGradientStrength: 0.5;">
       
     <a-assets>
-      <a-asset-item id="narcissusModel" src="./assets/models/lumi-dance-6-ani.glb"></a-asset-item>
-      <a-asset-item id="tulipModel"     src="./assets/models/crabby-ani.glb"></a-asset-item>
-      <a-asset-item id="margaritaModel" src="./assets/models/star-colorx3-confetti-100.glb"></a-asset-item>
+      <a-asset-item id="challengeModel" src="./assets/models/text-challenge-butterfly.glb"></a-asset-item>
+      <a-asset-item id="thankyouModel"     src="./assets/models/text-thankyou-fish.glb"></a-asset-item>
+      <a-asset-item id="consolModel" src="./assets/models/text-consolation-whale.glb"></a-asset-item>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -295,8 +339,8 @@
         shadowCameraBottom: -40;
         shadowCameraRight: 40;
         shadowCameraLeft: -40;
-        target: #camera"
-      xrextras-attach="target: camera; offset: 8 15 4"
+        target: #ground"
+      xrextras-attach="target: ground; offset: 8 15 4"
       position="1 4.3 2.5"
       shadow>
     </a-entity>
@@ -308,29 +352,30 @@
       id="ground"
       class="cantap"
       scale="1000 2 1000"
-      position="0 1.99 -2"
+      position="0 1.99 -8"
       rotation="-90 0 0"
-      material="transparent: true; opacity: 0" 
-      shadow="receive: false; cast: false"> </a-box>
-
-    <a-plane
-      id="ground-buffer"
-      rotation="-90 0 0"
-      width="1000"
-      height="1000"
-      visible="false"
-      shadow="receive: false; cast: false"> </a-plane>
+      material="shader: shadow; transparent: true; opacity: 0.4"
+      shadow="receive: false; cast: false">
+    </a-box>
   </a-scene>
 
 <script>
+  // 시작 버튼 클릭 시 메인 팝업 폐쇄 및 터치 가이드 개시
   window.addEventListener('DOMContentLoaded', () => {
     const startBtn = document.getElementById('start_btn')
+    const audioToggleBtn = document.getElementById('audio_toggle_btn')
+    const reloadBtn = document.getElementById('reload_btn')
+    const bgm = document.getElementById('bgm')
+    const startArea = document.getElementById('start_area')
+    const screenGuide = document.getElementById('ar-screen-guide')
+
+    // 1️⃣ [시작 버튼] 핸들러 - 팝업 닫고 음악 자동 재생 트리거
     if (startBtn) {
       ['click', 'touchstart'].forEach((eventType) => {
         startBtn.addEventListener(eventType, (e) => {
           e.preventDefault()
           e.stopPropagation()
-          const startArea = document.getElementById('start_area')
+          
           if (startArea) {
             startArea.classList.add('hide')
             setTimeout(() => {
@@ -338,7 +383,12 @@
             }, 300)
           }
           
-          const screenGuide = document.getElementById('ar-screen-guide')
+          // ✅ 포토존 진입 즉시 배경음 재생 시작
+          if (bgm) {
+            bgm.play().catch(err => console.log("오디오 자동재생 정책 제어:", err))
+          }
+          if (audioToggleBtn) audioToggleBtn.textContent = '🔊'
+          
           if (screenGuide) screenGuide.classList.add('show')
 
           const container = document.getElementById('ar-menu-container')
@@ -346,8 +396,58 @@
         }, { passive: false })
       })
     }
+
+    // 2️⃣ ✅ [추가] 오디오 재생/멈춤 토글 이벤트 제어
+    if (audioToggleBtn && bgm) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        audioToggleBtn.addEventListener(eventType, (e) => {
+          e.preventDefault()
+          e.stopPropagation() // 하단 버튼 클릭 시 3D 공간 터치 전파 차단
+          
+          if (bgm.paused) {
+            bgm.play().catch(err => console.log(err))
+            audioToggleBtn.textContent = '🔊'
+          } else {
+            bgm.pause()
+            audioToggleBtn.textContent = '🔇'
+          }
+        }, { passive: false })
+      })
+    }
+
+    // 3️⃣ ✅ [추가] 스타트 에리어 복귀 리로드 이벤트 제어
+    if (reloadBtn) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        reloadBtn.addEventListener(eventType, (e) => {
+          e.preventDefault()
+          e.stopPropagation() // 하단 버튼 클릭 시 3D 공간 터치 전파 차단
+
+          // 음악 정지 및 시간축 리셋
+          if (bgm) {
+            bgm.pause()
+            bgm.currentTime = 0
+          }
+          if (audioToggleBtn) audioToggleBtn.textContent = '🔊'
+
+          // AR 가이드 화면 리셋
+          if (screenGuide) {
+            screenGuide.classList.remove('show')
+            screenGuide.style.display = 'flex'
+          }
+
+          // 안내 팝업 레이어 재활성화
+          if (startArea) {
+            startArea.style.display = 'block'
+            setTimeout(() => {
+              startArea.classList.remove('hide')
+            }, 10)
+          }
+        }, { passive: false })
+      })
+    }
   })
     
+  // A-Frame 월드 생성 컴포넌트 팩토리
   AFRAME.registerComponent('selection-place-1', {
     init() {
       const container = document.getElementById('ar-menu-container')
@@ -355,9 +455,9 @@
       const scene = document.querySelector('a-scene')
       
       const entries = [
-        {id: '#narcissusModel', img: './assets/icons/lumi-t.png'},
-        {id: '#tulipModel', img: './assets/icons/crabby-t.png'},
-        {id: '#margaritaModel', img: './assets/icons/star-confetti.jpg'},
+        {id: '#challengeModel', img: './assets/icons/challenge.png'},
+        {id: '#thankyouModel', img: './assets/icons/thankyou.png'},
+        {id: '#consolModel', img: './assets/icons/consolation.png'},
         {id: 'eraser', img: './assets/icons/erase.png'},
       ]
 
@@ -401,6 +501,7 @@
         }
       })
 
+      // 3D 오브젝트 배치 전용 터치 리스너 
       scene.addEventListener('click', (event) => {
         if (!canCreateObject) return
         const {intersectedEl} = event.detail
@@ -442,7 +543,6 @@
             newElement.setAttribute('animation-mixer', '')
             
             scene.appendChild(newElement)
-            newElement.appendChild(newElement)
             newElement.addEventListener('model-loaded', () => {
               newElement.setAttribute('visible', 'true')
               newElement.setAttribute('animation', {
