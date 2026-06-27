@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>car-absolute-scale</title>
+
+  <script src="./../xr_st/8frame-1.5.0.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>  
+  
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <script src="./../xr_st/coaching-overlay.js"></script>
+  <script src="./CSS2DRenderer.js"></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script type="module" src="./app1.js" defer></script>
+  <link rel="stylesheet" href="./index.css">
+  <style>
+    <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+    }
+
+    /* ✅ html, body 자체 정렬 영향 차단 */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      position: relative !important;
+    }
+
+    /* ── 시작 안내 팝업 ── */
+    #start_area {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.55) !important;
+      z-index: 99999 !important;
+      display: block !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .start-card {
+      position: fixed !important;
+      top: 15px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+
+      background: #ffffff !important;
+      padding: 22px 15px !important;
+      border-radius: 20px !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+      border: 1px solid #d3eae7 !important;
+      width: 90% !important;
+      max-width: 380px !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      pointer-events: auto !important;
+      text-align: center;
+    }
+
+    .img-wrapper {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 10px !important;
+      margin-bottom: 15px !important;
+    }
+
+    .img-wrapper img {
+      width: 38% !important;
+      max-width: 110px !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+
+    .start-card p {
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      color: #245752 !important;
+      font-weight: 700 !important;
+      word-break: keep-all !important;
+    }
+
+    #start_btn {
+      width: 100% !important;
+      max-width: 220px !important;
+      height: 46px !important;
+      font-size: 15px !important;
+      font-weight: bold !important;
+      background: linear-gradient(to right, #79cb83, #3ca89e) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 23px !important;
+      margin-top: 18px !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25) !important;
+    }
+
+    #start_area.hide {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+  </style>
+</head>
+
+<body>
+<div id="container"></div>
+  <!-- ✅ 서비스 안내 팝업 -->
+  <div id="start_area">
+    <div class="start-card">
+      <div class="img-wrapper">
+        <img src="./assets/textures/photo-auth.png" alt="AR 포토존" width="200">
+        <img src="./assets/textures/world-lh-300.png" alt="AR 포털" width="200">
+      </div>
+      <p>
+        화면의 지시에 따라 앞뒤로 움직이면 등대가 나타나고 <br>
+        등대를 원하는 크기와 위치로 배치할 합니다.<br>
+        (터치한 상태로 이동, 엄지와 검지로 크기를 조정)<br><br>
+        영국의 에디스톤 등대를 체험하고,<br>
+        인증샷을 올리면 최종 인증이 완료됩니다.
+      </p>
+      <button id="start_btn">포토존 시작</button>
+    </div>
+  </div>
+<a-scene
+  responsive-immersive
+  coaching-overlay
+  landing-page
+  xrextras-gesture-detector
+  xrextras-loading
+  xrextras-runtime-error
+  gltf-model="dracoDecoderPath: https://cdn.8thwall.com/web/aframe/draco-decoder/"
+  renderer="colorManagement: true"
+  xrweb="allowedDevices: any;
+    defaultEnvironmentFogIntensity: 0.5; 
+    defaultEnvironmentFloorTexture: #groundTex; 
+    defaultEnvironmentFloorColor: #FFF;
+    defaultEnvironmentSkyBottomColor: #B4C4CC; 
+    defaultEnvironmentSkyTopColor: #5ac8fa;
+    defaultEnvironmentSkyGradientStrength: 0.5;
+    scale: absolute">
+
+  <a-assets>
+    <a-asset-item id="carModel" src="./assets/lumi-dance-6-ani.glb"></a-asset-item>
+    <img id="groundTex" src="assets/textures/concrete.jpg">
+  </a-assets>
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+  <a-camera
+    id="camera"
+    position="0 1.75 12"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
+  
+  <a-entity
+    xr-light
+    light="type: directional;
+      castShadow: true;
+      shadowMapHeight:2048;
+      shadowMapWidth:2048;
+      shadowCameraTop: 20;
+      shadowCameraBottom: -20;
+      shadowCameraLeft: -20;
+      shadowCameraRight: 20;
+      target: #car;
+      shadowRadius: 3"
+    xrextras-attach="target: car; offset: 0 15 0;"
+    shadow>
+  </a-entity>
+  
+  <a-light
+    xr-light="max: 0.5"
+    type="ambient">
+  </a-light>
+
+  <a-entity
+    id="car"
+    gltf-model="#carModel"
+    rotation="0 10 0"
+    scale="1 1 1"
+    xrextras-hold-drag="rise-height: 0"
+    xrextras-two-finger-rotate
+    absolute-pinch-scale
+    proximity
+    animation="property: position; from: 0 -10 0; to: 0 0 0; dir: linear; dur: 1000; loop: false"
+    animation__1="property: scale; from: 0 0 0; to: 1 1 1; dir: linear; dur: 100; loop: false"
+    animation-mixer
+    shadow="receive: false">
+  </a-entity>
+  <a-plane
+    id="ground"
+    rotation="-90 0 0"
+    width="100"
+    height="100"
+    material="shader: shadow; opacity: 0.5;"
+    shadow
+  ></a-plane>
+</a-scene>
+  <script>
+    // ✅ 시작 버튼: 팝업 닫기
+    window.addEventListener('DOMContentLoaded', () => {
+      const startBtn = document.getElementById('start_btn');
+      if (startBtn) {
+        ['click', 'touchstart'].forEach(eventType => {
+          startBtn.addEventListener(eventType, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            executeStart();
+          }, { passive: false });
+        });
+      }
+    });
+
+    function executeStart() {
+      const startArea = document.getElementById('start_area');
+      if (startArea) {
+        startArea.classList.add('hide');
+        setTimeout(() => {
+          startArea.style.display = 'none';
+        }, 300);
+      }
+
+      // 포털 비디오 재생 트리거 (모바일 자동재생 제약 대응)
+      const portalVid = document.getElementById('portal-video');
+      if (portalVid) {
+        portalVid.play().catch(err => console.log("비디오 재생 대기:", err));
+      }
+    }
+  </script>
+</body>
+</html>
