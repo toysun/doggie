@@ -196,13 +196,13 @@
     id="car"
     gltf-model="#carModel"
     rotation="0 70 0"
-    scale="5 5 5"
+    scale="1 1 1"
     xrextras-hold-drag="rise-height: 0"
     xrextras-two-finger-rotate
     absolute-pinch-scale
     proximity
-    animation="property: position; from: 0 10 0; to: 0 0 0; dir: linear; delay: 4000; dur: 8000; loop: false"
-    animation__1="property: scale; from: 0 0 0; to: 5 5 5; dir: linear; delay: 4000; dur: 8000; loop: false"
+    animation="property: position; from: 0 -10 0; to: 0 0 0; dir: linear; dur: 100; loop: false"
+    animation__1="property: scale; from: 0 0 0; to: 1 1 1; dir: linear; dur: 100; loop: false"
     animation-mixer
     shadow="receive: false">
   </a-entity>
@@ -210,8 +210,8 @@
         gltf-model="#boat-model"
         reflections="type: static"
         rotation="0 -45 0"
-        position="28 -15 -60"
-        scale="0.05 0.05 0.05"
+        position="-2 0 0"
+        scale="1 1 1"
         shadow="receive: false"
         animation-mixer>
       </a-entity>
