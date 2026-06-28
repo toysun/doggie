@@ -160,7 +160,7 @@
 
   <a-assets>
     <a-asset-item id="carModel" src="./assets/biscayne-lh-beach.glb"></a-asset-item>
-    <a-asset-item id="boat-Model" src="./assets/fishing_boat.glb"></a-asset-item-->
+    <a-asset-item id="waterModel" src="./assets/yammy_water.glb"></a-asset-item>
     <img id="groundTex" src="assets/textures/concrete.jpg">
   </a-assets>
     <xrextras-capture-button></xrextras-capture-button>
@@ -206,6 +206,13 @@
     animation__1="property: scale; from: 0 0 0; to: 1 1 1; dir: linear; dur: 100; loop: false"
     animation-mixer
     shadow="receive: false">
+                 <a-entity
+               id="model"
+               gltf-model="#waterModel"
+               scale="10 10 10"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
   </a-entity>
   <a-plane
     id="ground"
