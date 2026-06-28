@@ -182,7 +182,7 @@
         <a-asset-item id="confetti2-asset" src="./heart-balloon-color-confetti.glb"></a-asset-item>
         <a-asset-item id="confetti3-asset" src="./star-balloon-confetti.glb"></a-asset-item>
         <a-asset-item id="confetti4-asset" src="./flower-confetti.glb"></a-asset-item>
-        <a-asset-item id="text-thankyou" src="./text-thankyou-ani.glb"></a-asset-item>
+        <a-asset-item id="text-congraturation" src="./text-congraturation-ani.glb"></a-asset-item>
       </a-assets>
 
       <xrextras-capture-button></xrextras-capture-button>
@@ -232,7 +232,7 @@
       <a-entity id="confetti3-el" gltf-model="#confetti3-asset" position="0 0 0" scale="10 10 10" visible="false" confetti-once fix-metal-material></a-entity>
       <a-entity id="confetti4-el" gltf-model="#confetti4-asset" position="0 0 0" scale="10 10 10" visible="false" confetti-once fix-metal-material></a-entity>
 
-      <a-entity id="thankyou" gltf-model="#text-thankyou" position="0 2.4 -4" scale="10 10 10"></a-entity>
+      <a-entity id="thankyou" gltf-model="#text-congraturation" position="0 6 -8" scale="10 10 10" animation-mixer></a-entity>
       <a-plane id="ground" rotation="-90 0 0" width="1000" height="1000" material="shader: shadow" shadow></a-plane>
     </a-scene>
 
