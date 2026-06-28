@@ -198,6 +198,7 @@
 
     <a-assets>
       <a-asset-item id="carModel" src="./assets/lumi-dance-6-ani.glb"></a-asset-item>
+      <a-asset-item id="starModel" src="./assets/star-color-confetti-100.glb"></a-asset-item>
       <img id="groundTex" src="assets/textures/concrete.jpg">
     </a-assets>
 
@@ -245,6 +246,13 @@
       animation__1="property: scale; from: 0 0 0; to: 1 1 1; dir: linear; dur: 100; loop: false"
       animation-mixer
       shadow="receive: false">
+                  <a-entity
+               id="model"
+               gltf-model="#starModel"
+               scale="1 1 1"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
     </a-entity>
 
     <a-plane
