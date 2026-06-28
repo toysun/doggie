@@ -239,6 +239,7 @@
       <a-asset-item id="haemu-idle"    src="./haemu-idle.glb"></a-asset-item>
       <a-asset-item id="cloud-storm"   src="./storm-clouds-ani.glb"></a-asset-item>
       <a-asset-item id="sky-lighting"   src="./sky-lighting-ani-1.glb"></a-asset-item>
+      <a-asset-item id="blow-fish"   src="./blow-fish-loop.glb"></a-asset-item>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -311,7 +312,7 @@
         id="cloud"
         gltf-model="#cloud-storm"
         rotation="0 0 0"
-        scale="2 2 2"
+        scale="1 1 1"
         animation-mixer
         shadow="receive: false">
       </a-entity>
@@ -320,6 +321,13 @@
         gltf-model="#sky-lighting"
         rotation="0 0 0"
         scale="2 2 2"
+        animation-mixer
+        shadow="receive: false">
+      <a-entity
+        id="lighting"
+        gltf-model="#blow-fish"
+        rotation="0 0 0"
+        scale="1 1 1"
         animation-mixer
         shadow="receive: false">
       </a-entity>
