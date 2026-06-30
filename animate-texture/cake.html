@@ -10,7 +10,7 @@
   <script src="./../xr_st/landing-page.js"></script>  
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
-  <script type="module" src="./app1.js" defer></script>
+  <!--script type="module" src="./app1.js" defer></script-->
   
 </head>
 
@@ -45,7 +45,7 @@
       shadowCameraTop: 10;
       target: #cowboy;
       shadowRadius: 12"
-    xrextras-attach="target: cowboy; offset: 1 15 3;"
+    xrextras-attach="target: cake; offset: 1 15 3;"
     shadow>
   </a-entity>
 
@@ -62,7 +62,7 @@
 
   <a-entity
     id="cake"
-    animate-cape
+    animate-cake
     gltf-model="#cakeModel"
     position="0 0.1 0"
     class="cantap"
@@ -82,6 +82,41 @@
     shadow>
   </a-plane>  
 </a-scene>
+<script>
+  AFRAME.registerComponent('animate-texture', {
+  init() {
+    this.offset = 0
+  },
+  tick() {
+    const mesh = this.el.getObject3D('mesh')
+    if (!mesh) {
+      return
+    }
+    mesh.traverse((node) => {
+      if (node.isMesh) {
+        node.material.map.offset.x = this.offset
+        node.material.needsUpdate = true
+      }
+    })
+    this.offset += 0.001
+  },
+})
 
+AFRAME.registerComponent('animate-cake', {
+  init() {
+    this.offset = 0
+  },
+  tick() {
+    const mesh = this.el.getObject3D('mesh')
+    if (!mesh) {
+      return
+    }
+    mesh.getObjectByName('CakeBody').material.map.repeat.x = 0.5
+    mesh.getObjectByName('CakeBody').material.map.repeat.y = 0.5
+    mesh.getObjectByName('CakeBody').material.map.offset.x = this.offset
+    this.offset += 0.002
+  },
+})
+</script>
 </body>
 </html>
