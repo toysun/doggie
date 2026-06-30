@@ -83,39 +83,48 @@
   </a-plane>  
 </a-scene>
 <script>
-  AFRAME.registerComponent('animate-texture', {
+AFRAME.registerComponent('animate-texture', {
   init() {
     this.offset = 0
   },
   tick() {
     const mesh = this.el.getObject3D('mesh')
-    if (!mesh) {
-      return
-    }
+    if (!mesh) return
+
     mesh.traverse((node) => {
-      if (node.isMesh) {
+      if (node.isMesh && node.material && node.material.map) {
         node.material.map.offset.x = this.offset
-        node.material.needsUpdate = true
+        // Removed node.material.needsUpdate = true to prevent critical lag
       }
     })
     this.offset += 0.001
-  },
+  }
 })
 
 AFRAME.registerComponent('animate-cake', {
   init() {
     this.offset = 0
+    this.cakeTexture = null
+
+    // Wait for the GLTF model to safely finish loading before querying its children
+    this.el.addEventListener('model-loaded', () => {
+      const mesh = this.el.getObject3D('mesh')
+      const cakeBody = mesh.getObjectByName('CakeBody')
+      
+      if (cakeBody && cakeBody.material && cakeBody.material.map) {
+        this.cakeTexture = cakeBody.material.map
+        // Set repeat configuration once, instead of doing it every frame
+        this.cakeTexture.repeat.set(0.5, 0.5)
+      }
+    })
   },
   tick() {
-    const mesh = this.el.getObject3D('mesh')
-    if (!mesh) {
-      return
+    // Only animate if the texture reference has been successfully found
+    if (this.cakeTexture) {
+      this.cakeTexture.offset.x = this.offset
+      this.offset += 0.002
     }
-    mesh.getObjectByName('CakeBody').material.map.repeat.x = 0.5
-    mesh.getObjectByName('CakeBody').material.map.repeat.y = 0.5
-    mesh.getObjectByName('CakeBody').material.map.offset.x = this.offset
-    this.offset += 0.002
-  },
+  }
 })
 </script>
 </body>
