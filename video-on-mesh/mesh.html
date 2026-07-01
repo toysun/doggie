@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>video & image material on mesh</title>
+
+  <script src="./../xr_st/8frame-1.4.1.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>  
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <link rel="stylesheet" type="text/css" href="index.css">
+  
+  <style>
+    /* 파일 업로드 버튼 스타일 예시 (필요시 index.css로 이동) */
+    .custom-upload {
+      position: absolute;
+      z-index: 999;
+      top: 20px;
+      left: 20px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: sans-serif;
+    }
+    #file { display: none; }
+  </style>
+</head>
+
+<body>
+<label id="uploadBtn" for="file" class="custom-upload">Add Media (Image/Video)</label>
+<input id="file" type="file" name="filename" accept="video/*, image/*">
+
+<a-scene
+  xrextras-gesture-detector
+  landing-page="mediaSrc: https://i.giphy.com/media/gtfuPId8wvtfkyQ7Tc/giphy.mp4"
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement: true"
+  xrweb>
+
+  <a-assets>
+    <a-asset-item id="chair" src="./assets/glb/cake-with-candle-fire.glb"></a-asset-item>
+    <a-asset-item id="tv" src="./assets/glb/retro-tv.glb"></a-asset-item>
+    
+    <video id="vid-neon" muted autoplay crossorigin="anonymous" loop="true" src="./assets/video/neon-frame.mp4"></video>    
+    <video id="vid-cat" muted autoplay playsinline loop="true" crossorigin="anonymous" src="./assets/video/cat-noir.mp4"></video>    
+    <img id="sample-img" crossorigin="anonymous" src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=500">
+  </a-assets>
+
+  <xrextras-capture-button></xrextras-capture-button>
+  <xrextras-capture-config request-mic="manual" enable-end-card="false"></xrextras-capture-config>
+  <xrextras-capture-preview></xrextras-capture-preview>
+  
+  <a-camera
+    id="camera"
+    position="0 8 10"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
+  
+  <a-entity
+    xr-light
+    light="type: directional; castShadow: true; shadowMapHeight:2048; shadowMapWidth:2048; shadowCameraTop: 20; shadowCameraBottom: -20; shadowCameraRight: 20; shadowCameraLeft: -20; target: #camera"
+    xrextras-attach="target: camera; offset: 8 15 4"
+    position="1 4.3 2.5"
+    shadow>
+  </a-entity>
+  
+  <a-light xr-light="max: 0.5" type="ambient"></a-light>
+
+  <a-entity 
+    id="group"
+    geometry="primitive: box; width: 8; height: 8; depth: 4;"
+    material="transparent: true; opacity: 0.0; depthTest: false"
+    xrextras-pinch-scale="max: 2"
+    xrextras-two-finger-rotate
+    xrextras-hold-drag="riseHeight: 1">
+
+    <a-entity 
+      id="chairModel" 
+      gltf-model="#chair"
+      media-texture="src: #vid-neon; meshName: CakeBody"
+      position="-2 0 0"
+      rotation="0 55 0"
+      scale="3 3 3"
+      animation-mixer
+      shadow="receive: false"
+    ></a-entity>
+  
+    <a-entity 
+      id="tvModel" 
+      gltf-model="#tv"
+      media-texture="src: #vid-cat; meshName: Screen"
+      position="2 0 0"
+      rotation="0 -55 0"
+      scale="3 3 3"
+      reflections="type: realtime"
+      shadow="receive: false"
+    ></a-entity>
+  
+  </a-entity>
+
+  <a-plane id="ground" rotation="-90 0 0" width="100" height="100" material="shader: shadow; opacity: 0.5;" shadow></a-plane>
+</a-scene>
+
+<script>
+/**
+ * 비디오 및 이미지를 특정 Mesh에 매핑하는 통합 컴포넌트
+ */
+AFRAME.registerComponent('media-texture', {
+  schema: {
+    src: { type: 'selector' },       // <video> 또는 <img> 요소 선택자
+    meshName: { type: 'string', default: '' } // 3D 모델 내부의 특정 텍스처를 바꿀 오브젝트 명
+  },
+
+  init() {
+    this.texture = null;
+    // GLTF 모델 로드가 완료되면 텍스처를 적용합니다.
+    this.el.addEventListener('model-loaded', () => this.applyMedia());
+  },
+
+  update() {
+    this.applyMedia();
+  },
+
+  applyMedia() {
+    const mesh = this.el.getObject3D('mesh');
+    const targetElement = this.data.src;
+
+    if (!mesh || !targetElement) return;
+
+    // 기존 텍스처 메모리 해제 폐기(메모리 누수 방지)
+    if (this.texture) this.texture.dispose();
+
+    // 1. 미디어 타입 판별 및 Three.js 텍스처 생성
+    if (targetElement.tagName === 'VIDEO') {
+      this.texture = new THREE.VideoTexture(targetElement);
+      this.texture.minFilter = THREE.LinearFilter;
+      this.texture.magFilter = THREE.LinearFilter;
+    } else if (targetElement.tagName === 'IMG') {
+      this.texture = new THREE.Texture(targetElement);
+      this.texture.needsUpdate = true;
+    } else {
+      console.warn('지원하지 않는 미디어 타입입니다.');
+      return;
+    }
+
+    // A-Frame 색상 공간 설정 동기화
+    this.texture.colorSpace = THREE.SRGBColorSpace || THREE.sRGBEncoding;
+
+    // 2. 3D 오브젝트 내부 탐색 후 텍스처 주입
+    mesh.traverse((node) => {
+      if (node.isMesh) {
+        // meshName이 비어있으면 모든 mesh에 적용, 적혀있으면 일치하는 노드에만 적용
+        if (!this.data.meshName || node.name === this.data.meshName) {
+          
+          const materials = Array.isArray(node.material) ? node.material : [node.material];
+          
+          materials.forEach((mat) => {
+            if (mat) {
+              mat.map = this.texture;
+              mat.needsUpdate = true;
+            }
+          });
+        }
+      }
+    });
+  }
+});
+
+/**
+ * 카메라 롤 / 파일 업로드 처리 이벤트 핸들러
+ */
+document.getElementById('file').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const fileURL = URL.createObjectURL(file);
+  const assetsContainer = document.querySelector('a-assets');
+  
+  // 예시로 TV 모델(#tvModel)의 스크린을 교체하도록 타겟 설정
+  const targetEntity = document.getElementById('tvModel'); 
+
+  if (file.type.startsWith('video/')) {
+    // 동적 비디오 엘리먼트 생성 및 등록
+    let videoEl = document.getElementById('user-dynamic-video');
+    if (!videoEl) {
+      videoEl = document.createElement('video');
+      videoEl.id = 'user-dynamic-video';
+      videoEl.setAttribute('autoplay', '');
+      videoEl.setAttribute('muted', '');
+      videoEl.setAttribute('playsinline', '');
+      videoEl.setAttribute('loop', 'true');
+      videoEl.setAttribute('crossorigin', 'anonymous');
+      assetsContainer.appendChild(videoEl);
+    }
+    videoEl.src = fileURL;
+    videoEl.play();
+
+    // 컴포넌트 속성 갱신 (meshName은 기존 'Screen' 유지)
+    targetEntity.setAttribute('media-texture', { src: '#user-dynamic-video' });
+
+  } else if (file.type.startsWith('image/')) {
+    // 동적 이미지 엘리먼트 생성 및 등록
+    let imgEl = document.getElementById('user-dynamic-img');
+    if (!imgEl) {
+      imgEl = document.createElement('img');
+      imgEl.id = 'user-dynamic-img';
+      imgEl.setAttribute('crossorigin', 'anonymous');
+      assetsContainer.appendChild(imgEl);
+    }
+    imgEl.src = fileURL;
+    
+    imgEl.onload = () => {
+      // 이미지가 로드 완료되면 컴포넌트 속성 갱신
+      targetEntity.setAttribute('media-texture', { src: '#user-dynamic-img' });
+    };
+  }
+});
+</script>
+</body>
+</html>
