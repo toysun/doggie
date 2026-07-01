@@ -14,10 +14,10 @@
   <link rel="stylesheet" type="text/css" href="index.css">
   
   <style>
-    /* 검은 화면 뒤로 버튼이 숨지 않도록 z-index를 최상위(10001)로 설정 */
+    /* 로딩 레이어 오버레이보다 무조건 위에 배치되도록 z-index 최상위 설정 및 버튼 시각화 */
     .custom-upload {
       position: fixed;
-      z-index: 10001;
+      z-index: 99999;
       top: 20px;
       left: 20px;
       background: #007AFF;
@@ -27,7 +27,8 @@
       cursor: pointer;
       font-family: sans-serif;
       font-weight: bold;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      display: block !important; /* display: none 제거 */
     }
     #file { display: none; }
   </style>
@@ -47,7 +48,8 @@
   xrweb>
 
   <a-assets>
-    <a-asset-item id="chair" src="./assets/glb/cake-with-candle-fire.glb"></a-asset-item>
+    <a-asset-item id="photo" src="./assets/glb/photo_frame.glb"></a-asset-item>
+    <a-asset-item id="cake" src="./assets/glb/cake-with-candle-fire.glb"></a-asset-item>
     <a-asset-item id="tv" src="./assets/glb/retro-tv.glb"></a-asset-item>
     
     <video id="vid-neon" muted autoplay playsinline loop="true" crossorigin="anonymous" src="./assets/video/neon-frame.mp4"></video>    
@@ -84,20 +86,20 @@
     xrextras-hold-drag="riseHeight: 1">
 
     <a-entity 
-      id="chairModel" 
-      gltf-model="#chair"
-      media-texture="src: #vid-neon; meshName: CakeBody"
-      position="-2 0 0"
-      rotation="0 55 0"
-      scale="3 3 3"
+      id="photoModel" 
+      gltf-model="#photo"
+      media-texture="src: #vid-neon; meshName: " 
+      position="-3 5.5 0"
+      rotation="0 35 0"
+      scale="50 50 50"
       animation-mixer
       shadow="receive: false"
     ></a-entity>
-  
+
     <a-entity 
       id="tvModel" 
       gltf-model="#tv"
-      media-texture="src: #vid-cat; meshName: Screen"
+      media-texture="src: #vid-cat; meshName: " 
       position="2 0 0"
       rotation="0 -55 0"
       scale="3 3 3"
@@ -107,23 +109,32 @@
   
   </a-entity>
 
+  <a-entity 
+    id="cakeModel" 
+    gltf-model="#cake"
+    position="-1 0 0"
+    rotation="0 0 0"
+    scale="3 3 3"
+    animation-mixer
+    shadow="receive: false"
+  ></a-entity>
+
   <a-plane id="ground" rotation="-90 0 0" width="100" height="100" material="shader: shadow; opacity: 0.5;" shadow></a-plane>
 </a-scene>
 
 <script>
 /**
- * 비디오 및 이미지를 안전하게 특정 Mesh에 매핑하는 통합 컴포넌트
+ * 비디오와 이미지를 모두 판별하여 3D Mesh에 텍스처를 주입하는 만능 컴포넌트
  */
 AFRAME.registerComponent('media-texture', {
   schema: {
-    src: { type: 'selector' },       
-    meshName: { type: 'string', default: '' } 
+    src: { type: 'selector' },          // <video> 또는 <img> 태그 선택자
+    meshName: { type: 'string', default: '' } // 특정 하위 Mesh 명칭 (비워두면 전체 적용)
   },
 
   init() {
     this.texture = null;
     this.applyMedia = this.applyMedia.bind(this);
-    // 모델이 완벽히 로드된 후 실행하여 검은 화면 멈춤 현상 방지
     this.el.addEventListener('model-loaded', this.applyMedia);
   },
 
@@ -142,22 +153,19 @@ AFRAME.registerComponent('media-texture', {
 
     if (!mesh || !targetElement) return;
 
-    // 메모리 누수 방지 차원 기존 텍스처 제거
+    // 이전 텍스처 메모리 해제
     if (this.texture) this.texture.dispose();
 
-    // 1. 미디어 타입(비디오 vs 이미지) 판별 및 텍스처 최적화 생성
+    // 1. 미디어 종류 감지 및 쓰리제이에스 텍스처 최적화 설정
     if (targetElement.tagName === 'VIDEO') {
-      // 브라우저 정책 우회용 강제 재생 시도
       if (targetElement.paused) {
-        targetElement.play().catch(e => console.log("자동 재생 대기 중 (사용자 클릭 필요)"));
+        targetElement.play().catch(() => console.log("유저 인터랙션 대기"));
       }
       this.texture = new THREE.VideoTexture(targetElement);
       this.texture.minFilter = THREE.LinearFilter;
       this.texture.magFilter = THREE.LinearFilter;
     } else if (targetElement.tagName === 'IMG') {
       this.texture = new THREE.Texture(targetElement);
-      
-      // 이미지가 이미 로드 완료되었는지 체크 후 업데이트 플래그 설정 (검은색 출력 버그 방지)
       if (targetElement.complete) {
         this.texture.needsUpdate = true;
       } else {
@@ -166,20 +174,21 @@ AFRAME.registerComponent('media-texture', {
         });
       }
     } else {
-      return;
+      return; // 지원하지 않는 포맷일 때 예외 처리로 튕김 방지
     }
 
     this.texture.colorSpace = THREE.SRGBColorSpace || THREE.sRGBEncoding;
 
-    // 2. 특정 하위 오브젝트 명(meshName)을 추적하여 안전하게 매핑
+    // 2. 모델 내부 노드를 순회하며 텍스처 주입
     mesh.traverse((node) => {
       if (node.isMesh) {
+        // meshName 설정이 없거나, 노드 이름이 일치할 때 적용
         if (!this.data.meshName || node.name === this.data.meshName) {
           const materials = Array.isArray(node.material) ? node.material : [node.material];
           materials.forEach((mat) => {
             if (mat) {
               mat.map = this.texture;
-              mat.needsUpdate = true; // WebGL 재컴파일 유도
+              mat.needsUpdate = true;
             }
           });
         }
@@ -189,7 +198,7 @@ AFRAME.registerComponent('media-texture', {
 });
 
 /**
- * 카메라 롤 / 파일 업로드 시 미디어를 동적으로 갱신하는 핸들러
+ * 디바이스 미디어(이미지/동영상) 업로드 처리 스크립트
  */
 document.getElementById('file').addEventListener('change', function(e) {
   const file = e.target.files[0];
@@ -197,7 +206,9 @@ document.getElementById('file').addEventListener('change', function(e) {
 
   const fileURL = URL.createObjectURL(file);
   const assetsContainer = document.querySelector('a-assets');
-  const targetEntity = document.getElementById('tvModel'); // TV 스크린을 타겟으로 지정
+  
+  // 업로드 시 미디어가 바뀔 타겟 모델 지정 (여기서는 예시로 tvModel로 지정)
+  const targetEntity = document.getElementById('tvModel'); 
 
   if (file.type.startsWith('video/')) {
     let videoEl = document.getElementById('user-dynamic-video');
@@ -212,8 +223,6 @@ document.getElementById('file').addEventListener('change', function(e) {
       assetsContainer.appendChild(videoEl);
     }
     videoEl.src = fileURL;
-    
-    // 버튼 클릭 등의 상호작용 직후이므로 확실히 play가 트리거됨
     videoEl.play().then(() => {
       targetEntity.setAttribute('media-texture', { src: '#user-dynamic-video' });
     });
@@ -227,7 +236,6 @@ document.getElementById('file').addEventListener('change', function(e) {
       assetsContainer.appendChild(imgEl);
     }
     imgEl.src = fileURL;
-    
     imgEl.onload = () => {
       targetEntity.setAttribute('media-texture', { src: '#user-dynamic-img' });
     };
