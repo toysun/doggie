@@ -10,27 +10,31 @@
   <script src="./../xr_st/landing-page.js"></script>  
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  
   <link rel="stylesheet" type="text/css" href="index.css">
   
   <style>
-    /* 파일 업로드 버튼 스타일 예시 (필요시 index.css로 이동) */
+    /* 검은 화면 뒤로 버튼이 숨지 않도록 z-index를 최상위(10001)로 설정 */
     .custom-upload {
-      position: absolute;
-      z-index: 999;
+      position: fixed;
+      z-index: 10001;
       top: 20px;
       left: 20px;
-      background: rgba(0,0,0,0.8);
+      background: #007AFF;
       color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
+      padding: 12px 24px;
+      border-radius: 8px;
       cursor: pointer;
       font-family: sans-serif;
+      font-weight: bold;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
     #file { display: none; }
   </style>
 </head>
 
 <body>
+
 <label id="uploadBtn" for="file" class="custom-upload">Add Media (Image/Video)</label>
 <input id="file" type="file" name="filename" accept="video/*, image/*">
 
@@ -46,9 +50,8 @@
     <a-asset-item id="chair" src="./assets/glb/cake-with-candle-fire.glb"></a-asset-item>
     <a-asset-item id="tv" src="./assets/glb/retro-tv.glb"></a-asset-item>
     
-    <video id="vid-neon" muted autoplay crossorigin="anonymous" loop="true" src="./assets/video/neon-frame.mp4"></video>    
+    <video id="vid-neon" muted autoplay playsinline loop="true" crossorigin="anonymous" src="./assets/video/neon-frame.mp4"></video>    
     <video id="vid-cat" muted autoplay playsinline loop="true" crossorigin="anonymous" src="./assets/video/cat-noir.mp4"></video>    
-    <img id="sample-img" crossorigin="anonymous" src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=500">
   </a-assets>
 
   <xrextras-capture-button></xrextras-capture-button>
@@ -109,22 +112,28 @@
 
 <script>
 /**
- * 비디오 및 이미지를 특정 Mesh에 매핑하는 통합 컴포넌트
+ * 비디오 및 이미지를 안전하게 특정 Mesh에 매핑하는 통합 컴포넌트
  */
 AFRAME.registerComponent('media-texture', {
   schema: {
-    src: { type: 'selector' },       // <video> 또는 <img> 요소 선택자
-    meshName: { type: 'string', default: '' } // 3D 모델 내부의 특정 텍스처를 바꿀 오브젝트 명
+    src: { type: 'selector' },       
+    meshName: { type: 'string', default: '' } 
   },
 
   init() {
     this.texture = null;
-    // GLTF 모델 로드가 완료되면 텍스처를 적용합니다.
-    this.el.addEventListener('model-loaded', () => this.applyMedia());
+    this.applyMedia = this.applyMedia.bind(this);
+    // 모델이 완벽히 로드된 후 실행하여 검은 화면 멈춤 현상 방지
+    this.el.addEventListener('model-loaded', this.applyMedia);
   },
 
   update() {
     this.applyMedia();
+  },
+
+  remove() {
+    this.el.removeEventListener('model-loaded', this.applyMedia);
+    if (this.texture) this.texture.dispose();
   },
 
   applyMedia() {
@@ -133,37 +142,44 @@ AFRAME.registerComponent('media-texture', {
 
     if (!mesh || !targetElement) return;
 
-    // 기존 텍스처 메모리 해제 폐기(메모리 누수 방지)
+    // 메모리 누수 방지 차원 기존 텍스처 제거
     if (this.texture) this.texture.dispose();
 
-    // 1. 미디어 타입 판별 및 Three.js 텍스처 생성
+    // 1. 미디어 타입(비디오 vs 이미지) 판별 및 텍스처 최적화 생성
     if (targetElement.tagName === 'VIDEO') {
+      // 브라우저 정책 우회용 강제 재생 시도
+      if (targetElement.paused) {
+        targetElement.play().catch(e => console.log("자동 재생 대기 중 (사용자 클릭 필요)"));
+      }
       this.texture = new THREE.VideoTexture(targetElement);
       this.texture.minFilter = THREE.LinearFilter;
       this.texture.magFilter = THREE.LinearFilter;
     } else if (targetElement.tagName === 'IMG') {
       this.texture = new THREE.Texture(targetElement);
-      this.texture.needsUpdate = true;
+      
+      // 이미지가 이미 로드 완료되었는지 체크 후 업데이트 플래그 설정 (검은색 출력 버그 방지)
+      if (targetElement.complete) {
+        this.texture.needsUpdate = true;
+      } else {
+        targetElement.addEventListener('load', () => {
+          this.texture.needsUpdate = true;
+        });
+      }
     } else {
-      console.warn('지원하지 않는 미디어 타입입니다.');
       return;
     }
 
-    // A-Frame 색상 공간 설정 동기화
     this.texture.colorSpace = THREE.SRGBColorSpace || THREE.sRGBEncoding;
 
-    // 2. 3D 오브젝트 내부 탐색 후 텍스처 주입
+    // 2. 특정 하위 오브젝트 명(meshName)을 추적하여 안전하게 매핑
     mesh.traverse((node) => {
       if (node.isMesh) {
-        // meshName이 비어있으면 모든 mesh에 적용, 적혀있으면 일치하는 노드에만 적용
         if (!this.data.meshName || node.name === this.data.meshName) {
-          
           const materials = Array.isArray(node.material) ? node.material : [node.material];
-          
           materials.forEach((mat) => {
             if (mat) {
               mat.map = this.texture;
-              mat.needsUpdate = true;
+              mat.needsUpdate = true; // WebGL 재컴파일 유도
             }
           });
         }
@@ -173,7 +189,7 @@ AFRAME.registerComponent('media-texture', {
 });
 
 /**
- * 카메라 롤 / 파일 업로드 처리 이벤트 핸들러
+ * 카메라 롤 / 파일 업로드 시 미디어를 동적으로 갱신하는 핸들러
  */
 document.getElementById('file').addEventListener('change', function(e) {
   const file = e.target.files[0];
@@ -181,12 +197,9 @@ document.getElementById('file').addEventListener('change', function(e) {
 
   const fileURL = URL.createObjectURL(file);
   const assetsContainer = document.querySelector('a-assets');
-  
-  // 예시로 TV 모델(#tvModel)의 스크린을 교체하도록 타겟 설정
-  const targetEntity = document.getElementById('tvModel'); 
+  const targetEntity = document.getElementById('tvModel'); // TV 스크린을 타겟으로 지정
 
   if (file.type.startsWith('video/')) {
-    // 동적 비디오 엘리먼트 생성 및 등록
     let videoEl = document.getElementById('user-dynamic-video');
     if (!videoEl) {
       videoEl = document.createElement('video');
@@ -199,13 +212,13 @@ document.getElementById('file').addEventListener('change', function(e) {
       assetsContainer.appendChild(videoEl);
     }
     videoEl.src = fileURL;
-    videoEl.play();
-
-    // 컴포넌트 속성 갱신 (meshName은 기존 'Screen' 유지)
-    targetEntity.setAttribute('media-texture', { src: '#user-dynamic-video' });
+    
+    // 버튼 클릭 등의 상호작용 직후이므로 확실히 play가 트리거됨
+    videoEl.play().then(() => {
+      targetEntity.setAttribute('media-texture', { src: '#user-dynamic-video' });
+    });
 
   } else if (file.type.startsWith('image/')) {
-    // 동적 이미지 엘리먼트 생성 및 등록
     let imgEl = document.getElementById('user-dynamic-img');
     if (!imgEl) {
       imgEl = document.createElement('img');
@@ -216,7 +229,6 @@ document.getElementById('file').addEventListener('change', function(e) {
     imgEl.src = fileURL;
     
     imgEl.onload = () => {
-      // 이미지가 로드 완료되면 컴포넌트 속성 갱신
       targetEntity.setAttribute('media-texture', { src: '#user-dynamic-img' });
     };
   }
