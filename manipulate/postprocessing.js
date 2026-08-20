@@ -169,7 +169,7 @@ const postprocessingComponent = {
 
     // add postprocessing effect pass
     const params = {
-      strength: 0.15,
+      strength: 0.2,
       radius: 0.5,
       threshold: 0,
       exposure: 1,
