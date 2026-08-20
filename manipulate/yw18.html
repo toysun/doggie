@@ -55,6 +55,7 @@
   </head>
 
   <body>
+    <!-- 🛠️ 수정: postprocessing 속성에 bloomStrength: 0.15 전달 -->
     <a-scene
       xrextras-gesture-detector
       landing-page
@@ -62,7 +63,7 @@
       xrextras-runtime-error
       renderer="colorManagement: true"
       xrweb="allowedDevices: any"
-      postprocessing>
+      postprocessing="bloomStrength: 0.15">
 
       <!-- We can define assets here to be loaded when A-Frame initializes -->
       <a-assets>
@@ -103,15 +104,15 @@
         scale="7 7 7"
         shadow="receive: false">
         <a-sphere
-    xrextras-one-finger-rotate
-    position="0 0.5 -1.0"
-    radius="0.01"
-    material="
-      color: #AD50FF; shader: flat; 
-      src:./cube-texture-w.png"
-    shadow
-    data-bloom="bloom">
-  </a-sphere>
+          xrextras-one-finger-rotate
+          position="0 0.5 -1.0"
+          radius="0.01"
+          material="
+            color: #AD50FF; shader: flat; 
+            src:./cube-texture-w.png"
+          shadow
+          data-bloom="bloom">
+        </a-sphere>
       </a-entity>
 
       <a-plane
