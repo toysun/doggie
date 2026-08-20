@@ -198,27 +198,26 @@
 
   <div id="container">
     <div id="start_area">
-      <img src="./photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
+      <img src="./djgo-photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
 
       <p class="guide-text">
-        등대를 배경으로 <br>
-        아래의 2개 AR포토존 중 하나를 선택해서<br>
+        동강사진박물관을 배경으로 <br>
         사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
       </p>
 
       <div class="photozone-container">
         <div class="photozone-card">
           <div class="photozone-title">✨ AR 루미와 나비 포토존</div>
-          <img src="./lumi-butterfly.jpg" alt="AR 루미" width="200">
+          <img src="./kkebi-camera.png" alt="AR 루미" width="200">
           <button class="start-zone-btn" onclick="startNavigation('lumi')">포토존 시작</button>
         </div>
 
-        <div class="photozone-card">
+        <!--div class="photozone-card">
           <div class="photozone-title">🌍 AR 크레비와 물고기</div>
           <img src="./crab-fish.jpg" alt="AR 크레비" width="200">
           <button class="start-zone-btn" onclick="startNavigation('crabby')">포토존 시작</button>
         </div>
-      </div>
+      </div-->
     </div>
   </div>
 
@@ -232,10 +231,10 @@
     xrextras-capture-config="requestMic: none">
 
     <a-assets>
-      <a-asset-item id="lumi-appear"      src="./lumi-photo-ani.glb"></a-asset-item>
-      <a-asset-item id="butterfly-color" src="./butterfly-color-loop.glb"></a-asset-item>
-      <a-asset-item id="crabby-dance"     src="./crabby-dance.glb"></a-asset-item>
-      <a-asset-item id="tropical-fish"   src="./tropical-fish-loop.glb"></a-asset-item>
+      <a-asset-item id="lumi-appear"      src="./kkebi-camera.glb"></a-asset-item>
+      <a-asset-item id="butterfly-color" src="./camera-flash-ani-1.glb"></a-asset-item>
+      <!--a-asset-item id="crabby-dance"     src="./crabby-dance.glb"></a-asset-item>
+      <a-asset-item id="tropical-fish"   src="./tropical-fish-loop.glb"></a-asset-item-->
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
