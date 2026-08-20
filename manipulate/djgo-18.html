@@ -209,11 +209,11 @@
         <div class="photozone-card">
           <div class="photozone-title">✨ AR 루미와 나비 포토존</div>
           <img src="./kkebi-camera.png" alt="AR 루미" width="200">
-          <button class="start-zone-btn" onclick="startNavigation('lumi')">포토존 시작</button>
+          <button class="start-zone-btn" onclick="startNavigation('kkebi')">포토존 시작</button>
         </div>
 
         <!--div class="photozone-card">
-          <div class="photozone-title">🌍 AR 크레비와 물고기</div>
+          <div class="photozone-title">🌍 AR 또깨비 포토존</div>
           <img src="./crab-fish.jpg" alt="AR 크레비" width="200">
           <button class="start-zone-btn" onclick="startNavigation('crabby')">포토존 시작</button>
         </div>
@@ -231,8 +231,8 @@
     xrextras-capture-config="requestMic: none">
 
     <a-assets>
-      <a-asset-item id="lumi-appear"      src="./kkebi-camera-lowpoly.glb"></a-asset-item>
-      <a-asset-item id="butterfly-color" src="./camera-flash-ani-1.glb"></a-asset-item>
+      <a-asset-item id="kkebi-appear"      src="./kkebi-camera-lowpoly.glb"></a-asset-item>
+      <a-asset-item id="camera-flash" src="./camera-flash-ani-1.glb"></a-asset-item>
       <!--a-asset-item id="crabby-dance"     src="./crabby-dance.glb"></a-asset-item>
       <a-asset-item id="tropical-fish"   src="./tropical-fish-loop.glb"></a-asset-item-->
     </a-assets>
@@ -263,9 +263,9 @@
     <a-light type="ambient" intensity="0.7"></a-light>
 
     <a-entity
-      id="lumi"
+      id="kkebi"
       visible="false"
-      gltf-model="#lumi-appear"
+      gltf-model="#kkebi-appear"
       rotation="0 0 0"
       scale="0 0 0"
       xrextras-hold-drag
@@ -277,8 +277,8 @@
       animation-mixer
       shadow="receive: false">
       <a-entity
-        id="butterfly"
-        gltf-model="#butterfly-color"
+        id="flash"
+        gltf-model="#camera-flash"
         rotation="0 90 0"
         scale="2 2 2"
         animation-mixer
@@ -286,7 +286,7 @@
       </a-entity>
     </a-entity>
 
-    <a-entity
+    <!--a-entity
       id="crabby"
       visible="false"
       gltf-model="#crabby-dance"
@@ -308,7 +308,7 @@
         animation-mixer
         shadow="receive: false">
       </a-entity>
-    </a-entity>
+    </a-entity-->
 
     <a-plane
       id="ground"
@@ -321,7 +321,7 @@
   </a-scene>
 
   <script>
-    const zoneIds = ['lumi', 'crabby'];
+    const zoneIds = ['kkebi'];
 
     window.addEventListener('DOMContentLoaded', () => {
       const audioBtn = document.getElementById('audio-toggle-btn');
