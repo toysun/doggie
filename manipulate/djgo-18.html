@@ -256,24 +256,22 @@
       visible="false"
       gltf-model="#kkebi-appear"
       rotation="0 0 0"
-      scale="0 0 0"
+      scale="1 1 1"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       proximity
-      animation="property: position; from: 0 -10 -4; to: 0 5 -4; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
-      animation__1="property: scale; from: 0 0 0; to: 20 20 20; dir: linear; dur: 2000; startEvents: ar-start; loop: false"
       animation-mixer
       shadow="receive: false">
-      <a-entity
+    </a-entity>
+    <a-entity
         id="flash"
         gltf-model="#camera-flash"
-        rotation="0 90 0"
-        scale="20 20 20"
+        rotation="0 0 0"
+        scale="1 1 1"
         animation-mixer
         shadow="receive: false">
       </a-entity>
-    </a-entity>
 
     <a-plane
       id="ground"
