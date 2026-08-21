@@ -205,7 +205,7 @@
       <div class="photozone-container">
         <div class="photozone-card">
           <div class="photozone-title">✨ AR 깨비 포토존</div>
-          <img src="./kkebi-radiostar.png" alt="AR 깨비" width="200">
+          <img src="./sq-mine.png" alt="AR 깨비" width="200">
           <button class="start-zone-btn" onclick="startNavigation('kkebi')">포토존 시작</button>
         </div>
       </div>
@@ -223,9 +223,9 @@
     xrextras-capture-config="requestMic: none">
 
     <a-assets>
-      <a-asset-item id="kkebi-appear" src="./kkebi-radiostar-lowpoly4x.glb"></a-asset-item>
-      <a-asset-item id="radio" src="./radiox4.glb"></a-asset-item>
-      <a-asset-item id="music" src="./music_notes_half_speed.glb"></a-asset-item>
+      <a-asset-item id="kkebi-appear" src="./sq-mine-lowpoly4x.glb"></a-asset-item>
+      <a-asset-item id="mine-cart" src="./mine_cart_crystal.glb"></a-asset-item>
+      <a-asset-item id="neon-bat" src="./neon-bat-circle-down.glb"></a-asset-item>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -269,7 +269,7 @@
     </a-entity>
     <a-entity
         id="flash"
-        gltf-model="#radio"
+        gltf-model="#mine-cart"
         rotation="15 0 0"
         position="-0.1 0 0.3"
         scale="1.5 1.5 1.5"
@@ -278,7 +278,7 @@
       </a-entity>
         <a-entity
         id="flash1"
-        gltf-model="#music"
+        gltf-model="#neon-bat"
         position="0 0 -1"
         rotation="0 90 0"
         scale="3 3 3"
