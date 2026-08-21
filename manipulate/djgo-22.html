@@ -39,12 +39,10 @@
         height: 100dvh !important;
         background-color: #edf6f5 !important;
         z-index: 999999 !important;
-        
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
         justify-content: flex-start !important;
-        
         overflow-y: auto !important;
         -webkit-overflow-scrolling: touch !important;
         padding: 20px 15px 80px !important;
@@ -183,6 +181,27 @@
       transform: scale(0.92) !important;
     }
   </style>
+
+  <!-- 🛠️ 금속 재질 흑색 왜곡 방지 커스텀 컴포넌트 등록 -->
+  <script>
+    AFRAME.registerComponent('fix-metal-material', {
+      init() {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (!mesh) return;
+
+          mesh.traverse((node) => {
+            if (node.isMesh && node.material) {
+              // 환경 반사맵이 없는 환경에서 금속(metalness 1.0)이 검게 반사되는 현상 보정
+              node.material.metalness = 0.1;  // 금속성 비중 보정
+              node.material.roughness = 0.35; // 거칠기 값 보정
+              node.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    });
+  </script>
 </head>
 
 <body>
@@ -192,7 +211,6 @@
   <button id="audio-toggle-btn" aria-label="음악 끄기 및 켜기">🎵</button>
   <button id="ar-reset-btn" aria-label="처음으로 돌아가기">🔄</button>
 
-  <!-- 🛠️ 수정: UI 태그 완벽하게 닫기 -->
   <div id="container">
     <div id="start_area">
       <img src="./djgo-photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
@@ -212,7 +230,6 @@
     </div>
   </div> 
 
-  <!-- 🛠️ 수정: a-scene에서 방해요소인 landing-page 속성 제거 -->
   <a-scene
     xrextras-gesture-detector
     xrextras-loading
@@ -224,7 +241,6 @@
 
     <a-assets>
       <a-asset-item id="kkebi-appear" src="./sq-balloon-lowpoly4x-ani.glb"></a-asset-item>
-      <!--a-asset-item id="mine-cart" src="./mine_cart_crystal.glb"></a-asset-item-->
       <a-asset-item id="bubble" src="./heart-balloon-confetti.glb"></a-asset-item>
     </a-assets>
 
@@ -241,7 +257,7 @@
     <a-entity
       light="
         type: directional;
-        intensity: 0.8;
+        intensity: 1.2;
         castShadow: true;
         shadowMapHeight:2048;
         shadowMapWidth:2048;
@@ -251,8 +267,9 @@
       shadow>
     </a-entity>
 
-    <a-light type="ambient" intensity="0.8"></a-light>
+    <a-light type="ambient" intensity="0.9"></a-light>
 
+    <!-- 🛠️ 불필요한 닫는 태그 </a-sphere> 제거 -->
     <a-entity
       id="kkebi"
       visible="false"
@@ -265,27 +282,20 @@
       proximity
       animation-mixer
       shadow="receive: false">
-        </a-sphere>
     </a-entity>
-    <!--a-entity
-        id="flash"
-        gltf-model="#mine-cart"
-        rotation="15 0 0"
-        position="-0.1 0 0.3"
-        scale="1.5 1.5 1.5"
-        animation-mixer
-        shadow="receive: false">
-      </a-entity-->
-        <a-entity
-        id="flash1"
-        gltf-model="#bubble"
-        position="0 0 -1"
-        rotation="0 90 0"
-        scale="3 3 3"
-        animation-mixer
-        shadow="receive: false"
-        confetti-once fix-metal-material>
-      </a-entity>
+
+    <!-- 🛠️ fix-metal-material 컴포넌트 적용으로 금속 재질 밝게 재현 -->
+    <a-entity
+      id="flash1"
+      gltf-model="#bubble"
+      position="0 0 -1"
+      rotation="0 90 0"
+      scale="3 3 3"
+      animation-mixer
+      shadow="receive: false"
+      confetti-once
+      fix-metal-material>
+    </a-entity>
 
     <a-plane
       id="ground"
@@ -363,7 +373,6 @@
       }
     });
 
-    // 🛠️ 수정: 버튼 클릭 이벤트 스크립트 수정 (스케일 강제 재설정 및 애니메이션 이벤트 발송)
     function startNavigation(zoneType) {
       console.log("선택된 포토존 형태: " + zoneType);
 
@@ -385,8 +394,8 @@
           const activeEntity = document.getElementById(zoneType);
           if (activeEntity) {
             activeEntity.setAttribute('visible', 'true');
-            activeEntity.setAttribute('scale', '2 2 2'); // 확실하게 화면에 나타나도록 스케일 고정 
-            activeEntity.emit('ar-start'); // 애니메이션 트리거 가동
+            activeEntity.setAttribute('scale', '2 2 2'); 
+            activeEntity.emit('ar-start');
             console.log(zoneType + " 애니메이션 시퀀스 개시");
           }
         }, 400);
