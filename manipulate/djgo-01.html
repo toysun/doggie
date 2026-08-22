@@ -140,7 +140,6 @@
         opacity: 0.95;
     }
 
-    /* 좌측 하단 음악/초기화 버튼 */
     #audio-toggle-btn {
       position: fixed !important;
       left: 16px !important;
@@ -185,7 +184,6 @@
       transform: scale(0.92) !important;
     }
 
-    /* 우측 하단 세로형 모델 선택 버튼 컨테이너 */
     #model-selector {
       position: fixed !important;
       right: 16px !important;
@@ -238,7 +236,6 @@
   <button id="audio-toggle-btn" aria-label="음악 끄기 및 켜기">🎵</button>
   <button id="ar-reset-btn" aria-label="처음으로 돌아가기">🔄</button>
 
-  <!-- 🛠️ 인덱스 번호(1, 2, 3)를 전달하도록 버튼 클릭 함수 수정 -->
   <div id="model-selector">
     <button class="model-thumb-btn active" onclick="switchKkebiModel(1, this)" aria-label="단종 모델">
       <img src="./sq-balloon.png" alt="모델 1">
@@ -263,7 +260,7 @@
       <div class="photozone-container">
         <div class="photozone-card">
           <div class="photozone-title">✨ AR 포토존</div>
-          <img src="./danjong-jungsun-uhd.png" alt="AR 포토존" width="200">
+          <img src="./sq-balloon.png" alt="AR 포토존" width="200">
           <button class="start-zone-btn" onclick="startNavigation('kkebi')">포토존 시작</button>
         </div>
       </div>
@@ -311,12 +308,13 @@
 
     <a-light type="ambient" intensity="0.5"></a-light>
 
-    <!-- 🛠️ 수정 핵심: 제어용 그룹 엔티티(#kkebi) 안에 3개 모델 엔티티를 각각 배치 -->
+    <!-- 🛠️ 수정: #kkebi 및 하위 자식 엔티티 전체에 class="cantap" 부여 -->
     <a-entity
       id="kkebi"
+      class="cantap"
       visible="false"
       rotation="0 0 0"
-      scale="2 2 2"
+      scale="5 5 5"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
@@ -324,6 +322,7 @@
 
       <a-entity
         id="kkebi-child-1"
+        class="cantap"
         gltf-model="#kkebi-model-1"
         visible="true"
         animation-mixer
@@ -332,6 +331,7 @@
 
       <a-entity
         id="kkebi-child-2"
+        class="cantap"
         gltf-model="#kkebi-model-2"
         visible="false"
         animation-mixer
@@ -340,6 +340,7 @@
 
       <a-entity
         id="kkebi-child-3"
+        class="cantap"
         gltf-model="#kkebi-model-3"
         visible="false"
         animation-mixer
@@ -371,7 +372,6 @@
   <script>
     const zoneIds = ['kkebi'];
 
-    // 🛠️ 수정: attribute 변경 대신 자식 엔티티 가시성(visible) 토글로 제어
     function switchKkebiModel(modelIndex, btnEl) {
       const child1 = document.getElementById('kkebi-child-1');
       const child2 = document.getElementById('kkebi-child-2');
@@ -438,7 +438,6 @@
               }
             });
 
-            // 모델 선택 상태 1번으로 리셋
             switchKkebiModel(1, document.querySelectorAll('.model-thumb-btn')[0]);
 
             if (audioBtn) audioBtn.style.display = 'none';
