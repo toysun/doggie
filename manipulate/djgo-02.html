@@ -183,6 +183,7 @@
   </style>
 
   <script>
+    // 금속 재질 흑색 현상 방지
     AFRAME.registerComponent('fix-metal-material', {
       init() {
         this.el.addEventListener('model-loaded', () => {
@@ -199,6 +200,30 @@
         });
       }
     });
+
+    // 🛠️ xrextras-hold-drag 터치 인식 바인딩 및 레이캐스터 자동 갱신 컴포넌트
+    AFRAME.registerComponent('enable-drag-raycast', {
+      init() {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (mesh) {
+            mesh.traverse((node) => {
+              if (node.isMesh) {
+                node.el = this.el; // 하위 3D 메시에 A-Frame 엘리먼트 참조 바인딩
+              }
+            });
+          }
+          refreshCameraRaycaster();
+        });
+      }
+    });
+
+    function refreshCameraRaycaster() {
+      const cameraEl = document.getElementById('camera');
+      if (cameraEl && cameraEl.components && cameraEl.components.raycaster) {
+        cameraEl.components.raycaster.refreshObjects();
+      }
+    }
   </script>
 </head>
 
@@ -238,8 +263,8 @@
     xrextras-capture-config="requestMic: none">
 
     <a-assets>
-      <a-asset-item id="danjong-appear" src="./danjong-2ani.glb"></a-asset-item>
-      <a-asset-item id="tiger-appear" src="./white_tiger-ani.glb"></a-asset-item>
+      <a-asset-item id="danjong-appear" src="./danjong-2ani-ani.glb"></a-asset-item>
+      <a-asset-item id="tiger-appear" src="./white-tiger-ani.glb"></a-asset-item>
       <a-asset-item id="butterfly" src="./butterfly-circle.glb"></a-asset-item>
     </a-assets>
 
@@ -268,7 +293,7 @@
 
     <a-light type="ambient" intensity="0.9"></a-light>
 
-    <!-- 🛠️ 수정 1: class="cantap" 추가 및 position 좌측(-2.5) 배치 -->
+    <!-- 🛠️ enable-drag-raycast 적용으로 hold-drag 터치 동작 보장 -->
     <a-entity
       id="kkebi"
       class="cantap"
@@ -276,29 +301,30 @@
       gltf-model="#danjong-appear"
       position="-2.5 0 0"
       rotation="0 0 0"
-      scale="3 3 3"
+      scale="2 2 2"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       proximity
       animation-mixer
+      enable-drag-raycast
       shadow="receive: false">
     </a-entity>
 
-    <!-- 🛠️ 수정 2: postion 오타 수정 -> position="2.5 0 0" 우측 배치 및 class="cantap" 부여 -->
     <a-entity
       id="kkebi1"
       class="cantap"
       visible="false"
       gltf-model="#tiger-appear"
-      position="2.5 0 0"
-      rotation="0 0 0"
-      scale="3 3 3"
+      position="1.5 0 0"
+      rotation="-10 0 0"
+      scale="6 6 6"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       proximity
-      animation-mixer
+      animation-mixer="clip: idle_02; loop: repeat; timeScale: 1
+      enable-drag-raycast
       shadow="receive: false">
     </a-entity>
 
@@ -308,7 +334,7 @@
       position="0 0 -1"
       rotation="0 90 0"
       scale="3 3 3"
-      animation-mixer
+      animation-mixer="clip: AmatureCurious; loop: repeat; timeScale: 1
       shadow="receive: false"
       confetti-once
       fix-metal-material>
@@ -325,7 +351,6 @@
   </a-scene>
 
   <script>
-    // 🛠️ 수정 3: zoneIds 배열에 kkebi1 추가 관리
     const zoneIds = ['kkebi', 'kkebi1'];
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -389,7 +414,6 @@
       }
     });
 
-    // 🛠️ 수정 4: 스타트 시 zoneIds 내의 두 모델 모두 visible='true' 및 스케일 적용
     function startNavigation(zoneType) {
       console.log("선택된 포토존 형태: " + zoneType);
 
@@ -408,15 +432,17 @@
           if (audioBtn) audioBtn.style.display = 'flex';
           if (resetBtn) resetBtn.style.display = 'flex';
 
-          // 등록된 모든 캐릭터 모델(kkebi, kkebi1)을 화면에 표시
           zoneIds.forEach((id) => {
             const entity = document.getElementById(id);
             if (entity) {
               entity.setAttribute('visible', 'true');
-              entity.setAttribute('scale', '3 3 3'); // 화면 크기에 맞게 조정
+              entity.setAttribute('scale', '3 3 3');
               entity.emit('ar-start');
             }
           });
+
+          // 🛠️ 모델이 화면에 나타난 직후 카메라 Raycaster 감지 타겟 즉시 갱신
+          setTimeout(refreshCameraRaycaster, 100);
         }, 400);
       }
 
