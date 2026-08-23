@@ -182,7 +182,6 @@
     }
   </style>
 
-  <!-- 🛠️ 금속 재질 흑색 왜곡 방지 커스텀 컴포넌트 등록 -->
   <script>
     AFRAME.registerComponent('fix-metal-material', {
       init() {
@@ -192,9 +191,8 @@
 
           mesh.traverse((node) => {
             if (node.isMesh && node.material) {
-              // 환경 반사맵이 없는 환경에서 금속(metalness 1.0)이 검게 반사되는 현상 보정
-              node.material.metalness = 0.1;  // 금속성 비중 보정
-              node.material.roughness = 0.35; // 거칠기 값 보정
+              node.material.metalness = 0.1;  
+              node.material.roughness = 0.35; 
               node.material.needsUpdate = true;
             }
           });
@@ -270,36 +268,40 @@
 
     <a-light type="ambient" intensity="0.9"></a-light>
 
-    <!-- 🛠️ 불필요한 닫는 태그 </a-sphere> 제거 -->
+    <!-- 🛠️ 수정 1: class="cantap" 추가 및 position 좌측(-2.5) 배치 -->
     <a-entity
       id="kkebi"
+      class="cantap"
       visible="false"
       gltf-model="#danjong-appear"
+      position="-2.5 0 0"
       rotation="0 0 0"
-      scale="5 5 5"
+      scale="3 3 3"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       proximity
-      animation-mixer="clip: idle_02; loop: repeat; timeScale: 1"
-      shadow="receive: false">
-    </a-entity>
-    <a-entity
-      id="kkebi1"
-      visible="false"
-      gltf-model="#tiger-appear"
-      rotation="0 0 0"
-      postion="1 0 0"
-      scale="5 5 5"
-      xrextras-hold-drag
-      xrextras-two-finger-rotate
-      xrextras-pinch-scale
-      proximity
-      animation-mixer="clip: AmatureCurious; loop: repeat; timeScale: 1"
+      animation-mixer
       shadow="receive: false">
     </a-entity>
 
-    <!-- 🛠️ fix-metal-material 컴포넌트 적용으로 금속 재질 밝게 재현 -->
+    <!-- 🛠️ 수정 2: postion 오타 수정 -> position="2.5 0 0" 우측 배치 및 class="cantap" 부여 -->
+    <a-entity
+      id="kkebi1"
+      class="cantap"
+      visible="false"
+      gltf-model="#tiger-appear"
+      position="2.5 0 0"
+      rotation="0 0 0"
+      scale="3 3 3"
+      xrextras-hold-drag
+      xrextras-two-finger-rotate
+      xrextras-pinch-scale
+      proximity
+      animation-mixer
+      shadow="receive: false">
+    </a-entity>
+
     <a-entity
       id="flash1"
       gltf-model="#butterfly"
@@ -323,7 +325,8 @@
   </a-scene>
 
   <script>
-    const zoneIds = ['kkebi'];
+    // 🛠️ 수정 3: zoneIds 배열에 kkebi1 추가 관리
+    const zoneIds = ['kkebi', 'kkebi1'];
 
     window.addEventListener('DOMContentLoaded', () => {
       const audioBtn = document.getElementById('audio-toggle-btn');
@@ -357,8 +360,6 @@
             e.preventDefault();
             e.stopPropagation();
 
-            console.log("메인 분기 화면으로 안전하게 초기화 복귀합니다.");
-
             bgm.pause();
             bgm.currentTime = 0;
             if (audioBtn) {
@@ -388,6 +389,7 @@
       }
     });
 
+    // 🛠️ 수정 4: 스타트 시 zoneIds 내의 두 모델 모두 visible='true' 및 스케일 적용
     function startNavigation(zoneType) {
       console.log("선택된 포토존 형태: " + zoneType);
 
@@ -406,13 +408,15 @@
           if (audioBtn) audioBtn.style.display = 'flex';
           if (resetBtn) resetBtn.style.display = 'flex';
 
-          const activeEntity = document.getElementById(zoneType);
-          if (activeEntity) {
-            activeEntity.setAttribute('visible', 'true');
-            activeEntity.setAttribute('scale', '2 2 2'); 
-            activeEntity.emit('ar-start');
-            console.log(zoneType + " 애니메이션 시퀀스 개시");
-          }
+          // 등록된 모든 캐릭터 모델(kkebi, kkebi1)을 화면에 표시
+          zoneIds.forEach((id) => {
+            const entity = document.getElementById(id);
+            if (entity) {
+              entity.setAttribute('visible', 'true');
+              entity.setAttribute('scale', '3 3 3'); // 화면 크기에 맞게 조정
+              entity.emit('ar-start');
+            }
+          });
         }, 400);
       }
 
@@ -420,14 +424,6 @@
       if (bgm) {
         bgm.play().catch(err => console.log("BGM 오토 플레이 정책 핸들링:", err));
       }
-
-      zoneIds.forEach((id) => {
-        const entity = document.getElementById(id);
-        if (entity && id !== zoneType) {
-          entity.setAttribute('visible', 'false');
-          entity.setAttribute('scale', '0 0 0');
-        }
-      });
     }
   </script>
 </body>
