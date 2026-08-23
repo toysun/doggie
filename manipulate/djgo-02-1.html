@@ -199,19 +199,25 @@
       }
     });
 
-    /* ------------------------------------------------------------------
-     * drag-manager : 씬(scene)에 1개만 붙이는 드래그 매니저
-     *  - A-Frame cursor/raycaster 의존 없이 자체 레이캐스트로 대상 선택
-     *  - 스킨드(애니메이션) 메시 대응: 정밀 히트 실패 시 바운딩박스 폴백
-     *  - 대상이 여러 개여도 "가장 가까운 하나"만 잡아서 이동
-     *  - 손가락 2개 이상이면 즉시 해제 → 회전/확대 제스처와 충돌 없음
-     * ------------------------------------------------------------------ */
+    /* ==================================================================
+     * drag-manager  (씬에 1개만 부착)
+     *
+     * 핵심: 후보마다 "독립적으로" 히트 거리를 계산한다.
+     *   - 정밀 메시 레이캐스트 거리
+     *   - 본(bone) 월드 좌표로 만든 실제 포즈 바운딩 박스 거리
+     *   두 값 중 작은 쪽을 그 오브젝트의 히트 거리로 삼고,
+     *   모든 후보 중 가장 가까운 하나만 잡는다.
+     *
+     * 이렇게 하지 않으면 스킨드 메시(바인드 포즈 기준 레이캐스트)가
+     * 어긋난 오브젝트는 옆 오브젝트에 항상 밀려서 절대 잡히지 않는다.
+     * ================================================================== */
     AFRAME.registerComponent('drag-manager', {
       schema: {
         cameraId: {default: 'camera'},
         selector: {default: '.cantap'},
-        boxPadding: {default: 0.2},   // 탭 판정 여유 (m)
-        enabled: {default: true}
+        padRatio: {default: 0.25},   // 히트박스 여유 (오브젝트 크기 비율)
+        minPad:   {default: 0.05},   // 최소 여유 (m)
+        debug:    {default: false}   // true = 히트박스를 화면에 표시
       },
 
       init() {
@@ -219,12 +225,18 @@
         this.pointer = new THREE.Vector2();
         this.up = new THREE.Vector3(0, 1, 0);
         this.plane = new THREE.Plane(this.up.clone(), 0);
+
         this.hitPoint = new THREE.Vector3();
         this.offset = new THREE.Vector3();
         this.worldPos = new THREE.Vector3();
-        this.box = new THREE.Box3();
-        this.tmp = new THREE.Vector3();
+        this._v = new THREE.Vector3();
+        this._v2 = new THREE.Vector3();
+        this._box = new THREE.Box3();
+        this._boxHit = new THREE.Vector3();
+
         this.target = null;
+        this.helpers = {};
+        this._acc = 0;
 
         this.onDown = this.onDown.bind(this);
         this.onMove = this.onMove.bind(this);
@@ -241,7 +253,6 @@
           window.addEventListener('touchcancel', this.onUp);
           window.addEventListener('mouseup', this.onUp);
         };
-
         if (this.el.canvas) { bind(); } else { this.el.addEventListener('render-target-loaded', bind); }
       },
 
@@ -252,7 +263,7 @@
 
       updatePointer(evt) {
         const src = evt.touches ? evt.touches[0] : evt;
-        if (!src) return false;
+        if (!src || !this.canvas) return false;
         const rect = this.canvas.getBoundingClientRect();
         this.pointer.x = ((src.clientX - rect.left) / rect.width) * 2 - 1;
         this.pointer.y = -((src.clientY - rect.top) / rect.height) * 2 + 1;
@@ -265,48 +276,79 @@
           .filter(el => el.object3D && el.object3D.visible && el.getAttribute('visible') !== false);
       },
 
+      /* 애니메이션이 적용된 "현재 포즈" 기준 바운딩 박스.
+         스킨드 메시는 지오메트리가 바인드 포즈에 묶여 있으므로
+         본의 월드 좌표를 모아서 실제 위치를 잡는다. */
+      poseBox(el, out) {
+        const obj = el.object3D;
+        obj.updateMatrixWorld(true);
+        out.makeEmpty();
+
+        let boneCount = 0;
+        obj.traverse((n) => {
+          if (n.isBone) {
+            n.getWorldPosition(this._v);
+            out.expandByPoint(this._v);
+            boneCount++;
+          } else if (n.isMesh && !n.isSkinnedMesh) {
+            out.expandByObject(n);
+          }
+        });
+
+        if (boneCount === 0 || out.isEmpty()) {
+          out.setFromObject(obj);   // 정적 모델 경로
+        }
+        if (out.isEmpty()) return null;
+
+        out.getSize(this._v2);
+        const pad = Math.max(
+          Math.max(this._v2.x, this._v2.y, this._v2.z) * this.data.padRatio,
+          this.data.minPad
+        );
+        out.expandByScalar(pad);
+        return out;
+      },
+
+      /* 후보 하나의 히트 거리 (없으면 Infinity) */
+      hitDistance(el) {
+        let dist = Infinity;
+
+        const hits = this.raycaster.intersectObject(el.object3D, true);
+        if (hits.length) { dist = hits[0].distance; }
+
+        const box = this.poseBox(el, this._box);
+        if (box) {
+          const p = this.raycaster.ray.intersectBox(box, this._boxHit);
+          if (p) {
+            const d = p.distanceTo(this.raycaster.ray.origin);
+            if (d < dist) { dist = d; }
+          } else if (box.containsPoint(this.raycaster.ray.origin)) {
+            dist = 0;   // 카메라가 히트박스 안에 들어가 있는 경우
+          }
+        }
+        return dist;
+      },
+
       onDown(evt) {
-        if (!this.data.enabled) return;
         if (evt.touches && evt.touches.length > 1) { this.target = null; return; }
 
         const cam = this.getCamera();
-        if (!cam || !this.canvas || !this.updatePointer(evt)) return;
+        if (!cam || !this.updatePointer(evt)) return;
         this.raycaster.setFromCamera(this.pointer, cam);
 
-        const els = this.candidates();
-        if (!els.length) return;
-
         let picked = null;
+        let best = Infinity;
 
-        // 1차: 실제 메시 정밀 히트
-        const hits = this.raycaster.intersectObjects(els.map(el => el.object3D), true);
-        if (hits.length) {
-          let obj = hits[0].object;
-          while (obj && !obj.el) { obj = obj.parent; }
-          let el = obj ? obj.el : null;
-          while (el && els.indexOf(el) === -1) { el = el.parentEl; }
-          picked = el;
-        }
-
-        // 2차: 바운딩박스 폴백 (스킨드 메시는 바인드 포즈 기준이라 빗나가기 쉬움)
-        if (!picked) {
-          let best = Infinity;
-          els.forEach((el) => {
-            this.box.setFromObject(el.object3D);
-            if (this.box.isEmpty()) return;
-            this.box.expandByScalar(this.data.boxPadding);
-            const p = this.raycaster.ray.intersectBox(this.box, this.tmp);
-            if (!p) return;
-            const d = p.distanceTo(this.raycaster.ray.origin);
-            if (d < best) { best = d; picked = el; }
-          });
-        }
+        this.candidates().forEach((el) => {
+          const d = this.hitDistance(el);
+          if (d < best) { best = d; picked = el; }
+        });
 
         if (!picked) return;
 
         this.target = picked;
         picked.object3D.getWorldPosition(this.worldPos);
-        this.plane.set(this.up, -this.worldPos.y);   // 오브젝트가 서 있는 높이의 수평면
+        this.plane.set(this.up, -this.worldPos.y);
 
         if (this.raycaster.ray.intersectPlane(this.plane, this.hitPoint)) {
           this.offset.copy(this.worldPos).sub(this.hitPoint);
@@ -314,6 +356,7 @@
           this.offset.set(0, 0, 0);
         }
 
+        if (this.data.debug) { console.log('[drag] picked:', picked.id, 'dist:', best.toFixed(2)); }
         picked.emit('drag-start');
       },
 
@@ -328,19 +371,40 @@
         if (!this.raycaster.ray.intersectPlane(this.plane, this.hitPoint)) return;
 
         const obj = this.target.object3D;
-        this.tmp.copy(this.hitPoint).add(this.offset);
-        if (obj.parent) { obj.parent.worldToLocal(this.tmp); }
+        this._v.copy(this.hitPoint).add(this.offset);
+        if (obj.parent) { obj.parent.worldToLocal(this._v); }
 
-        obj.position.x = this.tmp.x;
-        obj.position.z = this.tmp.z;   // y는 유지 → 바닥에 붙어서 이동
+        obj.position.x = this._v.x;
+        obj.position.z = this._v.z;   // y 유지 → 바닥에 붙어 이동
 
-        if (evt.cancelable) { evt.preventDefault(); }  // 페이지 스크롤/오작동 방지
+        if (evt.cancelable) { evt.preventDefault(); }
       },
 
       onUp() {
         if (!this.target) return;
         this.target.emit('drag-end');
         this.target = null;
+      },
+
+      /* debug: true 일 때 히트박스를 초록 와이어로 표시 */
+      tick(time, dt) {
+        if (!this.data.debug) return;
+        this._acc += dt || 0;
+        if (this._acc < 200) return;
+        this._acc = 0;
+
+        this.candidates().forEach((el) => {
+          const box = this.poseBox(el, new THREE.Box3());
+          if (!box) return;
+          let helper = this.helpers[el.id];
+          if (!helper) {
+            helper = new THREE.Box3Helper(box, 0x00ff88);
+            this.helpers[el.id] = helper;
+            this.el.object3D.add(helper);
+          } else {
+            helper.box.copy(box);
+          }
+        });
       },
 
       remove() {
@@ -387,7 +451,7 @@
     xrextras-gesture-detector
     xrextras-loading
     xrextras-runtime-error
-    drag-manager="cameraId: camera; selector: .cantap"
+    drag-manager="cameraId: camera; selector: .cantap; debug: false"
     renderer="colorManagement: true"
     xrweb="allowedDevices: any"
     postprocessing="bloomStrength: 0.2"
@@ -409,7 +473,6 @@
       cursor="fuse: false; rayOrigin: mouse;">
     </a-camera>
 
-    <!-- 조명 타깃을 실제 존재하는 엔티티(kkebi)로 수정 -->
     <a-entity
       light="
         type: directional;
@@ -425,12 +488,13 @@
 
     <a-light type="ambient" intensity="0.9"></a-light>
 
+    <!-- 서로 겹치지 않도록 x 간격을 벌림 -->
     <a-entity
       id="kkebi"
       class="cantap"
       visible="false"
       gltf-model="#danjong-appear"
-      position="-1 0 0"
+      position="-1.8 0 0"
       rotation="0 0 0"
       scale="8 8 8"
       xrextras-two-finger-rotate
@@ -444,9 +508,9 @@
       class="cantap"
       visible="false"
       gltf-model="#tiger-appear"
-      position="1 0 0"
+      position="1.8 0 0"
       rotation="0 0 0"
-      scale="5 5 5"
+      scale="7 7 7"
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       animation-mixer="clip: Armature|Curious; loop: repeat; timeScale: 1"
@@ -476,7 +540,7 @@
 
   <script>
     const zoneIds = ['kkebi', 'kkebi1'];
-    const initialTransforms = {};   // 시작 시점의 position/scale 저장 (리셋용)
+    const initialTransforms = {};
 
     function captureInitialTransforms() {
       zoneIds.forEach((id) => {
@@ -546,7 +610,7 @@
               const entity = document.getElementById(id);
               if (!entity) return;
               entity.setAttribute('visible', 'false');
-              restoreTransform(id);   // scale 0 대신 원래 값 복구
+              restoreTransform(id);
             });
 
             if (audioBtn) audioBtn.style.display = 'none';
@@ -584,7 +648,7 @@
           zoneIds.forEach((id) => {
             const entity = document.getElementById(id);
             if (!entity) return;
-            restoreTransform(id);                    // 원래 위치/스케일로
+            restoreTransform(id);
             entity.setAttribute('visible', 'true');
             entity.emit('ar-start');
           });
