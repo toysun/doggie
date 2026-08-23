@@ -182,7 +182,6 @@
     }
   </style>
 
-  <!-- 🛠️ 금속 재질 흑색 왜곡 방지 커스텀 컴포넌트 등록 -->
   <script>
     AFRAME.registerComponent('fix-metal-material', {
       init() {
@@ -192,15 +191,43 @@
 
           mesh.traverse((node) => {
             if (node.isMesh && node.material) {
-              // 환경 반사맵이 없는 환경에서 금속(metalness 1.0)이 검게 반사되는 현상 보정
-              node.material.metalness = 0.1;  // 금속성 비중 보정
-              node.material.roughness = 0.35; // 거칠기 값 보정
+              node.material.metalness = 0.1;  
+              node.material.roughness = 0.35; 
               node.material.needsUpdate = true;
             }
           });
         });
       }
     });
+
+    // 🛠️ 추가: 드래그 터치 감지를 위한 enable-drag-raycast 컴포넌트 등록
+    AFRAME.registerComponent('enable-drag-raycast', {
+      init() {
+        const bindMesh = () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (mesh) {
+            mesh.traverse((node) => {
+              if (node.isMesh) {
+                node.el = this.el; // 하위 3D 메시에 parent 엔티티 바인딩
+              }
+            });
+            refreshCameraRaycaster();
+          }
+        };
+
+        if (this.el.getObject3D('mesh')) {
+          bindMesh();
+        }
+        this.el.addEventListener('model-loaded', bindMesh);
+      }
+    });
+
+    function refreshCameraRaycaster() {
+      const cameraEl = document.getElementById('camera');
+      if (cameraEl && cameraEl.components && cameraEl.components.raycaster) {
+        cameraEl.components.raycaster.refreshObjects();
+      }
+    }
   </script>
 </head>
 
@@ -270,15 +297,15 @@
 
     <a-light type="ambient" intensity="0.9"></a-light>
 
-    <!-- 🛠️ 불필요한 닫는 태그 </a-sphere> 제거 -->
+    <!-- 🛠️ 수정: kkebi 태그를 명확히 닫아 kkebi1과의 부모-자식 구조 분리 -->
     <a-entity
       id="kkebi"
       class="cantap"
       visible="false"
       gltf-model="#danjong-appear"
-      position="-1 0 0"
+      position="-1.5 0 0"
       rotation="0 0 0"
-      scale="16 16 16"
+      scale="3 3 3"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
@@ -286,22 +313,28 @@
       animation-mixer="clip: idle_02; loop: repeat; timeScale: 1"
       enable-drag-raycast
       shadow="receive: false">
+    </a-entity>
+
     <a-entity
       id="kkebi1"
       class="cantap"
+      visible="false"
       gltf-model="#tiger-appear"
-      position="1 0 0"
+      position="1.5 0 0"
       rotation="0 0 0"
       scale="3 3 3"
+      xrextras-hold-drag
+      xrextras-two-finger-rotate
+      xrextras-pinch-scale
+      proximity
       animation-mixer="clip: Armature|Curious; loop: repeat; timeScale: 1"
+      enable-drag-raycast
       shadow="receive: false">
     </a-entity>
-    </a-entity>
 
-    <!-- 🛠️ fix-metal-material 컴포넌트 적용으로 금속 재질 밝게 재현 -->
     <a-entity
       id="flash1"
-      gltf-model="#bubble"
+      gltf-model="#butterfly"
       position="0 0 -1"
       rotation="0 90 0"
       scale="3 3 3"
@@ -322,7 +355,8 @@
   </a-scene>
 
   <script>
-    const zoneIds = ['kkebi'];
+    // 🛠️ 수정: zoneIds 배열에 kkebi와 kkebi1 모두 등록
+    const zoneIds = ['kkebi', 'kkebi1'];
 
     window.addEventListener('DOMContentLoaded', () => {
       const audioBtn = document.getElementById('audio-toggle-btn');
@@ -355,8 +389,6 @@
           resetBtn.addEventListener(eventType, (e) => {
             e.preventDefault();
             e.stopPropagation();
-
-            console.log("메인 분기 화면으로 안전하게 초기화 복귀합니다.");
 
             bgm.pause();
             bgm.currentTime = 0;
@@ -405,13 +437,17 @@
           if (audioBtn) audioBtn.style.display = 'flex';
           if (resetBtn) resetBtn.style.display = 'flex';
 
-          const activeEntity = document.getElementById(zoneType);
-          if (activeEntity) {
-            activeEntity.setAttribute('visible', 'true');
-            activeEntity.setAttribute('scale', '2 2 2'); 
-            activeEntity.emit('ar-start');
-            console.log(zoneType + " 애니메이션 시퀀스 개시");
-          }
+          zoneIds.forEach((id) => {
+            const entity = document.getElementById(id);
+            if (entity) {
+              entity.setAttribute('visible', 'true');
+              entity.setAttribute('scale', '3 3 3');
+              entity.emit('ar-start');
+            }
+          });
+
+          // 🛠️ 레이캐스터 객체 목록 갱신
+          setTimeout(refreshCameraRaycaster, 150);
         }, 400);
       }
 
@@ -419,14 +455,6 @@
       if (bgm) {
         bgm.play().catch(err => console.log("BGM 오토 플레이 정책 핸들링:", err));
       }
-
-      zoneIds.forEach((id) => {
-        const entity = document.getElementById(id);
-        if (entity && id !== zoneType) {
-          entity.setAttribute('visible', 'false');
-          entity.setAttribute('scale', '0 0 0');
-        }
-      });
     }
   </script>
 </body>
