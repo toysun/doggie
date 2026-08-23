@@ -183,7 +183,6 @@
   </style>
 
   <script>
-    // 금속 재질 흑색 현상 방지
     AFRAME.registerComponent('fix-metal-material', {
       init() {
         this.el.addEventListener('model-loaded', () => {
@@ -201,20 +200,28 @@
       }
     });
 
-    // 🛠️ xrextras-hold-drag 터치 인식 바인딩 및 레이캐스터 자동 갱신 컴포넌트
+    // 🛠️ 수정: 이미 로드된 메시 및 향후 로드될 메시 모두 선제적으로 바인딩하도록 보완
     AFRAME.registerComponent('enable-drag-raycast', {
       init() {
-        this.el.addEventListener('model-loaded', () => {
+        const bindMesh = () => {
           const mesh = this.el.getObject3D('mesh');
           if (mesh) {
             mesh.traverse((node) => {
               if (node.isMesh) {
-                node.el = this.el; // 하위 3D 메시에 A-Frame 엘리먼트 참조 바인딩
+                node.el = this.el; // 하위 3D 메시에 A-Frame 엘리먼트 참조 강제 바인딩
               }
             });
+            refreshCameraRaycaster();
           }
-          refreshCameraRaycaster();
-        });
+        };
+
+        // 이미 모델 메시가 로드되어 있는 경우 즉시 실행
+        if (this.el.getObject3D('mesh')) {
+          bindMesh();
+        }
+
+        // 비동기로 모델이 로드되는 시점 대응
+        this.el.addEventListener('model-loaded', bindMesh);
       }
     });
 
@@ -239,14 +246,14 @@
       <img src="./djgo-photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
 
       <p class="guide-text">
-        청령포를 배경으로 <br>
+        젊은달Y파크를 배경으로 <br>
         사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
       </p>
 
       <div class="photozone-container">
         <div class="photozone-card">
-          <div class="photozone-title">✨ AR 포토존</div>
-          <img src="./danjong-tiger.png" alt="AR 포토존" width="200">
+          <div class="photozone-title">✨ AR 깨비 포토존</div>
+          <img src="./sq-balloon.png" alt="AR 깨비" width="200">
           <button class="start-zone-btn" onclick="startNavigation('kkebi')">포토존 시작</button>
         </div>
       </div>
@@ -293,20 +300,19 @@
 
     <a-light type="ambient" intensity="0.9"></a-light>
 
-    <!-- 🛠️ enable-drag-raycast 적용으로 hold-drag 터치 동작 보장 -->
     <a-entity
       id="kkebi"
       class="cantap"
       visible="false"
       gltf-model="#danjong-appear"
       position="-2.5 0 0"
-      rotation="0 0 0"
-      scale="8 8 8"
+      rotation="8 8 8"
+      scale="3 3 3"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       proximity
-      animation-mixer="clip: idle_02; loop: repeat; timeScale: 1"
+      animation-mixer
       enable-drag-raycast
       shadow="receive: false">
     </a-entity>
@@ -316,14 +322,14 @@
       class="cantap"
       visible="false"
       gltf-model="#tiger-appear"
-      position="1.5 0 0"
+      position="2.5 0 0"
       rotation="0 0 0"
-      scale="4 4 4"
+      scale="5 5 5"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       proximity
-      animation-mixer="clip: Armature|Curious; loop: repeat; timeScale: 1"
+      animation-mixer
       enable-drag-raycast
       shadow="receive: false">
     </a-entity>
@@ -441,8 +447,8 @@
             }
           });
 
-          // 🛠️ 모델이 화면에 나타난 직후 카메라 Raycaster 감지 타겟 즉시 갱신
-          setTimeout(refreshCameraRaycaster, 100);
+          // 🛠️ 화면 표시 후 레이캐스터 대상 오브젝트 수동 동기화
+          setTimeout(refreshCameraRaycaster, 150);
         }, 400);
       }
 
