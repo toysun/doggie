@@ -200,23 +200,140 @@
       }
     });
 
-    // 🛠️ 자식 모델 메시에 터치가 들어왔을 때 상위 그룹(#kkebi)으로 드래그 대상 연동
     AFRAME.registerComponent('enable-drag-raycast', {
       init() {
         const bindMesh = () => {
-          this.el.object3D.traverse((node) => {
-            if (node.isMesh) {
-              node.el = this.el; // 하위 모든 메시에 상위 #kkebi 그룹 객체 바인딩
-            }
-          });
-          refreshCameraRaycaster();
+          const mesh = this.el.getObject3D('mesh');
+          if (mesh) {
+            mesh.traverse((node) => {
+              if (node.isMesh) {
+                node.el = this.el;
+              }
+            });
+            refreshCameraRaycaster();
+          }
         };
 
+        if (this.el.getObject3D('mesh')) {
+          bindMesh();
+        }
         this.el.addEventListener('model-loaded', bindMesh);
-        this.el.querySelectorAll('[gltf-model]').forEach((child) => {
-          child.addEventListener('model-loaded', bindMesh);
+      }
+    });
+
+    /* ==================================================================
+     * hit-proxy : 탭 판정용 투명 충돌 박스
+     *
+     * xrextras-hold-drag 는 "카메라 커서 레이캐스터가 이 엔티티를 명중
+     * 시켰을 때" 드래그를 시작한다. 그런데 스킨드 메시(본 애니메이션)는
+     * three.js 레이캐스트의 바운딩 스피어 사전 판정이 바인드 포즈 기준
+     * 이라, 애니메이션으로 실제 화면 위치가 달라진 모델은 아무리 눌러도
+     * 히트가 잡히지 않는다. (kkebi가 안 잡히던 원인)
+     *
+     * 이 컴포넌트는 본(bone)의 월드 좌표로 "현재 포즈"의 크기를 구해
+     * 투명 박스를 엔티티에 붙여준다. 레이캐스터는 이 박스를 명중시키고,
+     * setObject3D 로 붙였기 때문에 hold-drag 가 달린 엔티티가 그대로
+     * mousedown 을 받는다. → hold-drag 로직은 손대지 않아도 동작.
+     * ================================================================== */
+    AFRAME.registerComponent('hit-proxy', {
+      schema: {
+        padding:  {default: 0.12},  // 오브젝트 크기 대비 여유 비율
+        interval: {default: 500},   // 크기 재계산 주기(ms)
+        debug:    {default: false}  // true = 박스를 초록 반투명으로 표시
+      },
+
+      init() {
+        this._v = new THREE.Vector3();
+        this._box = new THREE.Box3();
+        this._size = new THREE.Vector3();
+        this._center = new THREE.Vector3();
+        this._scale = new THREE.Vector3();
+        this._acc = 0;
+
+        const material = new THREE.MeshBasicMaterial({
+          color: 0x00ff88,
+          transparent: true,
+          opacity: this.data.debug ? 0.25 : 0.0,
+          depthWrite: false,
+          depthTest: !this.data.debug,
+          side: THREE.DoubleSide
         });
-        setTimeout(bindMesh, 300);
+
+        this.mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+        this.mesh.name = 'hit-proxy';
+        this.mesh.renderOrder = -1;
+        this.mesh.castShadow = false;
+        this.mesh.receiveShadow = false;
+
+        // setObject3D 로 붙이면 A-Frame 이 .el 바인딩과 object3dset 갱신을 처리
+        this.el.setObject3D('hitproxy', this.mesh);
+
+        this.fit = this.fit.bind(this);
+        this.el.addEventListener('model-loaded', () => {
+          this.fit();
+          refreshCameraRaycaster();
+        });
+        this.el.addEventListener('ar-start', this.fit);
+        this.fit();
+        refreshCameraRaycaster();
+      },
+
+      /* 애니메이션이 반영된 현재 포즈 기준으로 박스 크기/위치 계산 */
+      fit() {
+        const obj = this.el.object3D;
+        if (!obj) return;
+
+        obj.updateMatrixWorld(true);
+        const box = this._box;
+        box.makeEmpty();
+
+        let bones = 0;
+        obj.traverse((n) => {
+          if (n === this.mesh) return;
+          if (n.isBone) {
+            n.getWorldPosition(this._v);
+            box.expandByPoint(this._v);
+            bones++;
+          } else if (n.isMesh && !n.isSkinnedMesh) {
+            box.expandByObject(n);
+          }
+        });
+
+        // 본이 없는 정적 모델 경로
+        if (bones === 0 || box.isEmpty()) {
+          this.mesh.visible = false;
+          box.setFromObject(obj);
+          this.mesh.visible = true;
+        }
+        if (box.isEmpty()) return;
+
+        box.getSize(this._size);
+        box.getCenter(this._center);
+
+        const pad = Math.max(this._size.x, this._size.y, this._size.z) * this.data.padding;
+        this._size.addScalar(pad * 2);
+
+        // 월드 크기를 로컬 크기로 환산 (부모 스케일 상쇄)
+        obj.getWorldScale(this._scale);
+        this.mesh.scale.set(
+          this._size.x / (this._scale.x || 1),
+          this._size.y / (this._scale.y || 1),
+          this._size.z / (this._scale.z || 1)
+        );
+
+        obj.worldToLocal(this._center);
+        this.mesh.position.copy(this._center);
+      },
+
+      tick(time, dt) {
+        this._acc += dt || 0;
+        if (this._acc < this.data.interval) return;
+        this._acc = 0;
+        if (this.el.object3D && this.el.object3D.visible) { this.fit(); }
+      },
+
+      remove() {
+        this.el.removeObject3D('hitproxy');
       }
     });
 
@@ -280,6 +397,7 @@
       cursor="fuse: false; rayOrigin: mouse;">
     </a-camera>
 
+    <!-- 🛠️ 수정: 존재하지 않는 #model → 실제 엔티티 #kkebi 로 교체 -->
     <a-entity
       light="
         type: directional;
@@ -288,49 +406,48 @@
         shadowMapHeight:2048;
         shadowMapWidth:2048;
         shadowCameraTop: 10;
-        target: #model;"
-      xrextras-attach="target: model; offset: 1 15 3;"
+        target: #kkebi;"
+      xrextras-attach="target: kkebi; offset: 1 15 3;"
       shadow>
     </a-entity>
 
     <a-light type="ambient" intensity="0.9"></a-light>
 
-    <!-- 🛠️ 그룹 엔티티(#kkebi): 단종과 호랑이 모델을 묶어 함께 움직이도록 처리 -->
+    <!-- 🛠️ hit-proxy 추가: 스킨드 메시 탭 판정 보정 -->
     <a-entity
       id="kkebi"
       class="cantap"
       visible="false"
-      position="0 0 0"
+      gltf-model="#danjong-appear"
+      position="-1.5 0 0"
       rotation="0 0 0"
       scale="3 3 3"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       proximity
-      enable-drag-raycast>
+      animation-mixer="clip: idle_02; loop: repeat; timeScale: 1"
+      enable-drag-raycast
+      hit-proxy="padding: 0.12; debug: false"
+      shadow="receive: false">
+    </a-entity>
 
-      <!-- 자식 1: 단종 모델 (좌측 배치) -->
-      <a-entity
-        id="kkebi-danjong"
-        class="cantap"
-        gltf-model="#danjong-appear"
-        position="-1.2 0 0"
-        rotation="0 0 0"
-        animation-mixer="clip: idle_02; loop: repeat; timeScale: 1"
-        shadow="receive: false">
-      </a-entity>
-
-      <!-- 자식 2: 호랑이 모델 (우측 배치) -->
-      <a-entity
-        id="kkebi-tiger"
-        class="cantap"
-        gltf-model="#tiger-appear"
-        position="1.2 0 0"
-        rotation="0 0 0"
-        animation-mixer="clip: Armature|Curious; loop: repeat; timeScale: 1"
-        shadow="receive: false">
-      </a-entity>
-
+    <a-entity
+      id="kkebi1"
+      class="cantap"
+      visible="false"
+      gltf-model="#tiger-appear"
+      position="1.5 0 0"
+      rotation="0 0 0"
+      scale="3 3 3"
+      xrextras-hold-drag
+      xrextras-two-finger-rotate
+      xrextras-pinch-scale
+      proximity
+      animation-mixer="clip: Armature|Curious; loop: repeat; timeScale: 1"
+      enable-drag-raycast
+      hit-proxy="padding: 0.12; debug: false"
+      shadow="receive: false">
     </a-entity>
 
     <a-entity
@@ -356,9 +473,35 @@
   </a-scene>
 
   <script>
-    const zoneIds = ['kkebi'];
+    const zoneIds = ['kkebi', 'kkebi1'];
+    const initialTransforms = {};
+
+    function captureInitialTransforms() {
+      zoneIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el || !el.object3D) return;
+        initialTransforms[id] = {
+          position: el.object3D.position.clone(),
+          scale: el.object3D.scale.clone(),
+          rotation: el.object3D.rotation.clone()
+        };
+      });
+    }
+
+    function restoreTransform(id) {
+      const el = document.getElementById(id);
+      const t = initialTransforms[id];
+      if (!el || !t || !el.object3D) return;
+      el.object3D.position.copy(t.position);
+      el.object3D.scale.copy(t.scale);
+      el.object3D.rotation.copy(t.rotation);
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
+      const scene = document.querySelector('a-scene');
+      if (scene.hasLoaded) { captureInitialTransforms(); }
+      else { scene.addEventListener('loaded', captureInitialTransforms); }
+
       const audioBtn = document.getElementById('audio-toggle-btn');
       const resetBtn = document.getElementById('ar-reset-btn');
       const bgm = document.getElementById('bgm');
@@ -397,12 +540,12 @@
               audioBtn.style.backgroundColor = '#ffffff';
             }
 
+            // 🛠️ scale 0 0 0 대신 원래 transform 복구 (pinch-scale 기준값 보존)
             zoneIds.forEach((id) => {
               const entity = document.getElementById(id);
-              if (entity) {
-                entity.setAttribute('visible', 'false');
-                entity.setAttribute('scale', '0 0 0');
-              }
+              if (!entity) return;
+              entity.setAttribute('visible', 'false');
+              restoreTransform(id);
             });
 
             if (audioBtn) audioBtn.style.display = 'none';
@@ -437,14 +580,24 @@
           if (audioBtn) audioBtn.style.display = 'flex';
           if (resetBtn) resetBtn.style.display = 'flex';
 
-          const activeEntity = document.getElementById(zoneType);
-          if (activeEntity) {
-            activeEntity.setAttribute('visible', 'true');
-            activeEntity.setAttribute('scale', '3 3 3');
-            activeEntity.emit('ar-start');
-          }
+          zoneIds.forEach((id) => {
+            const entity = document.getElementById(id);
+            if (!entity) return;
+            restoreTransform(id);
+            entity.setAttribute('visible', 'true');
+            entity.emit('ar-start');
+          });
 
-          setTimeout(refreshCameraRaycaster, 150);
+          // 히트 프록시 크기 재계산 후 레이캐스터 목록 갱신
+          setTimeout(() => {
+            zoneIds.forEach((id) => {
+              const el = document.getElementById(id);
+              if (el && el.components && el.components['hit-proxy']) {
+                el.components['hit-proxy'].fit();
+              }
+            });
+            refreshCameraRaycaster();
+          }, 150);
         }, 400);
       }
 
