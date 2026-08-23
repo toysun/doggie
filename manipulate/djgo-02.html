@@ -7,7 +7,7 @@
 
   <script src="//cdn.8thwall.com/web/aframe/8frame-1.4.1.min.js"></script>
   <script src="./../xr_st/xrextras.js"></script>
-  <script src="./../xr_st/landing-page.js"></script>  
+  <script src="./../xr_st/landing-page.js"></script>
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
 
@@ -141,19 +141,19 @@
     #audio-toggle-btn {
       position: fixed !important;
       left: 16px !important;
-      bottom: 95px !important;        
+      bottom: 95px !important;
       width: 54px !important;
       height: 54px !important;
       border-radius: 50% !important;
       border: 3px solid #ffffff !important;
       background-color: #ffffff !important;
       font-size: 20px !important;
-      display: none;                  
+      display: none;
       justify-content: center !important;
       align-items: center !important;
       cursor: pointer !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-      z-index: 9990 !important;        
+      z-index: 9990 !important;
       transition: transform 0.1s ease, background-color 0.2s ease !important;
       padding: 0 !important;
     }
@@ -161,14 +161,14 @@
     #ar-reset-btn {
       position: fixed !important;
       left: 16px !important;
-      bottom: 25px !important;          
+      bottom: 25px !important;
       width: 54px !important;
       height: 54px !important;
       border-radius: 50% !important;
       border: 3px solid #ffffff !important;
       background-color: #ffffff !important;
       font-size: 20px !important;
-      display: none;                  
+      display: none;
       justify-content: center !important;
       align-items: center !important;
       cursor: pointer !important;
@@ -188,11 +188,10 @@
         this.el.addEventListener('model-loaded', () => {
           const mesh = this.el.getObject3D('mesh');
           if (!mesh) return;
-
           mesh.traverse((node) => {
             if (node.isMesh && node.material) {
-              node.material.metalness = 0.1;  
-              node.material.roughness = 0.35; 
+              node.material.metalness = 0.1;
+              node.material.roughness = 0.35;
               node.material.needsUpdate = true;
             }
           });
@@ -200,37 +199,225 @@
       }
     });
 
-    // 🛠️ 수정: 이미 로드된 메시 및 향후 로드될 메시 모두 선제적으로 바인딩하도록 보완
-    AFRAME.registerComponent('enable-drag-raycast', {
-      init() {
-        const bindMesh = () => {
-          const mesh = this.el.getObject3D('mesh');
-          if (mesh) {
-            mesh.traverse((node) => {
-              if (node.isMesh) {
-                node.el = this.el; // 하위 3D 메시에 A-Frame 엘리먼트 참조 강제 바인딩
-              }
-            });
-            refreshCameraRaycaster();
-          }
-        };
+    /* ==================================================================
+     * drag-manager  (씬에 1개만 부착)
+     *
+     * 핵심: 후보마다 "독립적으로" 히트 거리를 계산한다.
+     *   - 정밀 메시 레이캐스트 거리
+     *   - 본(bone) 월드 좌표로 만든 실제 포즈 바운딩 박스 거리
+     *   두 값 중 작은 쪽을 그 오브젝트의 히트 거리로 삼고,
+     *   모든 후보 중 가장 가까운 하나만 잡는다.
+     *
+     * 이렇게 하지 않으면 스킨드 메시(바인드 포즈 기준 레이캐스트)가
+     * 어긋난 오브젝트는 옆 오브젝트에 항상 밀려서 절대 잡히지 않는다.
+     * ================================================================== */
+    AFRAME.registerComponent('drag-manager', {
+      schema: {
+        cameraId: {default: 'camera'},
+        selector: {default: '.cantap'},
+        padRatio: {default: 0.25},   // 히트박스 여유 (오브젝트 크기 비율)
+        minPad:   {default: 0.05},   // 최소 여유 (m)
+        debug:    {default: false}   // true = 히트박스를 화면에 표시
+      },
 
-        // 이미 모델 메시가 로드되어 있는 경우 즉시 실행
-        if (this.el.getObject3D('mesh')) {
-          bindMesh();
+      init() {
+        this.raycaster = new THREE.Raycaster();
+        this.pointer = new THREE.Vector2();
+        this.up = new THREE.Vector3(0, 1, 0);
+        this.plane = new THREE.Plane(this.up.clone(), 0);
+
+        this.hitPoint = new THREE.Vector3();
+        this.offset = new THREE.Vector3();
+        this.worldPos = new THREE.Vector3();
+        this._v = new THREE.Vector3();
+        this._v2 = new THREE.Vector3();
+        this._box = new THREE.Box3();
+        this._boxHit = new THREE.Vector3();
+
+        this.target = null;
+        this.helpers = {};
+        this._acc = 0;
+
+        this.onDown = this.onDown.bind(this);
+        this.onMove = this.onMove.bind(this);
+        this.onUp = this.onUp.bind(this);
+
+        const bind = () => {
+          this.canvas = this.el.canvas;
+          if (!this.canvas) return;
+          this.canvas.addEventListener('touchstart', this.onDown, {passive: false});
+          this.canvas.addEventListener('touchmove', this.onMove, {passive: false});
+          this.canvas.addEventListener('mousedown', this.onDown);
+          this.canvas.addEventListener('mousemove', this.onMove);
+          window.addEventListener('touchend', this.onUp);
+          window.addEventListener('touchcancel', this.onUp);
+          window.addEventListener('mouseup', this.onUp);
+        };
+        if (this.el.canvas) { bind(); } else { this.el.addEventListener('render-target-loaded', bind); }
+      },
+
+      getCamera() {
+        const camEl = document.getElementById(this.data.cameraId);
+        return camEl && camEl.getObject3D('camera');
+      },
+
+      updatePointer(evt) {
+        const src = evt.touches ? evt.touches[0] : evt;
+        if (!src || !this.canvas) return false;
+        const rect = this.canvas.getBoundingClientRect();
+        this.pointer.x = ((src.clientX - rect.left) / rect.width) * 2 - 1;
+        this.pointer.y = -((src.clientY - rect.top) / rect.height) * 2 + 1;
+        return true;
+      },
+
+      candidates() {
+        return Array.prototype.slice
+          .call(this.el.querySelectorAll(this.data.selector))
+          .filter(el => el.object3D && el.object3D.visible && el.getAttribute('visible') !== false);
+      },
+
+      /* 애니메이션이 적용된 "현재 포즈" 기준 바운딩 박스.
+         스킨드 메시는 지오메트리가 바인드 포즈에 묶여 있으므로
+         본의 월드 좌표를 모아서 실제 위치를 잡는다. */
+      poseBox(el, out) {
+        const obj = el.object3D;
+        obj.updateMatrixWorld(true);
+        out.makeEmpty();
+
+        let boneCount = 0;
+        obj.traverse((n) => {
+          if (n.isBone) {
+            n.getWorldPosition(this._v);
+            out.expandByPoint(this._v);
+            boneCount++;
+          } else if (n.isMesh && !n.isSkinnedMesh) {
+            out.expandByObject(n);
+          }
+        });
+
+        if (boneCount === 0 || out.isEmpty()) {
+          out.setFromObject(obj);   // 정적 모델 경로
+        }
+        if (out.isEmpty()) return null;
+
+        out.getSize(this._v2);
+        const pad = Math.max(
+          Math.max(this._v2.x, this._v2.y, this._v2.z) * this.data.padRatio,
+          this.data.minPad
+        );
+        out.expandByScalar(pad);
+        return out;
+      },
+
+      /* 후보 하나의 히트 거리 (없으면 Infinity) */
+      hitDistance(el) {
+        let dist = Infinity;
+
+        const hits = this.raycaster.intersectObject(el.object3D, true);
+        if (hits.length) { dist = hits[0].distance; }
+
+        const box = this.poseBox(el, this._box);
+        if (box) {
+          const p = this.raycaster.ray.intersectBox(box, this._boxHit);
+          if (p) {
+            const d = p.distanceTo(this.raycaster.ray.origin);
+            if (d < dist) { dist = d; }
+          } else if (box.containsPoint(this.raycaster.ray.origin)) {
+            dist = 0;   // 카메라가 히트박스 안에 들어가 있는 경우
+          }
+        }
+        return dist;
+      },
+
+      onDown(evt) {
+        if (evt.touches && evt.touches.length > 1) { this.target = null; return; }
+
+        const cam = this.getCamera();
+        if (!cam || !this.updatePointer(evt)) return;
+        this.raycaster.setFromCamera(this.pointer, cam);
+
+        let picked = null;
+        let best = Infinity;
+
+        this.candidates().forEach((el) => {
+          const d = this.hitDistance(el);
+          if (d < best) { best = d; picked = el; }
+        });
+
+        if (!picked) return;
+
+        this.target = picked;
+        picked.object3D.getWorldPosition(this.worldPos);
+        this.plane.set(this.up, -this.worldPos.y);
+
+        if (this.raycaster.ray.intersectPlane(this.plane, this.hitPoint)) {
+          this.offset.copy(this.worldPos).sub(this.hitPoint);
+        } else {
+          this.offset.set(0, 0, 0);
         }
 
-        // 비동기로 모델이 로드되는 시점 대응
-        this.el.addEventListener('model-loaded', bindMesh);
+        if (this.data.debug) { console.log('[drag] picked:', picked.id, 'dist:', best.toFixed(2)); }
+        picked.emit('drag-start');
+      },
+
+      onMove(evt) {
+        if (!this.target) return;
+        if (evt.touches && evt.touches.length > 1) { this.onUp(); return; }
+
+        const cam = this.getCamera();
+        if (!cam || !this.updatePointer(evt)) return;
+
+        this.raycaster.setFromCamera(this.pointer, cam);
+        if (!this.raycaster.ray.intersectPlane(this.plane, this.hitPoint)) return;
+
+        const obj = this.target.object3D;
+        this._v.copy(this.hitPoint).add(this.offset);
+        if (obj.parent) { obj.parent.worldToLocal(this._v); }
+
+        obj.position.x = this._v.x;
+        obj.position.z = this._v.z;   // y 유지 → 바닥에 붙어 이동
+
+        if (evt.cancelable) { evt.preventDefault(); }
+      },
+
+      onUp() {
+        if (!this.target) return;
+        this.target.emit('drag-end');
+        this.target = null;
+      },
+
+      /* debug: true 일 때 히트박스를 초록 와이어로 표시 */
+      tick(time, dt) {
+        if (!this.data.debug) return;
+        this._acc += dt || 0;
+        if (this._acc < 200) return;
+        this._acc = 0;
+
+        this.candidates().forEach((el) => {
+          const box = this.poseBox(el, new THREE.Box3());
+          if (!box) return;
+          let helper = this.helpers[el.id];
+          if (!helper) {
+            helper = new THREE.Box3Helper(box, 0x00ff88);
+            this.helpers[el.id] = helper;
+            this.el.object3D.add(helper);
+          } else {
+            helper.box.copy(box);
+          }
+        });
+      },
+
+      remove() {
+        if (!this.canvas) return;
+        this.canvas.removeEventListener('touchstart', this.onDown);
+        this.canvas.removeEventListener('touchmove', this.onMove);
+        this.canvas.removeEventListener('mousedown', this.onDown);
+        this.canvas.removeEventListener('mousemove', this.onMove);
+        window.removeEventListener('touchend', this.onUp);
+        window.removeEventListener('touchcancel', this.onUp);
+        window.removeEventListener('mouseup', this.onUp);
       }
     });
-
-    function refreshCameraRaycaster() {
-      const cameraEl = document.getElementById('camera');
-      if (cameraEl && cameraEl.components && cameraEl.components.raycaster) {
-        cameraEl.components.raycaster.refreshObjects();
-      }
-    }
   </script>
 </head>
 
@@ -246,24 +433,25 @@
       <img src="./djgo-photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
 
       <p class="guide-text">
-        젊은달Y파크를 배경으로 <br>
+        청령포를 배경으로 <br>
         사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
       </p>
 
       <div class="photozone-container">
         <div class="photozone-card">
           <div class="photozone-title">✨ AR 깨비 포토존</div>
-          <img src="./sq-balloon.png" alt="AR 깨비" width="200">
+          <img src="./danjong-tiger.png" alt="AR 깨비" width="200">
           <button class="start-zone-btn" onclick="startNavigation('kkebi')">포토존 시작</button>
         </div>
       </div>
     </div>
-  </div> 
+  </div>
 
   <a-scene
     xrextras-gesture-detector
     xrextras-loading
     xrextras-runtime-error
+    drag-manager="cameraId: camera; selector: .cantap; debug: false"
     renderer="colorManagement: true"
     xrweb="allowedDevices: any"
     postprocessing="bloomStrength: 0.2"
@@ -293,27 +481,25 @@
         shadowMapHeight:2048;
         shadowMapWidth:2048;
         shadowCameraTop: 10;
-        target: #model;"
-      xrextras-attach="target: model; offset: 1 15 3;"
+        target: #kkebi;"
+      xrextras-attach="target: kkebi; offset: 1 15 3;"
       shadow>
     </a-entity>
 
     <a-light type="ambient" intensity="0.9"></a-light>
 
+    <!-- 서로 겹치지 않도록 x 간격을 벌림 -->
     <a-entity
       id="kkebi"
       class="cantap"
       visible="false"
       gltf-model="#danjong-appear"
-      position="-1 0 0"
+      position="-1.8 0 0"
       rotation="0 0 0"
       scale="8 8 8"
-      xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
-      proximity
       animation-mixer="clip: idle_02; loop: repeat; timeScale: 1"
-      enable-drag-raycast
       shadow="receive: false">
     </a-entity>
 
@@ -322,15 +508,12 @@
       class="cantap"
       visible="false"
       gltf-model="#tiger-appear"
-      position="1 0 0"
+      position="1.8 0 0"
       rotation="0 0 0"
-      scale="5 5 5"
-      xrextras-hold-drag
+      scale="7 7 7"
       xrextras-two-finger-rotate
       xrextras-pinch-scale
-      proximity
       animation-mixer="clip: Armature|Curious; loop: repeat; timeScale: 1"
-      enable-drag-raycast
       shadow="receive: false">
     </a-entity>
 
@@ -342,7 +525,6 @@
       scale="2 2 2"
       animation-mixer
       shadow="receive: false"
-      confetti-once
       fix-metal-material>
     </a-entity>
 
@@ -358,8 +540,34 @@
 
   <script>
     const zoneIds = ['kkebi', 'kkebi1'];
+    const initialTransforms = {};
+
+    function captureInitialTransforms() {
+      zoneIds.forEach((id) => {
+        const el = document.getElementById(id);
+        if (!el || !el.object3D) return;
+        initialTransforms[id] = {
+          position: el.object3D.position.clone(),
+          scale: el.object3D.scale.clone(),
+          rotation: el.object3D.rotation.clone()
+        };
+      });
+    }
+
+    function restoreTransform(id) {
+      const el = document.getElementById(id);
+      const t = initialTransforms[id];
+      if (!el || !t || !el.object3D) return;
+      el.object3D.position.copy(t.position);
+      el.object3D.scale.copy(t.scale);
+      el.object3D.rotation.copy(t.rotation);
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
+      const scene = document.querySelector('a-scene');
+      if (scene.hasLoaded) { captureInitialTransforms(); }
+      else { scene.addEventListener('loaded', captureInitialTransforms); }
+
       const audioBtn = document.getElementById('audio-toggle-btn');
       const resetBtn = document.getElementById('ar-reset-btn');
       const bgm = document.getElementById('bgm');
@@ -400,17 +608,16 @@
 
             zoneIds.forEach((id) => {
               const entity = document.getElementById(id);
-              if (entity) {
-                entity.setAttribute('visible', 'false');
-                entity.setAttribute('scale', '0 0 0');
-              }
+              if (!entity) return;
+              entity.setAttribute('visible', 'false');
+              restoreTransform(id);
             });
 
             if (audioBtn) audioBtn.style.display = 'none';
             resetBtn.style.display = 'none';
 
             if (startArea) startArea.style.display = 'block';
-            uiContainer.style.display = 'flex'; 
+            uiContainer.style.display = 'flex';
             uiContainer.style.visibility = 'visible';
             setTimeout(() => {
               uiContainer.style.opacity = '1';
@@ -425,7 +632,7 @@
 
       const uiContainer = document.getElementById('container');
       const startArea = document.getElementById('start_area');
-      
+
       if (uiContainer) {
         uiContainer.style.opacity = '0';
         setTimeout(() => {
@@ -440,15 +647,11 @@
 
           zoneIds.forEach((id) => {
             const entity = document.getElementById(id);
-            if (entity) {
-              entity.setAttribute('visible', 'true');
-              entity.setAttribute('scale', '3 3 3');
-              entity.emit('ar-start');
-            }
+            if (!entity) return;
+            restoreTransform(id);
+            entity.setAttribute('visible', 'true');
+            entity.emit('ar-start');
           });
-
-          // 🛠️ 화면 표시 후 레이캐스터 대상 오브젝트 수동 동기화
-          setTimeout(refreshCameraRaycaster, 150);
         }, 400);
       }
 
