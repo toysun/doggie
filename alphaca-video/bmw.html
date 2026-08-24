@@ -63,11 +63,11 @@
       <!-- 🛠️ 수정: 3D 모델(GLB)이 눕지 않고 똑바로 서도록 rotation 속성 추가 -->
       <!-- 대부분의 경우 이미지 평면에 대해 직각으로 세우려면 X축을 90(또는 -90)도 회전합니다. -->
       <!-- 만약 모델이 정면을 보지 않고 옆을 본다면 Y축(-90 또는 90), 뒤집힌다면 Z축(180)을 조합해 조절하세요. -->
-      <a-entity
+      <a-entity                                     
         id="snow-model"
         gltf-model="#snow"
         scale="0.01 0.01 0.01"
-        position="0.1 1.6 -0.5"
+        position="0.1 1.6 -1"
         rotation="90 0 0" 
         shadow
         animation-mixer>
