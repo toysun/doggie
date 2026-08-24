@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>8th Wall Web: Manipulate</title>
+
+  <script src="//cdn.8thwall.com/web/aframe/8frame-1.4.1.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>  
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      position: relative !important;
+    }
+
+    #container {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        background-color: #edf6f5 !important;
+        z-index: 999999 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        padding: 20px 15px 80px !important;
+        box-sizing: border-box !important;
+        transition: opacity 0.4s ease, visibility 0.4s ease;
+        pointer-events: auto;
+    }
+
+    #start_area {
+        position: relative !important;
+        top: 0 !important;
+        left: 0 !important;
+        transform: none !important;
+        width: 100%;
+        max-width: 450px;
+        text-align: center;
+        background: #ffffff;
+        padding: 35px 25px;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(65, 156, 146, 0.06);
+        border: 1px solid #d3eae7;
+        margin: 10px auto !important;
+    }
+
+    .main-guide-img {
+        margin-bottom: 15px;
+        display: inline-block;
+        height: auto;
+        max-width: 60%;
+    }
+
+    .guide-text {
+        color: #245752;
+        font-weight: 700;
+        font-size: 15px;
+        line-height: 1.6;
+        margin-bottom: 25px;
+        word-break: keep-all;
+    }
+
+    .photozone-container {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        margin-top: 15px;
+    }
+
+    .photozone-card {
+        background: #fafdfd;
+        border: 1px solid #e1f0ee;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .photozone-card:active {
+        transform: scale(0.98);
+        border-color: #419c92;
+    }
+
+    .photozone-card img {
+        max-width: 70%;
+        height: auto;
+        margin-bottom: 15px;
+        border-radius: 8px;
+    }
+
+    .photozone-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #35877e;
+        margin-bottom: 12px;
+    }
+
+    .start-zone-btn {
+        width: 100%;
+        max-width: 200px;
+        height: 44px;
+        background: linear-gradient(to right, #79cb83, #3ca89e);
+        color: #ffffff;
+        border: none;
+        border-radius: 22px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 10px rgba(60, 168, 158, 0.2);
+        transition: opacity 0.2s;
+    }
+    .start-zone-btn:hover {
+        opacity: 0.95;
+    }
+
+    #audio-toggle-btn {
+      position: fixed !important;
+      left: 16px !important;
+      bottom: 95px !important;        
+      width: 54px !important;
+      height: 54px !important;
+      border-radius: 50% !important;
+      border: 3px solid #ffffff !important;
+      background-color: #ffffff !important;
+      font-size: 20px !important;
+      display: none;                  
+      justify-content: center !important;
+      align-items: center !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+      z-index: 9990 !important;        
+      transition: transform 0.1s ease, background-color 0.2s ease !important;
+      padding: 0 !important;
+    }
+
+    #ar-reset-btn {
+      position: fixed !important;
+      left: 16px !important;
+      bottom: 25px !important;          
+      width: 54px !important;
+      height: 54px !important;
+      border-radius: 50% !important;
+      border: 3px solid #ffffff !important;
+      background-color: #ffffff !important;
+      font-size: 20px !important;
+      display: none;                  
+      justify-content: center !important;
+      align-items: center !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+      z-index: 9990 !important;
+      transition: transform 0.1s ease !important;
+      padding: 0 !important;
+    }
+    #audio-toggle-btn:active, #ar-reset-btn:active {
+      transform: scale(0.92) !important;
+    }
+  </style>
+
+  <!-- 🛠️ 금속 재질 흑색 왜곡 방지 커스텀 컴포넌트 등록 -->
+  <script>
+    AFRAME.registerComponent('fix-metal-material', {
+      init() {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (!mesh) return;
+
+          mesh.traverse((node) => {
+            if (node.isMesh && node.material) {
+              // 환경 반사맵이 없는 환경에서 금속(metalness 1.0)이 검게 반사되는 현상 보정
+              node.material.metalness = 0.1;  // 금속성 비중 보정
+              node.material.roughness = 0.35; // 거칠기 값 보정
+              node.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    });
+  </script>
+</head>
+
+<body>
+
+  <audio id="bgm" src="./The_Final_Lap_of_Grace.mp3" loop></audio>
+
+  <button id="audio-toggle-btn" aria-label="음악 끄기 및 켜기">🎵</button>
+  <button id="ar-reset-btn" aria-label="처음으로 돌아가기">🔄</button>
+
+  <div id="container">
+    <div id="start_area">
+      <img src="./djgo-photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
+
+      <p class="guide-text">
+        어라연를 배경으로 <br>
+        사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
+      </p>
+
+      <div class="photozone-container">
+        <div class="photozone-card">
+          <div class="photozone-title">✨ AR 포토존</div>
+          <img src="./rating-boat.png" alt="AR 포토" width="200">
+          <button class="start-zone-btn" onclick="startNavigation('kkebi')">포토존 시작</button>
+        </div>
+      </div>
+    </div>
+  </div> 
+
+  <a-scene
+    xrextras-gesture-detector
+    xrextras-loading
+    xrextras-runtime-error
+    renderer="colorManagement: true"
+    xrweb="allowedDevices: any"
+    postprocessing="bloomStrength: 0.2"
+    xrextras-capture-config="requestMic: none">
+
+    <a-assets>
+      <a-asset-item id="kkebi-appear" src="./Rating-boat-ani.glb"></a-asset-item>
+      <a-asset-item id="bubble" src="./yummy_water.glb"></a-asset-item>
+    </a-assets>
+
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+
+    <a-camera
+      id="camera"
+      position="0 4 8"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+
+    <a-entity
+      light="
+        type: directional;
+        intensity: 1.2;
+        castShadow: true;
+        shadowMapHeight:2048;
+        shadowMapWidth:2048;
+        shadowCameraTop: 10;
+        target: #model;"
+      xrextras-attach="target: model; offset: 1 15 3;"
+      shadow>
+    </a-entity>
+
+    <a-light type="ambient" intensity="0.9"></a-light>
+
+    <!-- 🛠️ 불필요한 닫는 태그 </a-sphere> 제거 -->
+    <a-entity
+      id="kkebi"
+      visible="false"
+      gltf-model="#kkebi-appear"
+      rotation="0 0 0"
+      scale="5 5 5"
+      xrextras-hold-drag
+      xrextras-two-finger-rotate
+      xrextras-pinch-scale
+      proximity
+      animation-mixer
+      shadow="receive: false">
+    </a-entity>
+
+    <!-- 🛠️ fix-metal-material 컴포넌트 적용으로 금속 재질 밝게 재현 -->
+    <a-entity
+      id="flash1"
+      gltf-model="#bubble"
+      position="0 0 -1"
+      rotation="0 90 0"
+      scale="5 5 5"
+      animation-mixer
+      shadow="receive: false"
+      confetti-once
+      fix-metal-material>
+    </a-entity>
+
+    <a-plane
+      id="ground"
+      rotation="-90 0 0"
+      width="1000"
+      height="1000"
+      material="shader: shadow"
+      shadow>
+    </a-plane>
+  </a-scene>
+
+  <script>
+    const zoneIds = ['kkebi'];
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const audioBtn = document.getElementById('audio-toggle-btn');
+      const resetBtn = document.getElementById('ar-reset-btn');
+      const bgm = document.getElementById('bgm');
+      const uiContainer = document.getElementById('container');
+      const startArea = document.getElementById('start_area');
+
+      if (audioBtn && bgm) {
+        ['click', 'touchstart'].forEach(eventType => {
+          audioBtn.addEventListener(eventType, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (bgm.paused) {
+              bgm.play().catch(err => console.log("Play failed: ", err));
+              audioBtn.innerText = '🎵';
+              audioBtn.style.backgroundColor = '#ffffff';
+            } else {
+              bgm.pause();
+              audioBtn.innerText = '🔇';
+              audioBtn.style.backgroundColor = '#f1f3f2';
+            }
+          }, { passive: false });
+        });
+      }
+
+      if (resetBtn && uiContainer && bgm) {
+        ['click', 'touchstart'].forEach(eventType => {
+          resetBtn.addEventListener(eventType, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            console.log("메인 분기 화면으로 안전하게 초기화 복귀합니다.");
+
+            bgm.pause();
+            bgm.currentTime = 0;
+            if (audioBtn) {
+              audioBtn.innerText = '🎵';
+              audioBtn.style.backgroundColor = '#ffffff';
+            }
+
+            zoneIds.forEach((id) => {
+              const entity = document.getElementById(id);
+              if (entity) {
+                entity.setAttribute('visible', 'false');
+                entity.setAttribute('scale', '0 0 0');
+              }
+            });
+
+            if (audioBtn) audioBtn.style.display = 'none';
+            resetBtn.style.display = 'none';
+
+            if (startArea) startArea.style.display = 'block';
+            uiContainer.style.display = 'flex'; 
+            uiContainer.style.visibility = 'visible';
+            setTimeout(() => {
+              uiContainer.style.opacity = '1';
+            }, 15);
+          }, { passive: false });
+        });
+      }
+    });
+
+    function startNavigation(zoneType) {
+      console.log("선택된 포토존 형태: " + zoneType);
+
+      const uiContainer = document.getElementById('container');
+      const startArea = document.getElementById('start_area');
+      
+      if (uiContainer) {
+        uiContainer.style.opacity = '0';
+        setTimeout(() => {
+          if (startArea) startArea.style.display = 'none';
+          uiContainer.style.visibility = 'hidden';
+          uiContainer.style.display = 'none';
+
+          const audioBtn = document.getElementById('audio-toggle-btn');
+          const resetBtn = document.getElementById('ar-reset-btn');
+          if (audioBtn) audioBtn.style.display = 'flex';
+          if (resetBtn) resetBtn.style.display = 'flex';
+
+          const activeEntity = document.getElementById(zoneType);
+          if (activeEntity) {
+            activeEntity.setAttribute('visible', 'true');
+            activeEntity.setAttribute('scale', '2 2 2'); 
+            activeEntity.emit('ar-start');
+            console.log(zoneType + " 애니메이션 시퀀스 개시");
+          }
+        }, 400);
+      }
+
+      const bgm = document.getElementById('bgm');
+      if (bgm) {
+        bgm.play().catch(err => console.log("BGM 오토 플레이 정책 핸들링:", err));
+      }
+
+      zoneIds.forEach((id) => {
+        const entity = document.getElementById(id);
+        if (entity && id !== zoneType) {
+          entity.setAttribute('visible', 'false');
+          entity.setAttribute('scale', '0 0 0');
+        }
+      });
+    }
+  </script>
+</body>
+</html>
