@@ -39,7 +39,8 @@
         loop="true"
         src="./bmw-welcome-lamp-car-show.mp4">
       </video>
-      <a-asset-item id="snow" src="./assets/bmw15th_cake5x.glb"></a-asset-item>    
+      <a-asset-item id="snow" src="./assets/bmw15th_cake5x.glb"></a-asset-item>
+      <a-asset-item id="snow1" src="./assets/confetti_fbx.glb"></a-asset-item>   
     </a-assets>
 
     <a-camera
@@ -66,7 +67,16 @@
       <a-entity                                     
         id="snow-model"
         gltf-model="#snow"
-        scale="0.1 0.1 0.1"
+        scale="1.5 1.5 1.5"
+        position="0.1 1.6 -1"
+        rotation="90 0 0" 
+        shadow
+        animation-mixer>
+      </a-entity>
+      <a-entity                                     
+        id="snow-model"
+        gltf-model="#snow1"
+        scale="1 1 1"
         position="0.1 1.6 -1"
         rotation="90 0 0" 
         shadow
