@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="8thwall:package" content="@8thwall.xrextras" />
+    <title>Sky Effects</title>
+
+    <script src="./../xr_st/8frame-1.4.1.min.js"></script>
+
+    <script src="./../xr_st/xrextras.js"></script>
+
+    <script src='./../xr_st/landing-page.js'></script>
+
+    <script src='./../xr_st/coaching-overlay.js'></script>
+
+    <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+    <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+    <script src="./sky-recenter.js"></script>
+    
+    <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+
+    *, *::before, *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Pretendard Variable", Pretendard, sans-serif;
+    }
+
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: block !important;
+      position: relative !important;
+    }
+
+    /* ── 시작 안내 팝업 ── */
+    #start_area {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      background: rgba(0, 0, 0, 0.55) !important;
+      z-index: 99999 !important;
+      display: block !important;
+      overflow-y: auto !important;
+      -webkit-overflow-scrolling: touch !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .start-card {
+      position: fixed !important;
+      top: 15px !important;
+      left: 50% !important;
+      transform: translateX(-50%) !important;
+      background: #ffffff !important;
+      padding: 22px 15px !important;
+      border-radius: 20px !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+      border: 1px solid #d3eae7 !important;
+      width: 90% !important;
+      max-width: 380px !important;
+      margin: 0 !important;
+      box-sizing: border-box !important;
+      pointer-events: auto !important;
+      text-align: center;
+    }
+
+    .img-wrapper {
+      display: flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      gap: 10px !important;
+      margin-bottom: 15px !important;
+    }
+
+    .img-wrapper img {
+      width: 38% !important;
+      max-width: 110px !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+
+    .start-card p {
+      font-size: 14px !important;
+      line-height: 1.5 !important;
+      color: #245752 !important;
+      font-weight: 700 !important;
+      word-break: keep-all !important;
+    }
+
+    #start_btn {
+      width: 100% !important;
+      max-width: 220px !important;
+      height: 46px !important;
+      font-size: 15px !important;
+      font-weight: bold !important;
+      background: linear-gradient(to right, #79cb83, #3ca89e) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 23px !important;
+      margin-top: 18px !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(60, 168, 158, 0.25) !important;
+    }
+
+    #start_area.hide {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    /* ── ✅ 추가: 좌측 하단 제어 버튼 컨테이너 및 디자인 ── */
+    #ar-control-container {
+      position: fixed !important;
+      left: 16px !important;
+      bottom: 24px !important;
+      display: flex !important;
+      gap: 12px !important;
+      z-index: 9995 !important; /* 시작 안내 레이어(99999)보단 아래 배치 */
+      pointer-events: auto !important;
+    }
+
+    .control-btn {
+      width: 56px !important;
+      height: 56px !important;
+      border-radius: 50% !important;
+      border: 3px solid #ffffff !important;
+      background-color: rgba(17, 17, 17, 0.85) !important;
+      color: #ffffff !important;
+      font-size: 20px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: pointer !important;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.35) !important;
+      transition: transform 0.15s !important;
+      padding: 0 !important;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .control-btn:active {
+      transform: scale(0.92) !important;
+    }
+</style>
+  </head>
+
+  <body>
+    <audio id="bgm" src="./magic-sparkle_sound.mp3" loop></audio>
+
+    <div id="ar-control-container">
+      <button id="audio_toggle_btn" class="control-btn" title="음악 멈춤/재생">🔊</button>
+      <button id="reload_btn" class="control-btn" title="처음으로 돌아가기">🔄</button>
+    </div>
+
+    <div id="start_area">
+    <div class="start-card">
+      <div class="img-wrapper">
+        <img src="./photo-auth.png" alt="AR 포토존" width="200">
+        <img src="./dj-js-birds.png" alt="AR 하늘인식 불꽃놀이" width="200">
+      </div>
+      <p>
+        등대를 배경으로 <br>
+        하늘을 비춰서 밤하늘의 별과 구름을 감상 하세요,<br>
+        인증샷을 올리면 최종 인증이 완료됩니다.
+      </p>
+      <button id="start_btn">포토존 시작</button>
+    </div>
+  </div>
+    <a-scene 
+        xrextras-loading
+        xrextras-runtime-error
+        landing-page
+        sky-coaching-overlay
+        sky-recenter
+        renderer="colorManagement: true"
+        xrlayers>
+        
+      <a-assets>
+        <a-asset-item id="star" src="./star-colorx3-confetti-100.glb"></a-asset-item>
+        <a-asset-item id="cloud" src="./clouds-ani.glb"></a-asset-item>
+        <a-asset-item id="fairy" src="./danjong-bird-ani.glb"></a-asset-item>
+        <a-asset-item id="fairy1" src="./jungsun-bird-ani.glb"></a-asset-item>
+        <img id="skyTexture" src='./fantasy-starry-sky-constellations.jpg'>
+        </a-assets>
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
+        <a-camera position="0 3 0"></a-camera>
+        
+        <a-entity xrlayerscene="name: sky; edgeSmoothness: 0.6">
+            <a-sky material="src: #skyTexture; transparent: true; opacity: 0.5;"></a-sky>
+            <a-entity
+               id="fairy"
+               gltf-model="#fairy"
+               position="1.8 20 -15"
+               scale="1 1 1"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+            <a-entity
+               id="fairy1"
+               gltf-model="#fairy1"
+               position="-1.8 20 -15"
+               scale="1 1 1"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+            <a-entity
+               id="model-star"
+               gltf-model="#star"
+               position="1.8 15 -15"
+               scale="1 1 1"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+            <a-entity
+               id="model-cloud"
+               gltf-model="#cloud"
+               position="1.8 10 -20"
+               scale="0.5 0.5 0.5"
+               shadow="receive: false"
+               animation-mixer>
+            </a-entity>
+            <a-entity light="type: ambient; intensity: 0.5;"></a-entity>
+        </a-entity> </a-scene>
+
+    <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    const startBtn = document.getElementById('start_btn')
+    const audioToggleBtn = document.getElementById('audio_toggle_btn')
+    const reloadBtn = document.getElementById('reload_btn')
+    const bgm = document.getElementById('bgm')
+    const startArea = document.getElementById('start_area')
+
+    // 1️⃣ [시작 버튼] 핸들러 - 팝업 닫고 음악 자동 재생 트리거
+    if (startBtn) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        startBtn.addEventListener(eventType, (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+          
+          if (startArea) {
+            startArea.classList.add('hide')
+            setTimeout(() => {
+              startArea.style.display = 'none'
+            }, 300)
+          }
+          
+          // ✅ 포토존 진입 즉시 배경음 재생 시작
+          if (bgm) {
+            bgm.play().catch(err => console.log("오디오 자동재생 정책 제어:", err))
+          }
+          if (audioToggleBtn) audioToggleBtn.textContent = '🔊'
+          
+          const container = document.getElementById('ar-menu-container')
+          if (container) container.style.pointerEvents = 'auto'
+        }, { passive: false })
+      })
+    }
+
+    // 2️⃣ [오디오 토글 버튼] 핸들러 - 재생/멈춤 토글 제어
+    if (audioToggleBtn && bgm) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        audioToggleBtn.addEventListener(eventType, (e) => {
+          e.preventDefault()
+          e.stopPropagation() // 버튼 터치 시 화면 스냅샷이나 AR 인터랙션 방해 차단
+          
+          if (bgm.paused) {
+            bgm.play().catch(err => console.log(err))
+            audioToggleBtn.textContent = '🔊'
+          } else {
+            bgm.pause()
+            audioToggleBtn.textContent = '🔇'
+          }
+        }, { passive: false })
+      })
+    }
+
+    // 3 [리로드 버튼] 핸들러 - 스타트 에리어 복귀 제어
+    if (reloadBtn) {
+      ['click', 'touchstart'].forEach((eventType) => {
+        reloadBtn.addEventListener(eventType, (e) => {
+          e.preventDefault()
+          e.stopPropagation()
+
+          // 음악 정지 및 시간축 리셋
+          if (bgm) {
+            bgm.pause()
+            bgm.currentTime = 0
+          }
+          if (audioToggleBtn) audioToggleBtn.textContent = '🔊'
+
+          // 안내 팝업 레이어 재활성화
+          if (startArea) {
+            startArea.style.display = 'block'
+            setTimeout(() => {
+              startArea.classList.remove('hide')
+            }, 10)
+          }
+        }, { passive: false })
+      })
+    }
+  })
+    </script>
+  </body>
+</html>
