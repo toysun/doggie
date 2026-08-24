@@ -14,11 +14,10 @@
   <script src="//cdn.8thwall.com/web/xrextras/xrextras.js"></script>
 
   <script src='//cdn.8thwall.com/web/landing-page/landing-page.js'></script>
-<script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
   <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
 
-  <script src="./target-bigwave.js">
-  </script>
+  <script src="./target-bigwave.js"></script>
 </head>
 
 <body>
@@ -41,7 +40,6 @@
         src="./bmw-welcome-lamp-car-show.mp4">
       </video>
       <a-asset-item id="snow" src="./assets/bmw15th_cake5x.glb"></a-asset-item>    
-
     </a-assets>
 
     <a-camera
@@ -51,25 +49,31 @@
     </a-camera>
 
     <a-light type="directional" intensity="0.5" position="1 1 1"></a-light>
-
     <a-light type="ambient" intensity="1"></a-light>
 
     <!-- Note: "name:" must be set to the name of the image target uploaded to the 8th Wall Console -->
+    <!-- 이미지 타겟 앵커 (부모) -->
     <a-entity
       target-video="name: bigwave-ar; video: #alpha-video;"
       material="shader: chromakey; src: #alpha-video; color: 0.1 0.9 0.2"
       geometry="primitive: plane; height: 1; width: 1;"
       position="0.1 1.6 -0.5"
       rotation="0 90 0">
+      
+      <!-- 🛠️ 수정: 3D 모델(GLB)이 눕지 않고 똑바로 서도록 rotation 속성 추가 -->
+      <!-- 대부분의 경우 이미지 평면에 대해 직각으로 세우려면 X축을 90(또는 -90)도 회전합니다. -->
+      <!-- 만약 모델이 정면을 보지 않고 옆을 본다면 Y축(-90 또는 90), 뒤집힌다면 Z축(180)을 조합해 조절하세요. -->
       <a-entity
-      id="snow"
-      gltf-model="#snow"
-      scale="2 2 2"
-      shadow
-      animation-mixer>
+        id="snow-model"
+        gltf-model="#snow"
+        scale="2 2 2"
+        rotation="90 0 0" 
+        shadow
+        animation-mixer>
       </a-entity>
     </a-entity>
   </a-scene>
+
   <script> 
      AFRAME.registerComponent('safe-vr-fix', { 
         init: function () { 
@@ -83,14 +87,8 @@
             } 
          }); 
 
-          // 씬에 붙여서 실행되도록 추가 
+         // 씬에 붙여서 실행되도록 추가 
          document.querySelector('a-scene').setAttribute('safe-vr-fix', '');
     </script>
 </body>
-
 </html>
-
-
-
-
-
