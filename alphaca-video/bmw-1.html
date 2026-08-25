@@ -186,14 +186,14 @@
       target-video="name: bigwave-ar; video: #alpha-video;"
       material="shader: chromakey; src: #alpha-video; color: 0.1 0.9 0.2"
       geometry="primitive: plane; height: 2; width: 2;"
-      position="0.1 1.6 1"
+      position="0.1 1.6 -0.5"
       rotation="0 0 0">
 
       <a-entity
         id="cake-model"
         gltf-model="#snow"
         scale="2 2 2"
-        position="0 0 0"
+        position="0.1 1.6 -1"
         rotation="90 0 0"
         shadow
         metal-material="metalness: 0.35; roughness: 0.45; envMapIntensity: 1.2; doubleSide: false"
@@ -205,7 +205,7 @@
         id="confetti-model"
         gltf-model="#snow1"
         scale="2 2 2"
-        position="0 0 0.2"
+        position="0.1 1.6 -1"
         rotation="90 0 0"
         metal-material="metalness: 1.0; roughness: 0.22; envMapIntensity: 1.8"
         animation-mixer="loop: repeat; timeScale: 1">
