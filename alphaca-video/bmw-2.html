@@ -1,0 +1,216 @@
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta charset="UTF-8">
+  <title>yellowtail video</title>
+  <script src="./../xr_st/8frame-1.4.1.min.js"></script>
+  <script src="./aframe-chromakey-material.min.js"></script>
+  <script src="//cdn.8thwall.com/web/xrextras/xrextras.js"></script>
+  <script src='//cdn.8thwall.com/web/landing-page/landing-page.js'></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <script src="./target-bigwave.js"></script>
+
+  <script>
+  /* ==================================================================
+   * 1) metal-env : 씬 전체에 환경맵(IBL) 부여
+   *
+   *  metalness 가 높은 PBR 재질은 "주변을 반사"해서 금속처럼 보인다.
+   *  directional / ambient 라이트만 있고 환경맵이 없으면 반사할 대상이
+   *  없어서 금속 재질은 거의 검게 렌더링된다. 금 confetti 가 안 보이던
+   *  가장 큰 원인.
+   *
+   *  외부 HDR 파일 없이 캔버스 그라디언트를 PMREM 으로 굽는다.
+   * ================================================================== */
+  AFRAME.registerComponent('metal-env', {
+    schema: {
+      topColor:    {default: '#ffffff'},
+      warmColor:   {default: '#ffe6ac'},
+      bottomColor: {default: '#20242c'}
+    },
+
+    init() {
+      const setup = () => {
+        const renderer = this.el.renderer;
+        if (!renderer || this._done) return;
+        this._done = true;
+
+        const env = this.buildEnv(renderer);
+        if (env) { this.el.object3D.environment = env; }   // THREE.Scene.environment
+      };
+
+      if (this.el.renderer) { setup(); }
+      else { this.el.addEventListener('render-target-loaded', setup); }
+    },
+
+    buildEnv(renderer) {
+      const c = document.createElement('canvas');
+      c.width = 512; c.height = 256;
+      const ctx = c.getContext('2d');
+
+      const g = ctx.createLinearGradient(0, 0, 0, 256);
+      g.addColorStop(0.00, this.data.topColor);
+      g.addColorStop(0.42, this.data.warmColor);
+      g.addColorStop(0.52, '#6b6155');
+      g.addColorStop(1.00, this.data.bottomColor);
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, 512, 256);
+
+      // 하이라이트 몇 개 → 조각이 회전할 때 반짝임이 생김
+      ctx.fillStyle = '#ffffff';
+      [[110, 55, 26], [300, 40, 16], [420, 80, 20], [200, 95, 12]].forEach(([x, y, r]) => {
+        ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      });
+
+      const tex = new THREE.CanvasTexture(c);
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      if (THREE.SRGBColorSpace !== undefined) { tex.colorSpace = THREE.SRGBColorSpace; }
+      else if (THREE.sRGBEncoding !== undefined) { tex.encoding = THREE.sRGBEncoding; }
+
+      try {
+        const pmrem = new THREE.PMREMGenerator(renderer);
+        pmrem.compileEquirectangularShader();
+        const env = pmrem.fromEquirectangular(tex).texture;
+        pmrem.dispose();
+        tex.dispose();
+        return env;
+      } catch (e) {
+        console.warn('[metal-env] PMREM 생성 실패, 원본 텍스처 사용', e);
+        return tex;
+      }
+    }
+  });
+
+  /* ==================================================================
+   * 2) metal-material : GLB 재질을 금속으로 보정
+   *
+   *  - 기존 fix-metal-material 은 이 문서에 등록되어 있지 않아 무시됐고,
+   *    등록돼 있었더라도 metalness 0.1 이라 오히려 금속감을 지운다.
+   *  - frustumCulled = false : confetti 처럼 애니메이션으로 넓게 퍼지는
+   *    모델은 바인드 포즈 기준 바운딩 스피어 때문에 통째로 컬링되어
+   *    사라지는 일이 잦다.
+   * ================================================================== */
+  AFRAME.registerComponent('metal-material', {
+    schema: {
+      metalness:       {default: 1.0},
+      roughness:       {default: 0.25},
+      envMapIntensity: {default: 1.6},
+      color:           {default: ''},     // 예: '#FFD37A' (비우면 GLB 원본 색 유지)
+      doubleSide:      {default: true},   // 얇은 조각은 뒷면도 그려야 안 사라짐
+      noCull:          {default: true}
+    },
+
+    init() {
+      this.apply = this.apply.bind(this);
+      if (this.el.getObject3D('mesh')) { this.apply(); }
+      this.el.addEventListener('model-loaded', this.apply);
+    },
+
+    apply() {
+      const mesh = this.el.getObject3D('mesh');
+      if (!mesh) return;
+
+      mesh.traverse((node) => {
+        if (!node.isMesh || !node.material) return;
+
+        if (this.data.noCull) { node.frustumCulled = false; }
+
+        const mats = Array.isArray(node.material) ? node.material : [node.material];
+        mats.forEach((m) => {
+          if (m.metalness === undefined) return;   // Standard/Physical 재질만 대상
+
+          m.metalness = this.data.metalness;
+          m.roughness = this.data.roughness;
+          m.envMapIntensity = this.data.envMapIntensity;
+          if (this.data.color) { m.color.set(this.data.color); }
+          if (this.data.doubleSide) { m.side = THREE.DoubleSide; }
+          m.needsUpdate = true;
+        });
+      });
+    }
+  });
+
+  AFRAME.registerComponent('safe-vr-fix', {
+    init: function () {
+      const sceneEl = this.el.sceneEl;
+      if (sceneEl.enterVRButton) {
+        const origUpdate = sceneEl.enterVRButton.updateEnterInterfaces;
+        sceneEl.enterVRButton.updateEnterInterfaces = function () {
+          if (origUpdate) origUpdate.apply(this, arguments);
+        };
+      }
+    }
+  });
+  </script>
+</head>
+<body>
+  <a-scene
+    xrextras-gesture-detector
+    landing-page
+    xrextras-loading
+    xrextras-runtime-error
+    safe-vr-fix
+    metal-env
+    renderer="colorManagement: true; sortObjects: true"
+    xrweb="disableWorldTracking: true; allowedDevices: any">
+
+    <a-assets>
+      <video
+        id="alpha-video"
+        muted
+        autoplay
+        playsinline
+        crossorigin="anonymous"
+        loop="true"
+        src="./bmw-welcome-lamp-car-show.mp4">
+      </video>
+      <a-asset-item id="snow" src="./assets/cake-with-candle-fire.glb"></a-asset-item>
+      <a-asset-item id="snow1" src="./gold-confetti-paper.glb"></a-asset-item>   
+    </a-assets>
+
+    <a-camera
+      position="0 4 10"
+      raycaster="objects: .cantap"
+      cursor="fuse: false; rayOrigin: mouse;">
+    </a-camera>
+
+    <!-- 🛠️ 금속 반사는 ambient 로는 표현되지 않는다.
+         ambient 를 낮추고 directional 을 올려 하이라이트를 살림 -->
+    <a-light type="directional" intensity="1.4" position="1 2 1"></a-light>
+    <a-light type="ambient" intensity="0.35"></a-light>
+
+    <!-- 이미지 타겟 앵커 (부모) -->
+    <a-entity
+      target-video="name: bigwave-ar; video: #alpha-video;"
+      material="shader: chromakey; src: #alpha-video; color: 0.1 0.9 0.2"
+      geometry="primitive: plane; height: 1; width: 1;"
+      position="0.1 1.6 -0.5"
+      rotation="0 0 0">
+
+      <a-entity
+        id="cake-model"
+        gltf-model="#snow"
+        scale="3 3 3"
+        position="0.1 1.6 -1"
+        rotation="90 0 0"
+        shadow
+        metal-material="metalness: 0.35; roughness: 0.45; envMapIntensity: 1.2; doubleSide: false"
+        animation-mixer>
+      </a-entity>
+
+      <!-- 🛠️ id 중복 제거 + 지면 아래(local z:-1)로 내려가 있던 위치 보정 -->
+      <a-entity
+        id="confetti-model"
+        gltf-model="#snow1"
+        scale="2 2 2"
+        position="0.1 1.6 -1"
+        rotation="90 0 0"
+        metal-material="metalness: 1.0; roughness: 0.22; envMapIntensity: 1.8"
+        animation-mixer="loop: repeat; timeScale: 1">
+      </a-entity>
+    </a-entity>
+  </a-scene>
+</body>
+</html>
