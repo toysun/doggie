@@ -312,51 +312,64 @@
     </a-entity>
 
     <!-- ── 포춘쿠키 5개 ────────────────────────────────────────
-      ★ 위치 변경 포인트:
-        - Z 양수(+) = 카메라 방향 = 도깨비 앞쪽에 배치
-        - 반원 반경 3m (기존 0.65m의 약 5배)
-        - radius 1.2m (기존 0.22m의 약 5.5배)
-        - 높이(y) 1.5~2m — 눈높이 부근에 크게 배치
-    ─────────────────────────────────────────────────────────── -->
-    <!-- 왼쪽 끝 -->
-    <a-sphere id="cookie-0" class="cantap"
-      visible="false" scale="0 0 0"
-      position="-3.0 1.5 0.5"
-      radius="0.6" color="#D4A017"
-      metalness="0.2" roughness="0.55" shadow>
-    </a-sphere>
+    <!-- ── 포춘쿠키 5개 ────────────────────────────────────────────
+      ★ 배치 전략: "앞쪽으로 기울인 원"
+        z 변화폭을 0.4m(2.3~2.7) 이내로 압축 → 카메라에서 봤을 때
+        5개 모두 정면에 보이고 겹치지 않음.
+        기존 z=0.5~3.2(2.7m 차이)에서 개선.
 
-    <!-- 왼쪽 -->
-    <a-sphere id="cookie-1" class="cantap"
-      visible="false" scale="0 0 0"
-      position="-1.8 1.8 2.5"
-      radius="0.6" color="#C8960C"
-      metalness="0.2" roughness="0.55" shadow>
-    </a-sphere>
+        X(-3.0~+3.0): 좌우 6m 폭으로 넉넉히 분산
+        Y(0.5~3.0): 아래→위 U자 아치형 배치
+        Z(2.3~2.7): 거의 동일한 깊이 → 겹침 방지
 
-    <!-- 중앙 (카메라와 가장 가까운 위치) -->
-    <a-sphere id="cookie-2" class="cantap"
-      visible="false" scale="0 0 0"
-      position="0 2.0 3.2"
-      radius="0.6" color="#E8B420"
-      metalness="0.2" roughness="0.55" shadow>
-    </a-sphere>
+      ★ rotation: 각 쿠키가 다른 각도로 놓여 GLB 모델의 입체감 표현
+        (fortune_cookie.glb 이 정면에서 원형으로 보일 경우 rotation 조정)
+    ──────────────────────────────────────────────────────────── -->
 
-    <!-- 오른쪽 -->
-    <a-sphere id="cookie-3" class="cantap"
+    <!-- 왼쪽 끝 — 아래, 비스듬히 기울어짐 -->
+    <a-entity id="cookie-0" class="cantap"
+      gltf-model="#cookie-glb"
       visible="false" scale="0 0 0"
-      position="1.8 1.8 2.5"
-      radius="0.6" color="#B8820A"
-      metalness="0.2" roughness="0.55" shadow>
-    </a-sphere>
+      position="-3.0 0.5 2.3"
+      rotation="15 -40 -20"
+      fix-metal-material shadow="receive:false">
+    </a-entity>
 
-    <!-- 오른쪽 끝 -->
-    <a-sphere id="cookie-4" class="cantap"
+    <!-- 왼쪽 — 중간 높이 -->
+    <a-entity id="cookie-1" class="cantap"
+      gltf-model="#cookie-glb"
       visible="false" scale="0 0 0"
-      position="3.0 1.5 0.5"
-      radius="0.6" color="#F0C030"
-      metalness="0.2" roughness="0.55" shadow>
-    </a-sphere>
+      position="-1.8 2.0 2.5"
+      rotation="10 -20 -10"
+      fix-metal-material shadow="receive:false">
+    </a-entity>
+
+    <!-- 중앙 — 가장 높고, 정면을 바라봄 -->
+    <a-entity id="cookie-2" class="cantap"
+      gltf-model="#cookie-glb"
+      visible="false" scale="0 0 0"
+      position="0 3.0 2.7"
+      rotation="0 0 0"
+      fix-metal-material shadow="receive:false">
+    </a-entity>
+
+    <!-- 오른쪽 — 중간 높이 -->
+    <a-entity id="cookie-3" class="cantap"
+      gltf-model="#cookie-glb"
+      visible="false" scale="0 0 0"
+      position="1.8 2.0 2.5"
+      rotation="10 20 10"
+      fix-metal-material shadow="receive:false">
+    </a-entity>
+
+    <!-- 오른쪽 끝 — 아래, 비스듬히 기울어짐 -->
+    <a-entity id="cookie-4" class="cantap"
+      gltf-model="#cookie-glb"
+      visible="false" scale="0 0 0"
+      position="3.0 0.5 2.3"
+      rotation="15 40 20"
+      fix-metal-material shadow="receive:false">
+    </a-entity>
 
   </a-entity><!-- /ar-group -->
 
@@ -518,12 +531,21 @@ const App = {
           property:'scale', from:'0 0 0', to:'1 1 1',
           dur:420, easing:'easeOutBack'
         });
+        // idle 떠오르기
         const pos = el.getAttribute('position');
         el.setAttribute('animation__idle', {
           property:'position',
           from:`${pos.x} ${pos.y} ${pos.z}`,
-          to:  `${pos.x} ${pos.y+0.35} ${pos.z}`,
-          dur:1600 + i*120, direction:'alternate', loop:true, easing:'easeInOutSine'
+          to:  `${pos.x} ${pos.y+0.25} ${pos.z}`,
+          dur:1600 + i*140, direction:'alternate', loop:true, easing:'easeInOutSine'
+        });
+        // GLB 모델 Y축 흔들림 — 3D 입체감 강조
+        const rot = el.getAttribute('rotation');
+        el.setAttribute('animation__wiggle', {
+          property:'rotation',
+          from:`${rot.x} ${rot.y - 8} ${rot.z}`,
+          to:  `${rot.x} ${rot.y + 8} ${rot.z}`,
+          dur:2200 + i*200, direction:'alternate', loop:true, easing:'easeInOutSine'
         });
       }, i * 260);
     });
@@ -552,6 +574,7 @@ const App = {
       if (i===idx) return;
       const el = this.$(id);
       el.removeAttribute('animation__idle');
+      el.removeAttribute('animation__wiggle');
       el.setAttribute('animation__out', {
         property:'scale', to:'0 0 0', dur:350, easing:'easeInBack'
       });
@@ -565,6 +588,7 @@ const App = {
     // 선택된 쿠키 흔들기 → 위로 → 사라지기
     const chosen = this.$(COOKIE_IDS[idx]);
     chosen.removeAttribute('animation__idle');
+    chosen.removeAttribute('animation__wiggle');
     chosen.setAttribute('animation__shake', {
       property:'rotation', from:'0 0 -18', to:'0 0 18',
       dur:110, direction:'alternate', loop:7, easing:'linear'
@@ -574,7 +598,7 @@ const App = {
       if (sid !== this._sid) return;
       chosen.setAttribute('animation__rise', {
         property:'position', from:`${cpos.x} ${cpos.y} ${cpos.z}`,
-        to:`${cpos.x} ${cpos.y+0.7} ${cpos.z}`, dur:520, easing:'easeOutCubic'
+        to:`${cpos.x} ${cpos.y+1.5} ${cpos.z}`, dur:520, easing:'easeOutCubic'
       });
     }, 820);
 
@@ -659,7 +683,7 @@ const App = {
     goblin.setAttribute('scale','0 0 0');
 
     // 쿠키 완전 초기화 — visible, scale, 모든 animation 속성 제거
-    const ANIMS = ['animation__idle','animation__spawn','animation__out',
+    const ANIMS = ['animation__idle','animation__wiggle','animation__spawn','animation__out',
                    'animation__shake','animation__rise','animation__vanish'];
     COOKIE_IDS.forEach(id => {
       const el = this.$(id);
