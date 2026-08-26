@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>도깨비의 행운쿠키 — 단종GO</title>
+
+  <script src="./../xr_st/8frame-1.4.1.min.js"></script>
+  <script src="./../xr_st/xrextras.js"></script>
+  <script src="./../xr_st/landing-page.js"></script>
+  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
+  <script src="./../xr_st/coaching-overlay.js"></script>
+  <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif; }
+
+    /* ── 공통 오버레이 ─────────────────────────────── */
+    .overlay {
+      position: fixed; inset: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 100; pointer-events: none;
+      transition: opacity 0.4s;
+    }
+    .overlay.hidden { opacity: 0; pointer-events: none !important; }
+    .overlay.visible { opacity: 1; }
+
+    /* ── 시작 화면 ─────────────────────────────────── */
+    #start-screen {
+      background: linear-gradient(160deg, #1a0533 0%, #0d2d5e 60%, #0a4a2a 100%);
+      pointer-events: all;
+    }
+    #start-screen .logo {
+      font-size: 2.4rem; font-weight: 900;
+      color: #FFD700; text-shadow: 0 0 20px rgba(255,215,0,0.8);
+      letter-spacing: 2px; margin-bottom: 6px;
+    }
+    #start-screen .subtitle {
+      color: #aee8c8; font-size: 0.95rem; margin-bottom: 40px;
+    }
+    #start-screen .goblin-emoji {
+      font-size: 5rem; margin-bottom: 24px;
+      animation: floatBounce 2s ease-in-out infinite;
+    }
+    #start-screen .desc {
+      color: #e8f4e8; text-align: center; font-size: 0.9rem;
+      line-height: 1.7; max-width: 280px; margin-bottom: 36px;
+    }
+    #start-btn {
+      background: linear-gradient(135deg, #FFD700, #FF8C00);
+      color: #1a0533; font-size: 1.1rem; font-weight: 900;
+      border: none; border-radius: 50px; padding: 16px 48px;
+      cursor: pointer; pointer-events: all;
+      box-shadow: 0 4px 20px rgba(255,200,0,0.5);
+      letter-spacing: 1px;
+    }
+
+    /* ── 바닥 스캔 안내 ────────────────────────────── */
+    #scan-guide {
+      justify-content: flex-end; padding-bottom: 80px;
+    }
+    #scan-guide .guide-box {
+      background: rgba(0,0,0,0.65); border-radius: 20px;
+      padding: 16px 28px; color: white; text-align: center;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    #scan-guide .guide-box p { font-size: 1rem; line-height: 1.6; }
+    #scan-guide .guide-box .scan-icon {
+      font-size: 2.5rem; margin-bottom: 8px;
+      animation: scanPulse 1.5s ease-in-out infinite;
+    }
+
+    /* ── 배치 안내 ─────────────────────────────────── */
+    #place-guide {
+      justify-content: flex-end; padding-bottom: 80px;
+    }
+    #place-guide .guide-box {
+      background: rgba(0,0,0,0.65); border-radius: 20px;
+      padding: 16px 28px; color: white; text-align: center;
+      border: 1px solid rgba(255,215,0,0.4);
+    }
+    #place-guide .touch-icon { font-size: 2.5rem; margin-bottom: 8px;
+      animation: tapBounce 1s ease-in-out infinite; }
+    #place-guide p { font-size: 1rem; line-height: 1.6; }
+
+    /* ── 도깨비 말풍선 ─────────────────────────────── */
+    #dialogue-bubble {
+      justify-content: flex-start; padding-top: 60px; padding-left: 16px;
+    }
+    #dialogue-bubble .bubble-wrap {
+      display: flex; align-items: flex-start; gap: 12px;
+      max-width: 340px;
+    }
+    #dialogue-bubble .goblin-face { font-size: 3rem; flex-shrink: 0; }
+    #dialogue-bubble .bubble {
+      background: rgba(255,255,255,0.95); border-radius: 20px 20px 20px 4px;
+      padding: 14px 18px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      position: relative;
+    }
+    #dialogue-bubble .bubble p {
+      font-size: 0.95rem; line-height: 1.6; color: #1a0533; font-weight: 600;
+    }
+
+    /* ── 대기 힌트 ─────────────────────────────────── */
+    #select-hint {
+      justify-content: flex-end; padding-bottom: 60px;
+    }
+    #select-hint .hint-box {
+      background: rgba(255,215,0,0.15); border: 2px solid rgba(255,215,0,0.6);
+      border-radius: 50px; padding: 12px 28px;
+      color: #FFD700; font-weight: 700; font-size: 1rem;
+      text-shadow: 0 0 8px rgba(255,215,0,0.6);
+      animation: glowPulse 1.8s ease-in-out infinite;
+    }
+
+    /* ── 쿠키 개봉 스파클 ──────────────────────────── */
+    #sparkle-overlay {
+      pointer-events: none;
+    }
+    .sparkle {
+      position: absolute; font-size: 1.8rem;
+      animation: sparkleExplode 0.8s ease-out forwards;
+    }
+
+    /* ── 포춘 카드 ─────────────────────────────────── */
+    #fortune-card {
+      background: rgba(0,0,0,0.6);
+      pointer-events: all;
+      justify-content: center;
+    }
+    #fortune-card .card {
+      background: linear-gradient(160deg, #fffef0, #fff8d6);
+      border: 3px solid #D4A017;
+      border-radius: 24px;
+      width: 300px;
+      padding: 28px 24px 24px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255,215,0,0.4), 0 8px 32px rgba(0,0,0,0.4);
+      animation: cardReveal 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards;
+    }
+    .card-header { font-size: 0.8rem; color: #888; font-weight: 600;
+      letter-spacing: 2px; margin-bottom: 4px; }
+    .card-title { font-size: 1rem; color: #D4A017; font-weight: 800;
+      margin-bottom: 12px; }
+    .card-grade-badge {
+      display: inline-block; padding: 4px 16px;
+      border-radius: 20px; font-size: 1.2rem; font-weight: 900;
+      margin-bottom: 16px; letter-spacing: 1px;
+    }
+    .grade-normal  { background: #e8f0e8; color: #2d6a2d; }
+    .grade-travel  { background: #e8f0ff; color: #1a4a9a; }
+    .grade-complete{ background: #fff0e8; color: #9a4a1a; }
+    .grade-daegil  { background: linear-gradient(135deg,#FFD700,#FF8C00);
+      color: #fff; box-shadow: 0 0 20px rgba(255,200,0,0.6); }
+
+    .card-message {
+      font-size: 1.05rem; line-height: 1.7; color: #333;
+      font-weight: 600; margin-bottom: 20px;
+    }
+    .card-keyword {
+      display: inline-block; background: #f5f0d0;
+      border: 1px solid #D4A017; border-radius: 20px;
+      padding: 4px 14px; font-size: 0.85rem; color: #9a7a00;
+      font-weight: 700; margin-bottom: 20px;
+    }
+    .card-footer {
+      font-size: 0.75rem; color: #999; margin-bottom: 16px;
+    }
+    .card-score {
+      font-size: 0.9rem; color: #D4A017; font-weight: 800;
+    }
+    #fortune-card .card-buttons {
+      display: flex; gap: 10px; margin-top: 16px;
+    }
+    .btn-photo {
+      flex: 1; background: linear-gradient(135deg,#FFD700,#FF8C00);
+      color: #1a0533; border: none; border-radius: 12px;
+      padding: 12px; font-size: 0.9rem; font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-close {
+      flex: 1; background: #f0f0f0; color: #666;
+      border: none; border-radius: 12px;
+      padding: 12px; font-size: 0.9rem; font-weight: 700;
+      cursor: pointer;
+    }
+
+    /* ── 포토존 UI ─────────────────────────────────── */
+    #photo-ui {
+      justify-content: flex-end; padding-bottom: 40px;
+      pointer-events: all;
+    }
+    #photo-ui .photo-bar {
+      display: flex; gap: 16px; align-items: center;
+    }
+    .btn-shoot {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: white; border: 4px solid #D4A017;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem;
+    }
+    .btn-restart {
+      background: rgba(255,255,255,0.2); border: 2px solid white;
+      color: white; border-radius: 20px; padding: 10px 20px;
+      font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    }
+
+    /* ── 키프레임 애니메이션 ───────────────────────── */
+    @keyframes floatBounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-12px); }
+    }
+    @keyframes scanPulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.6; transform: scale(0.9); }
+    }
+    @keyframes tapBounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+    @keyframes glowPulse {
+      0%,100% { box-shadow: none; }
+      50%      { box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+    }
+    @keyframes sparkleExplode {
+      0%   { transform: translate(0,0) scale(0); opacity: 1; }
+      70%  { opacity: 1; }
+      100% { transform: translate(var(--tx),var(--ty)) scale(1); opacity: 0; }
+    }
+    @keyframes cardReveal {
+      from { transform: scale(0.6) translateY(40px); opacity: 0; }
+      to   { transform: scale(1)   translateY(0);    opacity: 1; }
+    }
+
+    /* ── 대길 특별 이펙트 ──────────────────────────── */
+    #daegil-effect {
+      position: fixed; inset: 0; pointer-events: none;
+      z-index: 90; display: none;
+    }
+    #daegil-effect.active { display: block; }
+    #daegil-effect .ray {
+      position: absolute; top: 50%; left: 50%;
+      width: 200vmax; height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(255,215,0,0.6), transparent);
+      transform-origin: left center;
+      animation: rayRotate 3s linear infinite;
+    }
+    @keyframes rayRotate {
+      from { transform: rotate(calc(var(--angle) * 1deg)); opacity: 0.8; }
+      to   { transform: rotate(calc(var(--angle) * 1deg + 360deg)); opacity: 0.8; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ╔════════════════════════════════════════╗ -->
+<!-- ║  HTML UI 오버레이 레이어               ║ -->
+<!-- ╚════════════════════════════════════════╝ -->
+
+<!-- 시작 화면 -->
+<div id="start-screen" class="overlay visible">
+  <div class="goblin-emoji">👹</div>
+  <div class="logo">단종GO</div>
+  <div class="subtitle">완주 기념 · 도깨비의 행운쿠키</div>
+  <div class="desc">
+    단종GO의 모든 여정을 완주한 당신에게<br>
+    도깨비가 특별한 선물을 준비했습니다.<br><br>
+    🥠 포춘쿠키 하나를 골라 오늘의 운세를 확인하세요!
+  </div>
+  <button id="start-btn" onclick="App.start()">🌟 시작하기</button>
+</div>
+
+<!-- 바닥 스캔 안내 -->
+<div id="scan-guide" class="overlay hidden">
+  <div class="guide-box">
+    <div class="scan-icon">📱</div>
+    <p>스마트폰을 천천히 움직여<br>바닥을 인식해 주세요</p>
+  </div>
+</div>
+
+<!-- 배치 안내 -->
+<div id="place-guide" class="overlay hidden">
+  <div class="guide-box">
+    <div class="touch-icon">👆</div>
+    <p>도깨비를 소환할 위치를<br>화면에서 터치하세요!</p>
+  </div>
+</div>
+
+<!-- 도깨비 말풍선 -->
+<div id="dialogue-bubble" class="overlay hidden">
+  <div class="bubble-wrap">
+    <div class="goblin-face">👹</div>
+    <div class="bubble">
+      <p id="dialogue-text">오호! 여기까지 왔구나!</p>
+    </div>
+  </div>
+</div>
+
+<!-- 선택 힌트 -->
+<div id="select-hint" class="overlay hidden">
+  <div class="hint-box">🥠 포춘쿠키를 하나 터치하세요!</div>
+</div>
+
+<!-- 스파클 이펙트 컨테이너 -->
+<div id="sparkle-overlay" class="overlay"></div>
+
+<!-- 대길 특별 이펙트 -->
+<div id="daegil-effect">
+  <div class="ray" style="--angle:0"></div>
+  <div class="ray" style="--angle:30"></div>
+  <div class="ray" style="--angle:60"></div>
+  <div class="ray" style="--angle:90"></div>
+  <div class="ray" style="--angle:120"></div>
+  <div class="ray" style="--angle:150"></div>
+</div>
+
+<!-- 포춘 카드 -->
+<div id="fortune-card" class="overlay hidden">
+  <div class="card" id="fortune-card-inner">
+    <div class="card-header">🥠 오늘의 운세</div>
+    <div class="card-title" id="fc-title">단종GO 행운쿠키</div>
+    <div class="card-grade-badge" id="fc-grade">행운</div>
+    <div class="card-message" id="fc-message">메시지</div>
+    <div class="card-keyword" id="fc-keyword">#행운</div>
+    <div class="card-footer">행운지수</div>
+    <div class="card-score" id="fc-score">★★★★☆</div>
+    <div class="card-buttons">
+      <button class="btn-photo" onclick="App.goPhotoZone()">📸 포토존</button>
+      <button class="btn-close" onclick="App.closeCard()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 포토존 UI -->
+<div id="photo-ui" class="overlay hidden">
+  <div class="photo-bar">
+    <button class="btn-restart" onclick="App.restart()">🔄 다시하기</button>
+    <button class="btn-shoot" id="shoot-btn">📸</button>
+  </div>
+</div>
+
+<!-- ╔════════════════════════════════════════╗ -->
+<!-- ║  A-Frame AR 씬                         ║ -->
+<!-- ╚════════════════════════════════════════╝ -->
+<a-scene
+  coaching-overlay
+  xrextras-loading
+  xrextras-runtime-error
+  renderer="colorManagement: true; physicallyBasedRendering: true;"
+  xrweb="allowedDevices: any;
+    defaultEnvironmentFogIntensity: 0;
+    defaultEnvironmentSkyTopColor: #000000;
+    defaultEnvironmentSkyBottomColor: #000000;
+    scale: absolute">
+
+  <a-assets>
+    <!--
+      ★ 실제 GLB 파일로 교체하세요:
+        - ./assets/goblin.glb     : 도깨비 모델 (애니메이션: Idle, Appear, Celebrate)
+        - ./assets/fortune-cookie.glb : 닫힌 쿠키 (애니메이션: Idle, Shake, Open)
+    -->
+    <a-asset-item id="goblin-glb"  src="./assets/goblin.glb"></a-asset-item>
+    <a-asset-item id="cookie-glb"  src="./assets/fortune-cookie.glb"></a-asset-item>
+  </a-assets>
+
+  <!-- 카메라 (레이캐스트 대상: .cantap) -->
+  <a-camera
+    id="main-camera"
+    position="0 1.6 0"
+    raycaster="objects: .cantap"
+    cursor="fuse: false; rayOrigin: mouse;">
+  </a-camera>
+
+  <!-- 조명 -->
+  <a-light type="ambient"     intensity="0.6"></a-light>
+  <a-light type="directional" intensity="0.8" position="1 3 1" castShadow="true"></a-light>
+
+  <!-- 배치용 바닥 평면 (투명, 터치 감지용) -->
+  <a-plane
+    id="placement-plane"
+    class="cantap"
+    rotation="-90 0 0"
+    width="1000" height="1000"
+    material="opacity: 0; transparent: true; shader: flat"
+    placement-receiver>
+  </a-plane>
+
+  <!-- 그림자용 바닥 -->
+  <a-plane
+    id="ground-shadow"
+    rotation="-90 0 0"
+    width="1000" height="1000"
+    material="shader: shadow; opacity: 0.4"
+    shadow>
+  </a-plane>
+
+  <!-- AR 콘텐츠 그룹 (배치 전 숨김) -->
+  <a-entity id="ar-group" visible="false">
+
+    <!-- ───── 도깨비 ───── -->
+    <a-entity id="goblin-entity" position="0 0 0" scale="0 0 0">
+      <!--
+        GLB가 있으면 아래 주석 해제하고 placeholder 엔티티를 제거하세요:
+        <a-entity gltf-model="#goblin-glb" animation-mixer="clip: Idle; loop: repeat" shadow></a-entity>
+      -->
+      <!-- 도깨비 플레이스홀더 (GLB 없을 때) -->
+      <a-entity id="goblin-placeholder">
+        <!-- 몸통 -->
+        <a-cylinder color="#1DB954" height="0.55" radius="0.2"
+          position="0 0.28 0" shadow></a-cylinder>
+        <!-- 머리 -->
+        <a-sphere color="#1DB954" radius="0.23" position="0 0.7 0" shadow>
+          <!-- 눈 -->
+          <a-sphere color="#fff"    radius="0.07" position="-0.1 0.06  0.19"></a-sphere>
+          <a-sphere color="#fff"    radius="0.07" position=" 0.1 0.06  0.19"></a-sphere>
+          <a-sphere color="#ff0000" radius="0.04" position="-0.1 0.06  0.24"></a-sphere>
+          <a-sphere color="#ff0000" radius="0.04" position=" 0.1 0.06  0.24"></a-sphere>
+          <!-- 뿔 -->
+          <a-cone color="#E67E22" height="0.18" radius-bottom="0.06"
+            position="-0.1 0.24 0" rotation="0 0 -20"></a-cone>
+          <a-cone color="#E67E22" height="0.18" radius-bottom="0.06"
+            position=" 0.1 0.24 0" rotation="0 0  20"></a-cone>
+        </a-sphere>
+        <!-- 팔 (방망이) -->
+        <a-cylinder color="#1DB954" height="0.35" radius="0.07"
+          position="0.28 0.4 0" rotation="0 0 40"></a-cylinder>
+        <a-cylinder color="#8B4513" height="0.5"  radius="0.04"
+          position="0.42 0.22 0" rotation="0 0 60"></a-cylinder>
+        <!-- 방망이 구체 -->
+        <a-sphere color="#D4A017" radius="0.1" position="0.58 0.05 0"></a-sphere>
+      </a-entity>
+      <!-- 도깨비 idle 떠오르기 애니메이션 -->
+      <a-animation attribute="position" from="0 0 0" to="0 0.08 0"
+        dur="2000" direction="alternate" repeat="indefinite"
+        easing="easeInOutSine"></a-animation>
+    </a-entity>
+
+    <!-- ───── 포춘쿠키 5개 ───── -->
+    <!--
+      쿠키 배치: 도깨비 앞 반원형 (반지름 0.65m)
+      각도: -90° ~ +90° (5개 균등 배치: -90,-45,0,45,90)
+      쿠키 idx 0~4 → 클릭 시 컴포넌트가 처리
+    -->
+    <a-entity id="cookie-0" class="fortune-cookie-entity" fortune-cookie="idx: 0"
+      position="-0.65 0.4 0" scale="0 0 0"></a-entity>
+    <a-entity id="cookie-1" class="fortune-cookie-entity" fortune-cookie="idx: 1"
+      position="-0.32 0.55 -0.55" scale="0 0 0"></a-entity>
+    <a-entity id="cookie-2" class="fortune-cookie-entity" fortune-cookie="idx: 2"
+      position="0    0.65 -0.65" scale="0 0 0"></a-entity>
+    <a-entity id="cookie-3" class="fortune-cookie-entity" fortune-cookie="idx: 3"
+      position=" 0.32 0.55 -0.55" scale="0 0 0"></a-entity>
+    <a-entity id="cookie-4" class="fortune-cookie-entity" fortune-cookie="idx: 4"
+      position=" 0.65 0.4 0" scale="0 0 0"></a-entity>
+
+  </a-entity><!-- /ar-group -->
+
+</a-scene>
+
+<!-- ╔════════════════════════════════════════╗ -->
+<!-- ║  스크립트: 데이터 + 컴포넌트 + 앱 제어 ║ -->
+<!-- ╚════════════════════════════════════════╝ -->
+<script>
+// ════════════════════════════════════════════
+//  [1] 포춘 메시지 데이터 (기획서 50종)
+// ════════════════════════════════════════════
+const FORTUNE_DATA = [
+  // ── 일반 행운 (grade: normal) ──────────────
+  { id:'F001', grade:'normal',   keyword:'행운',  score:4, title:'행운',    message:'오늘의 좋은 기운은 이미 당신을 따라오고 있어요.' },
+  { id:'F002', grade:'normal',   keyword:'행운',  score:4, title:'행운',    message:'뜻밖의 순간에 반가운 행운이 찾아올 거예요.' },
+  { id:'F003', grade:'normal',   keyword:'도전',  score:4, title:'도전',    message:'망설였던 일이 있다면, 지금이 시작하기 좋은 때!' },
+  { id:'F004', grade:'normal',   keyword:'추억',  score:3, title:'추억',    message:'오늘 찍은 사진 한 장이 오래도록 웃게 해줄 거예요.' },
+  { id:'F005', grade:'normal',   keyword:'발견',  score:4, title:'발견',    message:'새로운 길 끝에서 생각지도 못한 즐거움을 발견할 거예요.' },
+  { id:'F006', grade:'normal',   keyword:'선택',  score:4, title:'선택',    message:'당신이 오늘 내린 선택, 꽤 괜찮은 선택이 될 것 같아요.' },
+  { id:'F007', grade:'normal',   keyword:'용기',  score:4, title:'용기',    message:'조금만 더 용기를 내보세요. 좋은 일이 기다리고 있어요.' },
+  { id:'F008', grade:'normal',   keyword:'행복',  score:4, title:'행복',    message:'오늘의 작은 행복이 내일 더 큰 행운으로 돌아옵니다.' },
+  { id:'F009', grade:'normal',   keyword:'발견',  score:3, title:'발견',    message:'우연히 발견한 곳이 가장 기억에 남는 장소가 될지도 몰라요.' },
+  { id:'F010', grade:'normal',   keyword:'인연',  score:4, title:'인연',    message:'좋은 사람과 함께한 오늘은 이미 행운 가득한 하루!' },
+  { id:'F011', grade:'normal',   keyword:'예언',  score:4, title:'예언',    message:'도깨비가 슬쩍 귀띔하네요. 곧 기분 좋은 소식이 온대요!' },
+  { id:'F012', grade:'normal',   keyword:'직감',  score:3, title:'직감',    message:'오늘은 왠지 당신의 촉을 믿어도 좋은 날이에요.' },
+  { id:'F013', grade:'normal',   keyword:'발견',  score:3, title:'발견',    message:'평범하게 지나쳤던 곳에서 특별한 것을 발견하게 될 거예요.' },
+  { id:'F014', grade:'normal',   keyword:'실행',  score:4, title:'실행',    message:'지금 떠오른 생각, 한번 실행해 보세요. 의외의 결과가 기다립니다.' },
+  { id:'F015', grade:'normal',   keyword:'용기',  score:4, title:'용기',    message:'오늘 당신에게 필요한 건 계획보다 한 걸음의 용기!' },
+  { id:'F016', grade:'normal',   keyword:'행운',  score:3, title:'행운',    message:'행운은 멀리 있지 않아요. 지금 당신 곁을 한번 둘러보세요.' },
+  { id:'F017', grade:'normal',   keyword:'선물',  score:4, title:'선물',    message:'기대하지 않았던 곳에서 작은 선물이 찾아옵니다.' },
+  { id:'F018', grade:'normal',   keyword:'웃음',  score:3, title:'웃음',    message:'오늘의 웃음은 생각보다 오래 기억될 거예요.' },
+  { id:'F019', grade:'normal',   keyword:'인연',  score:4, title:'인연',    message:'좋은 인연은 예상하지 못한 순간에 찾아오는 법이랍니다.' },
+  { id:'F020', grade:'normal',   keyword:'방향',  score:4, title:'방향',    message:'당신이 걷고 있는 길, 생각보다 꽤 좋은 방향이에요.' },
+  // ── 여행·추억 (grade: travel) ──────────────
+  { id:'F021', grade:'travel',   keyword:'영월',  score:4, title:'여행',    message:'영월에서 만든 오늘의 추억이 오래도록 좋은 기억으로 남을 거예요.' },
+  { id:'F022', grade:'travel',   keyword:'여행',  score:3, title:'여행',    message:'여행의 끝은 또 다른 여행을 시작하게 만드는 법이죠.' },
+  { id:'F023', grade:'travel',   keyword:'길',    score:3, title:'여행',    message:'오늘 걸었던 길이 언젠가 다시 찾고 싶은 길이 됩니다.' },
+  { id:'F024', grade:'travel',   keyword:'이야기',score:4, title:'추억',    message:'좋은 여행은 끝나도 이야기는 오래 남습니다.' },
+  { id:'F025', grade:'travel',   keyword:'풍경',  score:3, title:'영월',    message:'오늘 발견한 영월의 풍경 하나를 마음속에 꼭 담아가세요.' },
+  { id:'F026', grade:'travel',   keyword:'동행',  score:4, title:'동행',    message:'함께 걸었던 사람과 오늘 이야기를 오래도록 나누게 될 거예요.' },
+  { id:'F027', grade:'travel',   keyword:'순간',  score:4, title:'순간',    message:'여행에서 만난 작은 순간 하나가 뜻밖의 큰 추억이 됩니다.' },
+  { id:'F028', grade:'travel',   keyword:'여행',  score:3, title:'여행',    message:'돌아가는 길에도 여행은 계속됩니다. 천천히 주변을 바라보세요.' },
+  { id:'F029', grade:'travel',   keyword:'이야기',score:4, title:'이야기',  message:'오늘의 발걸음이 당신에게 새로운 이야기를 하나 선물했습니다.' },
+  { id:'F030', grade:'travel',   keyword:'설렘',  score:4, title:'설렘',    message:'영월에서의 시간은 끝나도 오늘의 설렘은 조금 더 계속될 거예요.' },
+  // ── 완주 축하 (grade: complete) ────────────
+  { id:'F031', grade:'complete', keyword:'도전',  score:5, title:'완주',    message:'여기까지 완주한 당신이라면 다음 도전도 문제없어요!' },
+  { id:'F032', grade:'complete', keyword:'행운',  score:5, title:'완주',    message:'끝까지 해낸 사람에게는 다음 행운이 더 잘 보이는 법이죠.' },
+  { id:'F033', grade:'complete', keyword:'예고',  score:5, title:'완주',    message:'오늘의 완주는 앞으로 찾아올 멋진 일의 예고편일지도 몰라요.' },
+  { id:'F034', grade:'complete', keyword:'다음',  score:4, title:'완주',    message:'한 걸음씩 걷다 보니 결국 여기까지 왔네요. 다음 목적지는 어디일까요?' },
+  { id:'F035', grade:'complete', keyword:'주인공',score:5, title:'완주',    message:'오늘의 주인공은 바로 당신! 엔딩까지 완벽했습니다.' },
+  { id:'F036', grade:'complete', keyword:'끈기',  score:5, title:'완주',    message:'포기하지 않고 여기까지 온 당신에게 행운 한 스푼 추가!' },
+  { id:'F037', grade:'complete', keyword:'행운',  score:5, title:'완주',    message:'완주 성공! 이제 행운도 당신을 따라잡을 차례예요.' },
+  { id:'F038', grade:'complete', keyword:'끈기',  score:5, title:'완주',    message:'도깨비가 인정했습니다. 당신은 생각보다 끈기가 대단한 사람이래요!' },
+  { id:'F039', grade:'complete', keyword:'보물',  score:4, title:'완주',    message:'오늘 얻은 최고의 보물은 스탬프보다 당신이 만든 추억일지도 몰라요.' },
+  { id:'F040', grade:'complete', keyword:'시작',  score:5, title:'완주',    message:'모든 미션 완료! 그런데 당신의 재미있는 이야기는 이제부터 시작입니다.' },
+  // ── 대길 (grade: daegil) ──────────────────
+  { id:'F041', grade:'daegil',   keyword:'대길',  score:5, title:'大吉',    message:'대길! 도깨비도 놀랄 만큼 좋은 기운이 느껴집니다.' },
+  { id:'F042', grade:'daegil',   keyword:'대길',  score:5, title:'大吉',    message:'오늘은 왠지 좋은 일이 하나쯤 더 생길 것 같은 날!' },
+  { id:'F043', grade:'daegil',   keyword:'대길',  score:5, title:'大吉',    message:'행운 발견! 앞으로 24시간 동안 웃을 일이 하나 더 생길지도 몰라요.' },
+  { id:'F044', grade:'daegil',   keyword:'대길',  score:5, title:'大吉',    message:'쉿! 도깨비가 당신에게 행운을 조금 더 넣어뒀대요.' },
+  { id:'F045', grade:'daegil',   keyword:'대길',  score:5, title:'大吉',    message:'이 쿠키를 고른 당신의 선택 감각, 제법인데요? 오늘은 당신의 날!' },
+  { id:'F046', grade:'daegil',   keyword:'당첨',  score:5, title:'大吉',    message:'축하합니다! 오늘의 "기분 좋은 일" 당첨 확률이 올라갔습니다.' },
+  { id:'F047', grade:'daegil',   keyword:'맛',    score:5, title:'大吉',    message:'도깨비 예언: 가까운 시일 안에 맛있는 것을 먹게 될 운명입니다.' },
+  { id:'F048', grade:'daegil',   keyword:'사진',  score:5, title:'大吉',    message:'도깨비 예언: 곧 사진첩에 저장하고 싶은 순간이 찾아옵니다.' },
+  { id:'F049', grade:'daegil',   keyword:'여행',  score:5, title:'大吉',    message:'도깨비 예언: 다시 떠나고 싶은 곳이 하나 더 생길 거예요.' },
+  { id:'F050', grade:'daegil',   keyword:'추억',  score:5, title:'大吉',    message:'마지막 예언! 오늘의 영월 여행은 끝이 아니라 또 하나의 좋은 추억의 시작입니다.' },
+];
+
+// 등급별 가중치 확률 (0~1 누적)
+const GRADE_WEIGHTS = { normal: 0.45, travel: 0.75, complete: 0.92, daegil: 1.0 };
+
+// 등급별 스코어 스타 표현
+const GRADE_STARS = { normal:'★★★☆☆', travel:'★★★★☆', complete:'★★★★☆', daegil:'★★★★★' };
+const GRADE_LABEL = { normal:'행운', travel:'여행운', complete:'완주운', daegil:'大吉' };
+const GRADE_CSS   = { normal:'grade-normal', travel:'grade-travel', complete:'grade-complete', daegil:'grade-daegil' };
+
+// 도깨비 대사 목록
+const DIALOGUES = [
+  '오호! 여기까지 왔구나!\n단종GO의 모든 여정을 완주한 걸 축하한다!',
+  '그냥 보내줄 순 없지!\n내가 특별한 선물을 준비했어.',
+  '이 중 하나를 골라봐.\n너의 앞날을 살짝 보여줄 테니까!',
+  '흐음~ 너무 고민하면 복이 달아난다구!',
+];
+
+// ════════════════════════════════════════════
+//  [2] 앱 상태 관리
+// ════════════════════════════════════════════
+const App = {
+  state: 'init',
+  placed: false,
+  cookieFortunes: [],   // 쿠키 5개에 미리 배정된 포춘
+  selectedFortune: null,
+  dialogueTimer: null,
+  hintTimer: null,
+
+  // ── 유틸 ──────────────────────────────────
+  show (id)  { document.getElementById(id).classList.replace('hidden','visible'); },
+  hide (id)  { document.getElementById(id).classList.replace('visible','hidden'); },
+
+  // ── 시작 ──────────────────────────────────
+  start () {
+    this.hide('start-screen');
+    this.show('scan-guide');
+    this.state = 'scanning';
+  },
+
+  // 바닥 인식 완료 콜백 (placement-receiver 컴포넌트에서 호출)
+  onFloorReady () {
+    if (this.state !== 'scanning') return;
+    this.state = 'placing';
+    this.hide('scan-guide');
+    this.show('place-guide');
+  },
+
+  // 배치 탭 콜백 (placement-receiver 컴포넌트에서 호출)
+  onPlace (position) {
+    if (this.state !== 'placing') return;
+    this.state = 'goblin_appear';
+    this.hide('place-guide');
+    this.placed = true;
+
+    // AR 그룹 위치 설정 후 표시
+    const group = document.getElementById('ar-group');
+    group.setAttribute('position', position);
+    group.setAttribute('visible', true);
+
+    // 도깨비 등장 (scale 0 → 1)
+    const goblin = document.getElementById('goblin-entity');
+    goblin.setAttribute('animation', {
+      property: 'scale', from: '0 0 0', to: '1 1 1',
+      dur: 800, easing: 'easeOutBack'
+    });
+
+    // 1.2초 후 첫 대사
+    setTimeout(() => this.showDialogue(0), 1200);
+    // 3.5초 후 두 번째 대사 + 쿠키 소환
+    setTimeout(() => {
+      this.showDialogue(1);
+      setTimeout(() => this.spawnCookies(), 1000);
+    }, 3500);
+  },
+
+  // ── 대사 표시 ─────────────────────────────
+  showDialogue (idx) {
+    clearTimeout(this.dialogueTimer);
+    const el = document.getElementById('dialogue-text');
+    el.textContent = DIALOGUES[idx];
+    this.show('dialogue-bubble');
+    this.dialogueTimer = setTimeout(() => {
+      if (idx < 2) this.hide('dialogue-bubble');
+    }, 2800);
+  },
+
+  // ── 쿠키 소환 ─────────────────────────────
+  spawnCookies () {
+    this.state = 'cookie_appear';
+
+    // 5개 쿠키에 포춘 사전 배정
+    this.cookieFortunes = this._assignFortunes();
+
+    const ids = ['cookie-0','cookie-1','cookie-2','cookie-3','cookie-4'];
+    ids.forEach((id, i) => {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        el.setAttribute('animation', {
+          property: 'scale', from: '0 0 0', to: '1 1 1',
+          dur: 500, easing: 'easeOutBack'
+        });
+        el.classList.add('cantap');
+      }, i * 250);
+    });
+
+    // 1.5초 후 대사 + 힌트
+    setTimeout(() => {
+      this.showDialogue(2);
+      this.show('select-hint');
+      this.state = 'waiting';
+
+      // 10초 지나도 선택 안 하면 재촉 대사
+      this.hintTimer = setTimeout(() => this.showDialogue(3), 10000);
+    }, 1500);
+  },
+
+  // 쿠키 5개에 등급+포춘 랜덤 배정
+  _assignFortunes () {
+    const result = [];
+    for (let i = 0; i < 5; i++) {
+      const r = Math.random();
+      let grade = 'normal';
+      for (const [g, w] of Object.entries(GRADE_WEIGHTS)) {
+        if (r <= w) { grade = g; break; }
+      }
+      const pool = FORTUNE_DATA.filter(f => f.grade === grade);
+      result.push(pool[Math.floor(Math.random() * pool.length)]);
+    }
+    return result;
+  },
+
+  // ── 쿠키 선택 (fortune-cookie 컴포넌트에서 호출) ──
+  onCookieSelected (idx) {
+    if (this.state !== 'waiting') return;
+    this.state = 'selected';
+    clearTimeout(this.hintTimer);
+    this.hide('select-hint');
+    this.hide('dialogue-bubble');
+
+    this.selectedFortune = this.cookieFortunes[idx];
+
+    // 선택 안 된 쿠키 페이드아웃
+    ['cookie-0','cookie-1','cookie-2','cookie-3','cookie-4'].forEach((id, i) => {
+      if (i === idx) return;
+      const el = document.getElementById(id);
+      el.classList.remove('cantap');
+      el.setAttribute('animation', {
+        property: 'scale', to: '0 0 0',
+        dur: 400, easing: 'easeInBack'
+      });
+    });
+
+    // 선택된 쿠키: 흔들림 → 위로 → 개봉 효과
+    const chosen = document.getElementById(`cookie-${idx}`);
+    chosen.classList.remove('cantap');
+    chosen.emit('shake');   // fortune-cookie 컴포넌트가 처리
+
+    // 1.5초 후 스파클 + 포춘 카드
+    setTimeout(() => {
+      this._playSparkle();
+      chosen.setAttribute('animation', {
+        property: 'scale', to: '0 0 0', dur: 300, easing: 'easeInBack'
+      });
+    }, 1400);
+
+    setTimeout(() => this.revealFortune(), 2200);
+  },
+
+  // ── 스파클 효과 ───────────────────────────
+  _playSparkle () {
+    const container = document.getElementById('sparkle-overlay');
+    const emojis = ['✨','⭐','🌟','💫','🌠'];
+    const cx = window.innerWidth / 2;
+    const cy = window.innerHeight / 2;
+
+    for (let i = 0; i < 18; i++) {
+      const span = document.createElement('div');
+      span.className = 'sparkle';
+      span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      const angle = (360 / 18) * i;
+      const dist  = 80 + Math.random() * 120;
+      const tx = Math.cos(angle * Math.PI / 180) * dist;
+      const ty = Math.sin(angle * Math.PI / 180) * dist - 100;
+      span.style.cssText = `
+        left: ${cx}px; top: ${cy}px;
+        --tx: ${tx}px; --ty: ${ty}px;
+        animation-delay: ${Math.random() * 0.2}s;
+      `;
+      container.appendChild(span);
+    }
+    setTimeout(() => { container.innerHTML = ''; }, 1200);
+  },
+
+  // ── 포춘 카드 표시 ────────────────────────
+  revealFortune () {
+    this.state = 'fortune';
+    const f = this.selectedFortune;
+
+    document.getElementById('fc-title').textContent   = `🥠 ${f.title}`;
+    document.getElementById('fc-grade').textContent   = GRADE_LABEL[f.grade];
+    document.getElementById('fc-grade').className     = `card-grade-badge ${GRADE_CSS[f.grade]}`;
+    document.getElementById('fc-message').textContent = f.message;
+    document.getElementById('fc-keyword').textContent = `#${f.keyword}`;
+    document.getElementById('fc-score').textContent   = GRADE_STARS[f.grade];
+
+    // 대길이면 특별 이펙트
+    if (f.grade === 'daegil') {
+      document.getElementById('daegil-effect').classList.add('active');
+      setTimeout(() => document.getElementById('daegil-effect').classList.remove('active'), 6000);
+    }
+
+    this.show('fortune-card');
+  },
+
+  closeCard () {
+    this.hide('fortune-card');
+    this.goPhotoZone();
+  },
+
+  // ── 포토존 ────────────────────────────────
+  goPhotoZone () {
+    this.state = 'photo';
+    this.hide('fortune-card');
+    // 도깨비 Celebrate 애니메이션 (GLB 있을 경우)
+    const goblin = document.getElementById('goblin-entity');
+    goblin.emit('celebrate');
+    this.show('photo-ui');
+  },
+
+  // ── 다시 시작 ─────────────────────────────
+  restart () {
+    location.reload();
+  }
+};
+
+// ════════════════════════════════════════════
+//  [3] A-Frame 컴포넌트 등록
+// ════════════════════════════════════════════
+(function () {
+  function registerComponents () {
+
+    // ── placement-receiver ──────────────────
+    // 바닥 평면 클릭 감지 → 도깨비 배치
+    AFRAME.registerComponent('placement-receiver', {
+      init () {
+        // 바닥이 인식되면 (SLAM 세션 준비 완료 이벤트)
+        this.el.sceneEl.addEventListener('realityready', () => {
+          App.onFloorReady();
+        });
+        // 화면 탭 → 배치
+        this.el.addEventListener('click', (evt) => {
+          if (!App.placed && App.state === 'placing') {
+            const pt = evt.detail.intersection && evt.detail.intersection.point;
+            if (pt) {
+              App.onPlace(`${pt.x} ${pt.y} ${pt.z}`);
+            }
+          }
+        });
+      }
+    });
+
+    // ── fortune-cookie ───────────────────────
+    // 각 쿠키 엔티티의 시각적 표현 + 상호작용
+    AFRAME.registerComponent('fortune-cookie', {
+      schema: { idx: { type: 'int', default: 0 } },
+
+      init () {
+        this._buildVisual();
+        this._setupAnimations();
+
+        // 클릭 → 선택
+        this.el.addEventListener('click', () => {
+          App.onCookieSelected(this.data.idx);
+        });
+
+        // shake 이벤트 (onCookieSelected에서 emit)
+        this.el.addEventListener('shake', () => {
+          this._playShake();
+        });
+      },
+
+      // 쿠키 3D 비주얼 빌드 (GLB 없을 때 프리미티브 사용)
+      _buildVisual () {
+        const colors = ['#D4A017','#C8960C','#B8820A','#E8B420','#F0C030'];
+        const col = colors[this.data.idx % colors.length];
+
+        // 메인 쿠키 몸체 (눌린 구 모양)
+        const body = document.createElement('a-sphere');
+        body.setAttribute('radius', '0.13');
+        body.setAttribute('scale', '1 0.55 0.85');
+        body.setAttribute('color', col);
+        body.setAttribute('metalness', '0.3');
+        body.setAttribute('roughness', '0.6');
+        body.setAttribute('shadow', '');
+        this.el.appendChild(body);
+
+        // 가운데 홈 (어두운 띠)
+        const groove = document.createElement('a-torus');
+        groove.setAttribute('radius', '0.09');
+        groove.setAttribute('radius-tubular', '0.015');
+        groove.setAttribute('color', '#8B6000');
+        groove.setAttribute('rotation', '90 0 0');
+        groove.setAttribute('position', '0 0 0');
+        this.el.appendChild(groove);
+
+        // 위에 떠오르는 반짝임 파티클 (idle 효과)
+        const glow = document.createElement('a-sphere');
+        glow.setAttribute('radius', '0.04');
+        glow.setAttribute('color', '#FFD700');
+        glow.setAttribute('position', '0 0.18 0');
+        glow.setAttribute('material', 'emissive: #FFD700; emissiveIntensity: 0.5');
+        glow.setAttribute('animation', {
+          property: 'position', from: '0 0.18 0', to: '0 0.26 0',
+          dur: 1200, direction: 'alternate', loop: true, easing: 'easeInOutSine'
+        });
+        glow.setAttribute('animation__scale', {
+          property: 'scale', from: '1 1 1', to: '0.5 0.5 0.5',
+          dur: 1200, direction: 'alternate', loop: true, easing: 'easeInOutSine'
+        });
+        this.el.appendChild(glow);
+
+        // idle 떠오르기
+        this.el.setAttribute('animation__float', {
+          property: 'position',
+          from: `${this.el.getAttribute('position').x} ${parseFloat(this.el.getAttribute('position').y)} ${this.el.getAttribute('position').z}`,
+          to:   `${this.el.getAttribute('position').x} ${parseFloat(this.el.getAttribute('position').y) + 0.06} ${this.el.getAttribute('position').z}`,
+          dur: 1600 + this.data.idx * 120,
+          direction: 'alternate', loop: true, easing: 'easeInOutSine'
+        });
+      },
+
+      _setupAnimations () {
+        // 회전 idle
+        this.el.setAttribute('animation__rot', {
+          property: 'rotation', from: '0 0 0', to: '0 360 0',
+          dur: 6000, loop: true, easing: 'linear'
+        });
+      },
+
+      _playShake () {
+        const origPos = this.el.getAttribute('position');
+        const x = origPos.x, y = origPos.y, z = origPos.z;
+
+        // 좌우 흔들림
+        this.el.setAttribute('animation__shake', {
+          property: 'rotation',
+          from: '0 0 -15', to: '0 0 15',
+          dur: 120, direction: 'alternate', loop: 6,
+          easing: 'linear'
+        });
+
+        // 위로 떠오르기
+        setTimeout(() => {
+          this.el.setAttribute('animation__float', {
+            property: 'position',
+            from: `${x} ${y} ${z}`,
+            to:   `${x} ${y + 0.6} ${z}`,
+            dur: 600, easing: 'easeOutCubic'
+          });
+        }, 700);
+      }
+    });
+
+  }
+
+  // 8th Wall 공식 패턴: XR8 준비 후 컴포넌트 등록
+  window.XR8
+    ? registerComponents()
+    : window.addEventListener('xrloaded', registerComponents);
+})();
+
+// ── 촬영 버튼 ─────────────────────────────────────
+document.getElementById('shoot-btn').addEventListener('click', () => {
+  // 8th Wall 내장 캡처 버튼 트리거 또는 XR8 캡처 API 사용
+  const captureBtn = document.querySelector('xrextras-capture-button');
+  if (captureBtn) {
+    captureBtn.click();
+  } else {
+    // xrextras-capture-button이 없는 경우 콘솔 안내
+    console.log('[fortune-ar] xrextras-capture-button을 a-scene 안에 추가하면 캡처됩니다.');
+    alert('📸 xrextras-capture-button을 씬에 추가하면 AR 사진 촬영이 가능합니다!');
+  }
+});
+</script>
+</body>
+</html>
