@@ -299,47 +299,57 @@
   <!--
     ════════════════════════════════════════
     AR 콘텐츠 그룹
-    - xrextras-hold-drag      꾹 눌러 드래그 이동
-    - xrextras-two-finger-rotate 두 손가락 회전
-    - xrextras-pinch-scale    핀치 크기 조절
-    - proximity               거리 감지
-    초기: visible=false / scale=0 → start() 에서 등장
+    ★ 수정 포인트:
+    1. scale="0 0 0" 제거 → scale은 항상 1 1 1 유지
+       (xrextras-pinch-scale 이 기준 scale 0을 잡으면 핀치가 오작동)
+    2. visible=false → start() 에서 visible=true 로만 전환
+    3. xrextras-hold-drag 감지를 위해 투명 구체(drag-sphere) 추가
+       (ar-group 자체는 geometry가 없어 레이캐스터에 잡히지 않음)
     ════════════════════════════════════════
   -->
   <a-entity
     id="ar-group"
     visible="false"
     position="0 0 -2"
-    scale="0 0 0"
     xrextras-hold-drag
     xrextras-two-finger-rotate
     xrextras-pinch-scale
     proximity>
 
+    <!-- 드래그/핀치 감지용 투명 메시 (geometry 없으면 xrextras 감지 불가) -->
+    <a-sphere id="drag-sphere"
+      radius="1.5"
+      material="opacity:0; transparent:true; shader:flat"
+      shadow="receive:false">
+    </a-sphere>
+
     <!-- ── 도깨비 ──────────────────────── -->
-    <a-entity id="goblin-entity" position="0 0 0" scale="0 0 0">
+    <!-- ★ <a-animation> deprecated → animation 컴포넌트 속성으로 교체 -->
+    <a-entity
+      id="goblin-entity"
+      position="0 0 0"
+      scale="0 0 0"
+      animation__idle="property:position; from:0 0 0; to:0 0.08 0;
+        dur:2200; direction:alternate; loop:true; easing:easeInOutSine">
 
       <!-- GLB 모델 사용 -->
-      <a-entity gltf-model="#goblin-glb" rotation="0 0 0" scale="3 3 3"
+      <a-entity gltf-model="#goblin-glb" rotation="0 0 0" scale="4 4 4"
         animation-mixer="clip: Idle; loop: repeat"
         shadow fix-metal-material></a-entity>
 
-      <!-- idle 떠오르기 -->
-      <a-animation attribute="position" from="0 0 0" to="0 0.08 0"
-        dur="2200" direction="alternate" repeat="indefinite" easing="easeInOutSine">
-      </a-animation>
     </a-entity>
 
     <!-- ── 포춘쿠키 5개 (반원 배치) ──────── -->
-    <a-entity id="cookie-0" class="cantap" fortune-cookie="idx:0"
+    <!-- ★ class="cantap"은 _build()의 hitbox에서만 부여 (부모+자식 중복 방지) -->
+    <a-entity id="cookie-0" fortune-cookie="idx:0"
       position="-0.65  0.38  0"    scale="0 0 0"></a-entity>
-    <a-entity id="cookie-1" class="cantap" fortune-cookie="idx:1"
+    <a-entity id="cookie-1" fortune-cookie="idx:1"
       position="-0.32  0.52 -0.55" scale="0 0 0"></a-entity>
-    <a-entity id="cookie-2" class="cantap" fortune-cookie="idx:2"
+    <a-entity id="cookie-2" fortune-cookie="idx:2"
       position="  0    0.62 -0.65" scale="0 0 0"></a-entity>
-    <a-entity id="cookie-3" class="cantap" fortune-cookie="idx:3"
+    <a-entity id="cookie-3" fortune-cookie="idx:3"
       position=" 0.32  0.52 -0.55" scale="0 0 0"></a-entity>
-    <a-entity id="cookie-4" class="cantap" fortune-cookie="idx:4"
+    <a-entity id="cookie-4" fortune-cookie="idx:4"
       position=" 0.65  0.38  0"    scale="0 0 0"></a-entity>
 
   </a-entity><!-- /ar-group -->
@@ -441,18 +451,14 @@ const App = {
       this.$('audio-toggle-btn').style.display = 'flex';
       this.$('ar-reset-btn').style.display = 'flex';
 
-      // AR 그룹 등장 (scale 0 → 2: 쿠키가 충분히 크게 보이도록)
+      // AR 그룹 등장 (scale=1 고정, visible 토글만 사용 — xrextras-pinch 오작동 방지)
       const group = this.$('ar-group');
       group.setAttribute('visible', 'true');
-      group.setAttribute('animation', {
-        property:'scale', from:'0 0 0', to:'2 2 2',
-        dur:600, easing:'easeOutBack'
-      });
       group.emit('ar-start');
 
-      // 도깨비 등장 (약간 딜레이)
+      // 도깨비만 scale 0→1 애니메이션 (쿠키는 _spawnCookies에서 별도 처리)
       setTimeout(() => {
-        this.$('goblin-entity').setAttribute('animation', {
+        this.$('goblin-entity').setAttribute('animation__appear', {
           property:'scale', from:'0 0 0', to:'1 1 1',
           dur:700, easing:'easeOutBack'
         });
@@ -488,19 +494,39 @@ const App = {
       const pool = FORTUNE_DATA.filter(f=>f.grade===grade);
       return pool[Math.floor(Math.random()*pool.length)];
     });
-    ['cookie-0','cookie-1','cookie-2','cookie-3','cookie-4'].forEach((id,i) => {
+
+    // ★ A-Frame animation 컴포넌트 대신 object3D 직접 조작으로 스케일 인
+    //   (animation 다중 인스턴스 충돌 문제 완전 우회)
+    const ids = ['cookie-0','cookie-1','cookie-2','cookie-3','cookie-4'];
+    const easeOutBack = (t) => {
+      const c1 = 1.70158, c3 = c1 + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    };
+    ids.forEach((id, i) => {
       setTimeout(() => {
-        this.$(id).setAttribute('animation', {
-          property:'scale', from:'0 0 0', to:'1 1 1', dur:450, easing:'easeOutBack'
-        });
-      }, i * 220);
+        const el = this.$(id);
+        if (!el) return;
+        el.object3D.visible = true;
+        let startTime = null;
+        const dur = 480;
+        const tick = (ts) => {
+          if (!startTime) startTime = ts;
+          const t = Math.min((ts - startTime) / dur, 1);
+          const s = easeOutBack(t);
+          el.object3D.scale.set(s, s, s);
+          if (t < 1) requestAnimationFrame(tick);
+          else el.object3D.scale.set(1, 1, 1);
+        };
+        requestAnimationFrame(tick);
+      }, i * 260);
     });
+
     setTimeout(() => {
       this._say(2);
       this.flex('select-hint');
       this.state = 'waiting';
       this._ht = setTimeout(() => this._say(3), 10000);
-    }, 1400);
+    }, 1600);
   },
 
   onPick (idx) {
@@ -511,21 +537,45 @@ const App = {
     this.none('dialogue-bubble');
     this.picked = this.cookieFortunes[idx];
 
-    // 선택 안 된 쿠키 제거
+    // 선택 안 된 쿠키 사라지기 (object3D 직접 조작)
+    const easeInBack = (t) => {
+      const c1 = 1.70158, c3 = c1 + 1;
+      return c3 * t * t * t - c1 * t * t;
+    };
     ['cookie-0','cookie-1','cookie-2','cookie-3','cookie-4'].forEach((id,i) => {
-      if (i===idx) return;
+      if (i === idx) return;
       const el = this.$(id);
-      el.classList.remove('cantap');
-      el.setAttribute('animation', {property:'scale', to:'0 0 0', dur:350, easing:'easeInBack'});
+      el.querySelectorAll('.cantap').forEach(h => h.classList.remove('cantap'));
+      let startTime = null;
+      const dur = 380;
+      const tick = (ts) => {
+        if (!startTime) startTime = ts;
+        const t = Math.min((ts - startTime) / dur, 1);
+        const s = 1 - easeInBack(t);
+        el.object3D.scale.set(Math.max(s,0), Math.max(s,0), Math.max(s,0));
+        if (t < 1) requestAnimationFrame(tick);
+        else el.object3D.visible = false;
+      };
+      requestAnimationFrame(tick);
     });
 
     this.$(`cookie-${idx}`).emit('shake');
 
     setTimeout(() => {
       this._sparkle();
-      this.$(`cookie-${idx}`).setAttribute('animation', {
-        property:'scale', to:'0 0 0', dur:280, easing:'easeInBack'
-      });
+      // 선택 쿠키 사라지기
+      const chosen = this.$(`cookie-${idx}`);
+      let startTime = null;
+      const dur = 300;
+      const tick = (ts) => {
+        if (!startTime) startTime = ts;
+        const t = Math.min((ts - startTime) / dur, 1);
+        const s = 1 - t;
+        chosen.object3D.scale.set(Math.max(s,0), Math.max(s,0), Math.max(s,0));
+        if (t < 1) requestAnimationFrame(tick);
+        else chosen.object3D.visible = false;
+      };
+      requestAnimationFrame(tick);
     }, 1350);
 
     setTimeout(() => this._revealFortune(), 2100);
@@ -584,14 +634,17 @@ const App = {
     if (aBtn) { aBtn.innerText='🎵'; aBtn.style.backgroundColor='#fff'; aBtn.style.display='none'; }
     this.$('ar-reset-btn').style.display = 'none';
 
-    const group = this.$('ar-group');
-    group.setAttribute('visible','false');
-    group.setAttribute('scale','0 0 0');
-
+    // ar-group: visible만 false (scale 건드리지 않음 — xrextras-pinch 기준 유지)
+    this.$('ar-group').setAttribute('visible','false');
+    // 도깨비 scale 초기화
+    const goblin = this.$('goblin-entity');
+    if (goblin) goblin.object3D.scale.set(0, 0, 0);
+    // 쿠키 초기화
     ['cookie-0','cookie-1','cookie-2','cookie-3','cookie-4'].forEach(id => {
       const el = this.$(id);
-      el.setAttribute('scale','0 0 0');
-      el.classList.remove('cantap');
+      if (!el) return;
+      el.object3D.scale.set(0, 0, 0);
+      el.object3D.visible = true;
     });
 
     ['dialogue-bubble','select-hint','fortune-card','photo-ui'].forEach(id=>this.none(id));
@@ -619,79 +672,69 @@ const App = {
         this.el.addEventListener('shake', () => this._shake());
       },
       _build () {
-        // ── fortune_cookie.glb 모델 ────────────────────────────────────
-        // GLB가 없을 경우 아래 model 블록을 주석 처리하고
-        // 그 아래 프리미티브 블록 주석을 해제하세요.
+        // fortune_cookie.glb 모델
         const model = document.createElement('a-entity');
         model.setAttribute('gltf-model', '#cookie-glb');
-        // fortune_cookie.glb 의 실제 크기에 맞게 scale 조정
-        // (모델이 너무 크면 줄이고, 너무 작으면 늘리세요)
         model.setAttribute('scale', '0.35 0.35 0.35');
         model.setAttribute('shadow', '');
         model.setAttribute('fix-metal-material', '');
         this.el.appendChild(model);
 
-        /* ── 프리미티브 폴백 (GLB 없을 때 주석 해제) ──────────────────
-        const cols = ['#D4A017','#C8960C','#E8B420','#B8820A','#F0C030'];
-        const c = cols[this.data.idx % cols.length];
-        const body = document.createElement('a-sphere');
-        body.setAttribute('radius','0.22'); body.setAttribute('scale','1 0.52 0.82');
-        body.setAttribute('color',c); body.setAttribute('metalness','0.25');
-        body.setAttribute('roughness','0.55'); body.setAttribute('shadow','');
-        this.el.appendChild(body);
-        const groove = document.createElement('a-torus');
-        groove.setAttribute('radius','0.16'); groove.setAttribute('radius-tubular','0.022');
-        groove.setAttribute('color','#8B6000'); groove.setAttribute('rotation','90 0 0');
-        this.el.appendChild(groove);
-        ── 프리미티브 폴백 끝 ────────────────────────────────────────── */
-
-        // 빛나는 파티클 (idle 효과)
+        // 빛나는 파티클
         const glow = document.createElement('a-sphere');
-        glow.setAttribute('radius','0.06'); glow.setAttribute('color','#FFD700');
+        glow.setAttribute('radius','0.06');
+        glow.setAttribute('color','#FFD700');
         glow.setAttribute('position','0 0.32 0');
         glow.setAttribute('material','emissive:#FFD700;emissiveIntensity:0.8;transparent:true;opacity:0.85');
-        const floatDur = 1300 + this.data.idx * 100;
-        glow.setAttribute('animation',{property:'position',from:'0 0.32 0',to:'0 0.44 0',
-          dur:floatDur,direction:'alternate',loop:true,easing:'easeInOutSine'});
-        glow.setAttribute('animation__s',{property:'scale',from:'1 1 1',to:'0.3 0.3 0.3',
-          dur:floatDur,direction:'alternate',loop:true,easing:'easeInOutSine'});
         this.el.appendChild(glow);
 
-        // ── 히트박스 (터치 감지 핵심) ────────────────────────────────
-        // A-Frame raycaster 는 .cantap 엔티티의 자식 mesh 를 히트해도
-        // click 이벤트를 자식 엔티티에 발생시킵니다.
-        // 따라서 부모(this.el)에 달린 click 리스너가 실행되지 않아
-        // 터치가 무시됩니다. 아래처럼 부모에 직접 geometry 를 가진
-        // 투명 히트박스를 만들고, 히트박스에 click 리스너를 달면
-        // raycaster 가 히트박스를 직접 맞추어 정확히 동작합니다.
+        // ★ 투명 히트박스 (raycaster 직접 감지 + click 리스너)
+        //   부모 엔티티 자체엔 geometry 없어서 click 이벤트가 자식에 발생함
+        //   → 히트박스에 직접 달아야 확실히 동작
         const hitbox = document.createElement('a-box');
-        hitbox.setAttribute('scale', '0.55 0.55 0.55'); // 55cm 정육면체 — 넉넉한 터치 영역
-        hitbox.setAttribute('material', 'opacity:0; transparent:true; shader:flat');
+        hitbox.setAttribute('scale', '0.55 0.55 0.55');
+        hitbox.setAttribute('material', 'opacity:0;transparent:true;shader:flat');
         hitbox.classList.add('cantap');
         const idx = this.data.idx;
         hitbox.addEventListener('click', () => App.onPick(idx));
         this.el.appendChild(hitbox);
-        // ─────────────────────────────────────────────────────────────
 
-        // idle float
-        const pos = this.el.getAttribute('position');
-        const px = pos.x||0, py = pos.y||0, pz = pos.z||0;
-        this.el.setAttribute('animation__float',{property:'position',
-          from:`${px} ${py} ${pz}`, to:`${px} ${py+0.1} ${pz}`,
-          dur: 1500+this.data.idx*130, direction:'alternate',loop:true,easing:'easeInOutSine'});
-        // idle 자전
-        this.el.setAttribute('animation__rot',{property:'rotation',
-          from:'0 0 0',to:'0 360 0',dur:6500,loop:true,easing:'linear'});
+        // ★ idle 떠오르기: animation 컴포넌트 대신 tick 루프에서 직접 처리
+        //   (animation 다중 인스턴스가 스케일 인 애니메이션을 방해하는 문제 방지)
+        const phase = (this.data.idx / 5) * Math.PI * 2;
+        this._idlePhase = phase;
+      },
+
+      tick (t) {
+        // idle float — animation 컴포넌트를 쓰지 않고 tick으로 직접 위치 계산
+        const baseY = this.el.getAttribute('position').y;
+        const offset = Math.sin(t / 1500 + this._idlePhase) * 0.06;
+        this.el.object3D.position.y = baseY + offset;
       },
       _shake () {
-        const pos = this.el.getAttribute('position');
-        const px=pos.x||0, py=pos.y||0, pz=pos.z||0;
-        this.el.setAttribute('animation__shake',{property:'rotation',
-          from:'0 0 -18',to:'0 0 18',dur:110,direction:'alternate',loop:7,easing:'linear'});
-        setTimeout(() => {
-          this.el.setAttribute('animation__float',{property:'position',
-            from:`${px} ${py} ${pz}`, to:`${px} ${py+0.7} ${pz}`,dur:550,easing:'easeOutCubic'});
-        }, 750);
+        // 흔들림: object3D rotation 직접
+        let shakeStart = null;
+        const shakeTick = (ts) => {
+          if (!shakeStart) shakeStart = ts;
+          const t = (ts - shakeStart) / 120;
+          this.el.object3D.rotation.z = Math.sin(t * Math.PI * 2) * 0.32;
+          if (ts - shakeStart < 840) requestAnimationFrame(shakeTick);
+          else {
+            this.el.object3D.rotation.z = 0;
+            // 위로 떠오르기
+            const startY = this.el.object3D.position.y;
+            let riseStart = null;
+            const riseTick = (ts2) => {
+              if (!riseStart) riseStart = ts2;
+              const t2 = Math.min((ts2 - riseStart) / 580, 1);
+              const ease = 1 - Math.pow(1 - t2, 3);
+              this.el.object3D.position.y = startY + ease * 0.75;
+              if (t2 < 1) requestAnimationFrame(riseTick);
+            };
+            requestAnimationFrame(riseTick);
+          }
+        };
+        requestAnimationFrame(shakeTick);
       }
     });
   }
