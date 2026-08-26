@@ -298,7 +298,7 @@
       id="goblin-entity"
       visible="false"
       gltf-model="#goblin-glb"
-      scale="5 5 5"
+      scale="3 3 3"
       rotation="0 0 0"
       animation-mixer="clip: Idle; loop: repeat"
       xrextras-hold-drag
@@ -319,42 +319,42 @@
         - 높이(y) 1.5~2m — 눈높이 부근에 크게 배치
     ─────────────────────────────────────────────────────────── -->
     <!-- 왼쪽 끝 -->
-    <a-sphere id="cookie-0" class="cantap" cookie-tap="idx:0"
+    <a-sphere id="cookie-0" class="cantap"
       visible="false" scale="0 0 0"
       position="-3.0 1.5 0.5"
-      radius="1.2" color="#D4A017"
+      radius="0.6" color="#D4A017"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
     <!-- 왼쪽 -->
-    <a-sphere id="cookie-1" class="cantap" cookie-tap="idx:1"
+    <a-sphere id="cookie-1" class="cantap"
       visible="false" scale="0 0 0"
       position="-1.8 1.8 2.5"
-      radius="1.2" color="#C8960C"
+      radius="0.6" color="#C8960C"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
     <!-- 중앙 (카메라와 가장 가까운 위치) -->
-    <a-sphere id="cookie-2" class="cantap" cookie-tap="idx:2"
+    <a-sphere id="cookie-2" class="cantap"
       visible="false" scale="0 0 0"
       position="0 2.0 3.2"
-      radius="1.2" color="#E8B420"
+      radius="0.6" color="#E8B420"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
     <!-- 오른쪽 -->
-    <a-sphere id="cookie-3" class="cantap" cookie-tap="idx:3"
+    <a-sphere id="cookie-3" class="cantap"
       visible="false" scale="0 0 0"
       position="1.8 1.8 2.5"
-      radius="1.2" color="#B8820A"
+      radius="0.6" color="#B8820A"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
     <!-- 오른쪽 끝 -->
-    <a-sphere id="cookie-4" class="cantap" cookie-tap="idx:4"
+    <a-sphere id="cookie-4" class="cantap"
       visible="false" scale="0 0 0"
       position="3.0 1.5 0.5"
-      radius="1.2" color="#F0C030"
+      radius="0.6" color="#F0C030"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
@@ -441,35 +441,48 @@ const COOKIE_IDS = ['cookie-0','cookie-1','cookie-2','cookie-3','cookie-4'];
 // ════════════════════════════════════════
 const App = {
   state:'idle', cookieFortunes:[], picked:null, _dt:null, _ht:null,
+  _sid: 0,    // 세션 ID — 리셋 시 증가해서 이전 세션의 setTimeout 콜백을 무효화
+  _tids: [],  // 취소 대상 setTimeout ID 목록
   $: id => document.getElementById(id),
   flex: id => { const e=document.getElementById(id); if(e) e.style.display='flex'; },
   none: id => { const e=document.getElementById(id); if(e) e.style.display='none'; },
 
+  // setTimeout 래퍼 — ID를 추적해서 reset() 에서 일괄 취소 가능
+  _after(fn, ms) {
+    const id = setTimeout(fn, ms);
+    this._tids.push(id);
+    return id;
+  },
+
   // ── 시작 (원본 photozone 패턴 동일) ──────────────────────────
   start() {
+    const sid = ++this._sid;  // 새 세션 ID 발급
     const container = this.$('container');
     container.style.opacity = '0';
-    setTimeout(() => {
+    this._after(() => {
+      if (sid !== this._sid) return;  // 리셋으로 세션이 바뀌었으면 무시
       container.style.visibility = 'hidden';
       container.style.display    = 'none';
       this.$('audio-toggle-btn').style.display = 'flex';
       this.$('ar-reset-btn').style.display     = 'flex';
 
-      // ar-group visible
       this.$('ar-group').setAttribute('visible','true');
 
-      // 도깨비 등장 — visible=true + pop-in 스케일 애니메이션
       const goblin = this.$('goblin-entity');
       goblin.setAttribute('visible','true');
-      goblin.setAttribute('scale','0 0 0');          // 잠깐 0으로 리셋
+      goblin.setAttribute('scale','0 0 0');
       goblin.setAttribute('animation__appear', {
-        property:'scale', from:'0 0 0', to:'5 5 5',
+        property:'scale', from:'0 0 0', to:'3 3 3',
         dur:600, easing:'easeOutBack'
       });
       goblin.emit('ar-start');
 
-      setTimeout(() => this._say(0), 800);
-      setTimeout(() => { this._say(1); setTimeout(()=>this._spawnCookies(),900); }, 3000);
+      this._after(() => { if(sid===this._sid) this._say(0); }, 800);
+      this._after(() => {
+        if(sid!==this._sid) return;
+        this._say(1);
+        this._after(() => { if(sid===this._sid) this._spawnCookies(sid); }, 900);
+      }, 3000);
 
     }, 400);
     const bgm = this.$('bgm');
@@ -484,9 +497,8 @@ const App = {
     if (idx < 2) this._dt = setTimeout(()=>this.none('dialogue-bubble'), dur);
   },
 
-  // ── 쿠키 소환 ─────────────────────────────────────────────────
-  // ★ a-sphere 에 직접 visible+animation → 단순하고 확실
-  _spawnCookies() {
+  _spawnCookies(sid) {
+    if (sid !== this._sid) return;
     this.state = 'cookie_appear';
     this.cookieFortunes = Array.from({length:5}, () => {
       const r = Math.random();
@@ -497,17 +509,15 @@ const App = {
     });
 
     COOKIE_IDS.forEach((id, i) => {
-      setTimeout(() => {
+      this._after(() => {
+        if (sid !== this._sid) return;  // 리셋으로 세션이 바뀌었으면 무시
         const el = this.$(id);
         if (!el) return;
-        // 1. visible 먼저 true (scale=0 이므로 보이지 않음)
         el.setAttribute('visible','true');
-        // 2. scale 0→1 애니메이션 — 각 쿠키마다 고유 이름 사용
         el.setAttribute('animation__spawn', {
           property:'scale', from:'0 0 0', to:'1 1 1',
           dur:420, easing:'easeOutBack'
         });
-        // 3. idle 떠오르기 — 쿠키 크기(반경 1.2m)에 맞춰 float 폭 0.35m
         const pos = el.getAttribute('position');
         el.setAttribute('animation__idle', {
           property:'position',
@@ -518,11 +528,12 @@ const App = {
       }, i * 260);
     });
 
-    setTimeout(() => {
+    this._after(() => {
+      if (sid !== this._sid) return;
       this._say(2);
       this.flex('select-hint');
       this.state = 'waiting';
-      this._ht = setTimeout(()=>this._say(3), 10000);
+      this._ht = this._after(()=>{ if(sid===this._sid) this._say(3); }, 10000);
     }, 1600);
   },
 
@@ -530,6 +541,7 @@ const App = {
   onPick(idx) {
     if (this.state !== 'waiting') return;
     this.state = 'selected';
+    const sid = this._sid;  // 현재 세션 ID 캡처
     clearTimeout(this._ht);
     this.none('select-hint');
     this.none('dialogue-bubble');
@@ -543,7 +555,11 @@ const App = {
       el.setAttribute('animation__out', {
         property:'scale', to:'0 0 0', dur:350, easing:'easeInBack'
       });
-      setTimeout(() => el.setAttribute('visible','false'), 360);
+      // sid 체크: 리셋 후 새 세션이 시작됐으면 실행하지 않음
+      this._after(() => {
+        if (sid !== this._sid) return;
+        el.setAttribute('visible','false');
+      }, 360);
     });
 
     // 선택된 쿠키 흔들기 → 위로 → 사라지기
@@ -554,21 +570,26 @@ const App = {
       dur:110, direction:'alternate', loop:7, easing:'linear'
     });
     const cpos = chosen.getAttribute('position');
-    setTimeout(() => {
+    this._after(() => {
+      if (sid !== this._sid) return;
       chosen.setAttribute('animation__rise', {
         property:'position', from:`${cpos.x} ${cpos.y} ${cpos.z}`,
         to:`${cpos.x} ${cpos.y+0.7} ${cpos.z}`, dur:520, easing:'easeOutCubic'
       });
     }, 820);
 
-    setTimeout(() => {
+    this._after(() => {
+      if (sid !== this._sid) return;
       this._sparkle();
       chosen.setAttribute('animation__vanish', {
         property:'scale', to:'0 0 0', dur:280, easing:'easeInBack'
       });
     }, 1380);
 
-    setTimeout(() => this._revealFortune(), 2100);
+    this._after(() => {
+      if (sid !== this._sid) return;
+      this._revealFortune();
+    }, 2100);
   },
 
   _sparkle() {
@@ -617,6 +638,15 @@ const App = {
 
   // ── 리셋 ─────────────────────────────────────────────────────
   reset() {
+    // ★ 세션 ID 증가 → 진행 중인 모든 _after 콜백이 sid 체크에서 튕겨져 무효화됨
+    this._sid++;
+
+    // ★ 추적된 모든 setTimeout 즉시 취소
+    this._tids.forEach(id => clearTimeout(id));
+    this._tids = [];
+    clearTimeout(this._dt);
+    clearTimeout(this._ht);
+
     const bgm = this.$('bgm');
     if(bgm){ bgm.pause(); bgm.currentTime=0; }
     const aBtn = this.$('audio-toggle-btn');
@@ -628,15 +658,20 @@ const App = {
     goblin.setAttribute('visible','false');
     goblin.setAttribute('scale','0 0 0');
 
+    // 쿠키 완전 초기화 — visible, scale, 모든 animation 속성 제거
+    const ANIMS = ['animation__idle','animation__spawn','animation__out',
+                   'animation__shake','animation__rise','animation__vanish'];
     COOKIE_IDS.forEach(id => {
-      const el=this.$(id);
+      const el = this.$(id);
       if(!el) return;
       el.setAttribute('visible','false');
       el.setAttribute('scale','0 0 0');
-      ['animation__idle','animation__spawn','animation__out',
-       'animation__shake','animation__rise','animation__vanish'].forEach(a=>{
-        if(el.hasAttribute(a)) el.removeAttribute(a);
-      });
+      // A-Frame object3D 도 강제 초기화 (animation 잔류 값 제거)
+      if (el.object3D) {
+        el.object3D.scale.set(0, 0, 0);
+        el.object3D.visible = false;
+      }
+      ANIMS.forEach(a => { if(el.hasAttribute(a)) el.removeAttribute(a); });
     });
 
     ['dialogue-bubble','select-hint','fortune-card','photo-ui'].forEach(id=>this.none(id));
@@ -645,25 +680,42 @@ const App = {
 
     const c=this.$('container');
     c.style.display='flex'; c.style.visibility='visible';
-    setTimeout(()=>{ c.style.opacity='1'; },15);
+    setTimeout(()=>{ c.style.opacity='1'; }, 15);
     this.state='idle'; this.cookieFortunes=[]; this.picked=null;
   }
 };
 
 // ════════════════════════════════════════
-//  [3] 컴포넌트 등록 (xrloaded 패턴)
+//  [3] 쿠키 클릭 리스너 — 컴포넌트 등록 방식 대신 scene 로드 후 직접 부착
+//  이유: xrloaded 이벤트 타이밍과 A-Frame 엔티티 초기화 타이밍이 엇갈리면
+//        컴포넌트 방식은 init() 이 호출되지 않아 click 리스너가 누락될 수 있음.
+//        직접 부착 방식은 엔티티 DOM이 존재하는 한 항상 동작함.
 // ════════════════════════════════════════
 (function(){
-  function registerComponents() {
-    // cookie-tap: a-sphere 에 직접 부착 → click 이벤트가 sphere 에 발생 → 즉시 실행
-    AFRAME.registerComponent('cookie-tap', {
-      schema: { idx: {type:'int', default:0} },
-      init() {
-        this.el.addEventListener('click', () => App.onPick(this.data.idx));
-      }
+  function attachCookieListeners() {
+    COOKIE_IDS.forEach((id, i) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      // 중복 부착 방지: 이전 리스너가 있으면 제거 후 재부착
+      if (el._cookieHandler) el.removeEventListener('click', el._cookieHandler);
+      el._cookieHandler = () => App.onPick(i);
+      el.addEventListener('click', el._cookieHandler);
     });
   }
-  window.XR8 ? registerComponents() : window.addEventListener('xrloaded', registerComponents);
+
+  // 방법 1: A-Frame scene 로드 완료 후 부착
+  const scene = document.querySelector('a-scene');
+  if (scene) {
+    if (scene.hasLoaded) {
+      attachCookieListeners();
+    } else {
+      scene.addEventListener('loaded', attachCookieListeners);
+    }
+  }
+
+  // 방법 2: xrloaded 이후에도 재확인 (방법 1 실패 시 보완)
+  const onXrLoaded = () => attachCookieListeners();
+  window.XR8 ? onXrLoaded() : window.addEventListener('xrloaded', onXrLoaded);
 })();
 
 // ════════════════════════════════════════
