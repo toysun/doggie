@@ -271,8 +271,8 @@
         goblin.glb       — 애니메이션 클립 예: Idle, Celebrate
         fortune-cookie.glb — 포춘쿠키 모델
     -->
-    <a-asset-item id="goblin-glb" src="./kkebi-cave-lowpoly.glb"></a-asset-item>
-    <a-asset-item id="cookie-glb" src="./fortune_cookie.glb"></a-asset-item>
+    <a-asset-item id="goblin-glb" src="./assets/goblin.glb"></a-asset-item>
+    <a-asset-item id="cookie-glb" src="./assets/fortune-cookie.glb"></a-asset-item>
   </a-assets>
 
   <xrextras-capture-button></xrextras-capture-button>
@@ -319,34 +319,10 @@
     <!-- ── 도깨비 ──────────────────────── -->
     <a-entity id="goblin-entity" position="0 0 0" scale="0 0 0">
 
-      <
-        GLB 모델이 준비됐을 때 아래 주석 해제 후 플레이스홀더 삭제:
-        <a-entity gltf-model="#goblin-glb" rotation="0 0 0" scale="4 4 4"
-          animation-mixer="clip: Idle; loop: repeat"
-          shadow fix-metal-material></a-entity>
-      >
-
-      <!-- ▼ 도깨비 프리미티브 플레이스홀더 ▼ -->
-      <!--a-cylinder color="#1DB954" height="0.55" radius="0.2"
-        position="0 0.28 0" shadow></a-cylinder>
-      <a-sphere color="#1DB954" radius="0.23" position="0 0.7 0" shadow>
-        <a-sphere color="#fff" radius="0.07" position="-0.1 0.06 0.19"></a-sphere>
-        <a-sphere color="#fff" radius="0.07" position=" 0.1 0.06 0.19"></a-sphere>
-        <a-sphere color="#e00" radius="0.04" position="-0.1 0.06 0.24"></a-sphere>
-        <a-sphere color="#e00" radius="0.04" position=" 0.1 0.06 0.24"></a-sphere>
-        <a-cone color="#E67E22" height="0.18" radius-bottom="0.06"
-          position="-0.1 0.24 0" rotation="0 0 -20"></a-cone>
-        <a-cone color="#E67E22" height="0.18" radius-bottom="0.06"
-          position=" 0.1 0.24 0" rotation="0 0  20"></a-cone>
-      </a-sphere>
-      <a-cylinder color="#1DB954" height="0.35" radius="0.07"
-        position="0.28 0.4 0" rotation="0 0 40"></a-cylinder>
-      <a-cylinder color="#8B4513" height="0.50" radius="0.04"
-        position="0.42 0.22 0" rotation="0 0 60"></a-cylinder>
-      <a-sphere color="#D4A017" radius="0.1" position="0.58 0.05 0"></a-sphere>
-      <a-text value="👹 도깨비" align="center" color="#1a0533"
-        position="0 1.05 0" scale="1.2 1.2 1.2"></a-text-->
-      <!-- ▲ 플레이스홀더 끝 ▲ -->
+      <!-- GLB 모델 사용 -->
+      <a-entity gltf-model="#goblin-glb" rotation="0 0 0" scale="4 4 4"
+        animation-mixer="clip: Idle; loop: repeat"
+        shadow fix-metal-material></a-entity>
 
       <!-- idle 떠오르기 -->
       <a-animation attribute="position" from="0 0 0" to="0 0.08 0"
@@ -465,11 +441,11 @@ const App = {
       this.$('audio-toggle-btn').style.display = 'flex';
       this.$('ar-reset-btn').style.display = 'flex';
 
-      // AR 그룹 등장
+      // AR 그룹 등장 (scale 0 → 2: 쿠키가 충분히 크게 보이도록)
       const group = this.$('ar-group');
       group.setAttribute('visible', 'true');
       group.setAttribute('animation', {
-        property:'scale', from:'0 0 0', to:'1 1 1',
+        property:'scale', from:'0 0 0', to:'2 2 2',
         dur:600, easing:'easeOutBack'
       });
       group.emit('ar-start');
@@ -611,7 +587,6 @@ const App = {
     const group = this.$('ar-group');
     group.setAttribute('visible','false');
     group.setAttribute('scale','0 0 0');
-    this.$('goblin-entity').setAttribute('scale','0 0 0');
 
     ['cookie-0','cookie-1','cookie-2','cookie-3','cookie-4'].forEach(id => {
       const el = this.$(id);
@@ -644,41 +619,67 @@ const App = {
         this.el.addEventListener('shake', () => this._shake());
       },
       _build () {
+        // ── fortune_cookie.glb 모델 ────────────────────────────────────
+        // GLB가 없을 경우 아래 model 블록을 주석 처리하고
+        // 그 아래 프리미티브 블록 주석을 해제하세요.
+        const model = document.createElement('a-entity');
+        model.setAttribute('gltf-model', '#cookie-glb');
+        // fortune_cookie.glb 의 실제 크기에 맞게 scale 조정
+        // (모델이 너무 크면 줄이고, 너무 작으면 늘리세요)
+        model.setAttribute('scale', '0.35 0.35 0.35');
+        model.setAttribute('shadow', '');
+        model.setAttribute('fix-metal-material', '');
+        this.el.appendChild(model);
+
+        /* ── 프리미티브 폴백 (GLB 없을 때 주석 해제) ──────────────────
         const cols = ['#D4A017','#C8960C','#E8B420','#B8820A','#F0C030'];
         const c = cols[this.data.idx % cols.length];
         const body = document.createElement('a-sphere');
-        body.setAttribute('radius','0.13'); body.setAttribute('scale','1 0.52 0.82');
+        body.setAttribute('radius','0.22'); body.setAttribute('scale','1 0.52 0.82');
         body.setAttribute('color',c); body.setAttribute('metalness','0.25');
         body.setAttribute('roughness','0.55'); body.setAttribute('shadow','');
         this.el.appendChild(body);
-
         const groove = document.createElement('a-torus');
-        groove.setAttribute('radius','0.09'); groove.setAttribute('radius-tubular','0.013');
+        groove.setAttribute('radius','0.16'); groove.setAttribute('radius-tubular','0.022');
         groove.setAttribute('color','#8B6000'); groove.setAttribute('rotation','90 0 0');
         this.el.appendChild(groove);
+        ── 프리미티브 폴백 끝 ────────────────────────────────────────── */
 
+        // 빛나는 파티클 (idle 효과)
         const glow = document.createElement('a-sphere');
-        glow.setAttribute('radius','0.035'); glow.setAttribute('color','#FFD700');
-        glow.setAttribute('position','0 0.17 0');
-        glow.setAttribute('material','emissive:#FFD700;emissiveIntensity:0.7;transparent:true;opacity:0.85');
+        glow.setAttribute('radius','0.06'); glow.setAttribute('color','#FFD700');
+        glow.setAttribute('position','0 0.32 0');
+        glow.setAttribute('material','emissive:#FFD700;emissiveIntensity:0.8;transparent:true;opacity:0.85');
         const floatDur = 1300 + this.data.idx * 100;
-        glow.setAttribute('animation',{property:'position',from:'0 0.17 0',to:'0 0.27 0',
+        glow.setAttribute('animation',{property:'position',from:'0 0.32 0',to:'0 0.44 0',
           dur:floatDur,direction:'alternate',loop:true,easing:'easeInOutSine'});
-        glow.setAttribute('animation__s',{property:'scale',from:'1 1 1',to:'0.4 0.4 0.4',
+        glow.setAttribute('animation__s',{property:'scale',from:'1 1 1',to:'0.3 0.3 0.3',
           dur:floatDur,direction:'alternate',loop:true,easing:'easeInOutSine'});
         this.el.appendChild(glow);
 
-        const lbl = document.createElement('a-text');
-        lbl.setAttribute('value',`${this.data.idx+1}`);
-        lbl.setAttribute('align','center'); lbl.setAttribute('color','#fff');
-        lbl.setAttribute('position','0 0.22 0.14'); lbl.setAttribute('scale','0.5 0.5 0.5');
-        this.el.appendChild(lbl);
+        // ── 히트박스 (터치 감지 핵심) ────────────────────────────────
+        // A-Frame raycaster 는 .cantap 엔티티의 자식 mesh 를 히트해도
+        // click 이벤트를 자식 엔티티에 발생시킵니다.
+        // 따라서 부모(this.el)에 달린 click 리스너가 실행되지 않아
+        // 터치가 무시됩니다. 아래처럼 부모에 직접 geometry 를 가진
+        // 투명 히트박스를 만들고, 히트박스에 click 리스너를 달면
+        // raycaster 가 히트박스를 직접 맞추어 정확히 동작합니다.
+        const hitbox = document.createElement('a-box');
+        hitbox.setAttribute('scale', '0.55 0.55 0.55'); // 55cm 정육면체 — 넉넉한 터치 영역
+        hitbox.setAttribute('material', 'opacity:0; transparent:true; shader:flat');
+        hitbox.classList.add('cantap');
+        const idx = this.data.idx;
+        hitbox.addEventListener('click', () => App.onPick(idx));
+        this.el.appendChild(hitbox);
+        // ─────────────────────────────────────────────────────────────
 
+        // idle float
         const pos = this.el.getAttribute('position');
         const px = pos.x||0, py = pos.y||0, pz = pos.z||0;
         this.el.setAttribute('animation__float',{property:'position',
-          from:`${px} ${py} ${pz}`, to:`${px} ${py+0.07} ${pz}`,
+          from:`${px} ${py} ${pz}`, to:`${px} ${py+0.1} ${pz}`,
           dur: 1500+this.data.idx*130, direction:'alternate',loop:true,easing:'easeInOutSine'});
+        // idle 자전
         this.el.setAttribute('animation__rot',{property:'rotation',
           from:'0 0 0',to:'0 360 0',dur:6500,loop:true,easing:'linear'});
       },
