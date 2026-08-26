@@ -312,45 +312,49 @@
     </a-entity>
 
     <!-- ── 포춘쿠키 5개 ────────────────────────────────────────
-      ★ 핵심 변경: a-entity wrapper 제거, a-sphere 가 직접 엔티티
-      ★ class="cantap" 이 geometry 있는 sphere 에 직접 부여
-        → raycaster 가 sphere mesh 를 바로 감지 → click 이벤트 발생
-        → cookie-tap 컴포넌트 click 리스너 즉시 실행
-      ★ scale="0 0 0" 으로 숨김 → _spawnCookies() 가 animation 으로 표시
-      ★ visible="false" 도 함께 적용 → 확실하게 숨김
+      ★ 위치 변경 포인트:
+        - Z 양수(+) = 카메라 방향 = 도깨비 앞쪽에 배치
+        - 반원 반경 3m (기존 0.65m의 약 5배)
+        - radius 1.2m (기존 0.22m의 약 5.5배)
+        - 높이(y) 1.5~2m — 눈높이 부근에 크게 배치
     ─────────────────────────────────────────────────────────── -->
+    <!-- 왼쪽 끝 -->
     <a-sphere id="cookie-0" class="cantap" cookie-tap="idx:0"
       visible="false" scale="0 0 0"
-      position="-0.65 0.38  0"
-      radius="0.22" scale-y="0.5" color="#D4A017"
+      position="-3.0 1.5 0.5"
+      radius="1.2" color="#D4A017"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
+    <!-- 왼쪽 -->
     <a-sphere id="cookie-1" class="cantap" cookie-tap="idx:1"
       visible="false" scale="0 0 0"
-      position="-0.32 0.52 -0.55"
-      radius="0.22" color="#C8960C"
+      position="-1.8 1.8 2.5"
+      radius="1.2" color="#C8960C"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
+    <!-- 중앙 (카메라와 가장 가까운 위치) -->
     <a-sphere id="cookie-2" class="cantap" cookie-tap="idx:2"
       visible="false" scale="0 0 0"
-      position="0 0.62 -0.65"
-      radius="0.22" color="#E8B420"
+      position="0 2.0 3.2"
+      radius="1.2" color="#E8B420"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
+    <!-- 오른쪽 -->
     <a-sphere id="cookie-3" class="cantap" cookie-tap="idx:3"
       visible="false" scale="0 0 0"
-      position="0.32 0.52 -0.55"
-      radius="0.22" color="#B8820A"
+      position="1.8 1.8 2.5"
+      radius="1.2" color="#B8820A"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
+    <!-- 오른쪽 끝 -->
     <a-sphere id="cookie-4" class="cantap" cookie-tap="idx:4"
       visible="false" scale="0 0 0"
-      position="0.65 0.38  0"
-      radius="0.22" color="#F0C030"
+      position="3.0 1.5 0.5"
+      radius="1.2" color="#F0C030"
       metalness="0.2" roughness="0.55" shadow>
     </a-sphere>
 
@@ -503,12 +507,12 @@ const App = {
           property:'scale', from:'0 0 0', to:'1 1 1',
           dur:420, easing:'easeOutBack'
         });
-        // 3. idle 떠오르기 — 스폰 후 시작
+        // 3. idle 떠오르기 — 쿠키 크기(반경 1.2m)에 맞춰 float 폭 0.35m
         const pos = el.getAttribute('position');
         el.setAttribute('animation__idle', {
           property:'position',
           from:`${pos.x} ${pos.y} ${pos.z}`,
-          to:  `${pos.x} ${pos.y+0.08} ${pos.z}`,
+          to:  `${pos.x} ${pos.y+0.35} ${pos.z}`,
           dur:1600 + i*120, direction:'alternate', loop:true, easing:'easeInOutSine'
         });
       }, i * 260);
