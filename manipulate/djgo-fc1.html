@@ -139,23 +139,9 @@
       font-weight:700; margin-bottom:16px; }
     .card-stars { font-size:1.1rem; color:#D4A017; margin-bottom:18px; }
     .card-btns  { display:flex; gap:10px; }
-    .btn-photo  { flex:1; background:linear-gradient(135deg,#FFD700,#FF8C00); color:#1a0533;
-      border:none; border-radius:12px; padding:12px; font-size:.9rem;
-      font-weight:800; cursor:pointer; }
     .btn-close  { flex:1; background:#f0f0f0; color:#555; border:none;
       border-radius:12px; padding:12px; font-size:.9rem; font-weight:700; cursor:pointer; }
 
-    /* ── 포토존 ──────────────────────── */
-    #photo-ui {
-      position:fixed; bottom:30px; left:0; right:0;
-      display:none; justify-content:center; align-items:center; gap:16px; z-index:500;
-    }
-    .btn-shoot {
-      width:70px; height:70px; border-radius:50%;
-      background:#fff; border:4px solid #D4A017; font-size:1.9rem;
-      cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.3);
-      display:flex; align-items:center; justify-content:center;
-    }
 
     /* ── 대길 ────────────────────────── */
     #daegil-effect {
@@ -239,13 +225,9 @@
     <div class="card-kw"     id="fc-kw">#행운</div>
     <div class="card-stars"  id="fc-stars">★★★★☆</div>
     <div class="card-btns">
-      <button class="btn-photo" onclick="App.goPhoto()">📸 포토존</button>
       <button class="btn-close" onclick="App.closeCard()">닫기</button>
     </div>
   </div>
-</div>
-<div id="photo-ui">
-  <button class="btn-shoot" id="shoot-btn">📸</button>
 </div>
 
 <!-- ============================================================
@@ -266,8 +248,6 @@
     <a-asset-item id="cookie-glb" src="./fortune_cookie.glb"></a-asset-item>
   </a-assets>
 
-  <xrextras-capture-button></xrextras-capture-button>
-  <xrextras-capture-preview></xrextras-capture-preview>
 
   <a-camera
     id="camera"
@@ -326,11 +306,11 @@
         (fortune_cookie.glb 이 정면에서 원형으로 보일 경우 rotation 조정)
     ──────────────────────────────────────────────────────────── -->
 
-    <!-- 왼쪽 끝 — 아래, 비스듬히 기울어짐 -->
+    <!-- 왼쪽 끝 — 가장 높음 -->
     <a-entity id="cookie-0" class="cantap"
       gltf-model="#cookie-glb"
       visible="false" scale="0 0 0"
-      position="-3.0 0.5 2.3"
+      position="-3.0 2.5 2.3"
       rotation="15 -40 -20"
       fix-metal-material shadow="receive:false">
     </a-entity>
@@ -339,16 +319,16 @@
     <a-entity id="cookie-1" class="cantap"
       gltf-model="#cookie-glb"
       visible="false" scale="0 0 0"
-      position="-1.8 2.0 2.5"
+      position="-1.8 1.5 2.5"
       rotation="10 -20 -10"
       fix-metal-material shadow="receive:false">
     </a-entity>
 
-    <!-- 중앙 — 가장 높고, 정면을 바라봄 -->
+    <!-- 중앙 — 가장 낮음 (도깨비를 가리지 않음) -->
     <a-entity id="cookie-2" class="cantap"
       gltf-model="#cookie-glb"
       visible="false" scale="0 0 0"
-      position="0 3.0 2.7"
+      position="0 0.5 2.7"
       rotation="0 0 0"
       fix-metal-material shadow="receive:false">
     </a-entity>
@@ -357,16 +337,16 @@
     <a-entity id="cookie-3" class="cantap"
       gltf-model="#cookie-glb"
       visible="false" scale="0 0 0"
-      position="1.8 2.0 2.5"
+      position="1.8 1.5 2.5"
       rotation="10 20 10"
       fix-metal-material shadow="receive:false">
     </a-entity>
 
-    <!-- 오른쪽 끝 — 아래, 비스듬히 기울어짐 -->
+    <!-- 오른쪽 끝 — 가장 높음 -->
     <a-entity id="cookie-4" class="cantap"
       gltf-model="#cookie-glb"
       visible="false" scale="0 0 0"
-      position="3.0 0.5 2.3"
+      position="3.0 2.5 2.3"
       rotation="15 40 20"
       fix-metal-material shadow="receive:false">
     </a-entity>
@@ -528,7 +508,7 @@ const App = {
         if (!el) return;
         el.setAttribute('visible','true');
         el.setAttribute('animation__spawn', {
-          property:'scale', from:'0 0 0', to:'1 1 1',
+          property:'scale', from:'0 0 0', to:'0.85 0.85 0.85',
           dur:420, easing:'easeOutBack'
         });
         // idle 떠오르기
@@ -651,14 +631,8 @@ const App = {
     this.flex('fortune-card');
   },
 
-  closeCard() { this.none('fortune-card'); this.goPhoto(); },
+  closeCard() { this.none('fortune-card'); this.reset(); },
 
-  goPhoto() {
-    this.state = 'photo';
-    this.none('fortune-card');
-    this.$('goblin-entity').emit('celebrate');
-    this.flex('photo-ui');
-  },
 
   // ── 리셋 ─────────────────────────────────────────────────────
   reset() {
@@ -698,7 +672,7 @@ const App = {
       ANIMS.forEach(a => { if(el.hasAttribute(a)) el.removeAttribute(a); });
     });
 
-    ['dialogue-bubble','select-hint','fortune-card','photo-ui'].forEach(id=>this.none(id));
+    ['dialogue-bubble','select-hint','fortune-card'].forEach(id=>this.none(id));
     this.$('daegil-effect').classList.remove('on');
     this.$('sparkle-overlay').innerHTML='';
 
@@ -767,10 +741,6 @@ window.addEventListener('DOMContentLoaded', () => {
       },{passive:false});
     });
   }
-  document.getElementById('shoot-btn').addEventListener('click',()=>{
-    const cb=document.querySelector('xrextras-capture-button');
-    if(cb) cb.click();
-  });
 });
 </script>
 </body>
