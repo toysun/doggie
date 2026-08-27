@@ -87,9 +87,13 @@
       display:none; justify-content:center; z-index:500; pointer-events:none;
     }
     .hint-box {
-      background:rgba(255,215,0,.18); border:2px solid rgba(255,215,0,.7);
-      border-radius:50px; padding:12px 28px; color:#c8900a;
-      font-weight:800; font-size:1rem; backdrop-filter:blur(4px);
+      background:rgba(15,8,0, 0.82); border:2px solid rgba(255,215,0,.7);
+      border-radius:50px; padding:12px 28px; color:#FFE566;
+      font-weight:900; font-size:1.1rem; backdrop-filter:blur(10px);
+       -webkit-backdrop-filter: blur(10px);
+      text-shadow: 0 0 12px rgba(255,215,0,0.9), 0 1px 3px rgba(0,0,0,0.8);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,215,0,0.25);
+      letter-spacing: 0.5px;
       animation:glowPulse 1.8s ease-in-out infinite;
     }
     @keyframes glowPulse { 0%,100%{box-shadow:none} 50%{box-shadow:0 0 18px rgba(255,215,0,.45)} }
