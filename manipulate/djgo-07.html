@@ -202,6 +202,30 @@
       }
     });
   </script>
+  <script>
+    // 🌟 각진 로우폴리 모델을 둥글고 부드럽게 렌더링해주는 마법의 컴포넌트
+    AFRAME.registerComponent('smooth-model', {
+      init: function () {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (mesh) {
+            mesh.traverse((node) => {
+              if (node.isMesh && node.material) {
+                // 1. 각진 쉐이딩 끄고 표면 빛 반사를 부드럽게 조절
+                node.material.flatShading = false;
+                node.material.roughness = 0.7; // 너무 번쩍거리지 않게 매트하게
+                node.material.needsUpdate = true;
+                // 2. 모델의 각진 정점(Vertex)을 둥글게 재계산
+                if (node.geometry) {
+                  node.geometry.computeVertexNormals();
+                }
+              }
+            });
+          }
+        });
+      }
+    });
+  </script>
 </head>
 
 <body>
@@ -267,8 +291,8 @@
       shadow>
     </a-entity>
 
-    <a-light type="ambient" intensity="0.9"></a-light>
-
+    <a-light type="ambient" intensity="0.6"></a-light>
+    <a-light type="hemisphere" color="#ffffff" groundColor="#aaaaaa" intensity="0.7"></a-light>
     <!-- 🛠️ 불필요한 닫는 태그 </a-sphere> 제거 -->
     <a-entity
       id="kkebi"
@@ -280,6 +304,7 @@
       xrextras-two-finger-rotate
       xrextras-pinch-scale
       proximity
+      smooth-model
       animation-mixer>
     </a-entity>
 
