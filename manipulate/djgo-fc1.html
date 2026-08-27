@@ -132,8 +132,8 @@
     .g-complete { background:#fff0e8; color:#9a4a1a; }
     .g-daegil   { background:linear-gradient(135deg,#FFD700,#FF8C00); color:#fff;
       box-shadow:0 0 18px rgba(255,200,0,.55); }
-    .card-msg   { font-size:.98rem; line-height:1.72; color:#333;
-      font-weight:600; margin-bottom:16px; }
+    .card-msg   { font-size:1.47rem; line-height:1.72; color:#333;
+      font-weight:800; margin-bottom:16px; }
     .card-kw    { display:inline-block; background:#f5f0d0; border:1px solid #D4A017;
       border-radius:20px; padding:4px 14px; font-size:.82rem; color:#9a7a00;
       font-weight:700; margin-bottom:16px; }
@@ -179,7 +179,7 @@
 </head>
 <body>
 
-<audio id="bgm" src="./The_Final_Lap_of_Grace.mp3" loop></audio>
+<audio id="bgm" src="./Candy_Cart_Pursuit.mp3" loop></audio>
 <button id="audio-toggle-btn" aria-label="음악 켜기/끄기">🎵</button>
 <button id="ar-reset-btn" aria-label="처음으로">🔄</button>
 
@@ -243,13 +243,11 @@
   xrextras-capture-config="requestMic: none">
 
   <a-assets>
-    <a-asset-item id="goblin-glb" src="./kkebi-cave-lowpoly-appear.glb"></a-asset-item>
+    <a-asset-item id="goblin-glb" src="./kkebi-cave-lowpoly.glb"></a-asset-item>
     <!-- fortune_cookie.glb 가 있으면 쿠키 엔티티의 gltf-model 주석을 해제하세요 -->
     <a-asset-item id="cookie-glb" src="./fortune_cookie.glb"></a-asset-item>
   </a-assets>
-  
-    <xrextras-capture-button></xrextras-capture-button>
-    <xrextras-capture-preview></xrextras-capture-preview>
+
 
   <a-camera
     id="camera"
