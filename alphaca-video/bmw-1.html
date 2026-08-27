@@ -144,6 +144,30 @@
     }
   });
   </script>
+  <script>
+    // 🌟 각진 로우폴리 모델을 둥글고 부드럽게 렌더링해주는 마법의 컴포넌트
+    AFRAME.registerComponent('smooth-model', {
+      init: function () {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (mesh) {
+            mesh.traverse((node) => {
+              if (node.isMesh && node.material) {
+                // 1. 각진 쉐이딩 끄고 표면 빛 반사를 부드럽게 조절
+                node.material.flatShading = false;
+                node.material.roughness = 0.7; // 너무 번쩍거리지 않게 매트하게
+                node.material.needsUpdate = true;
+                // 2. 모델의 각진 정점(Vertex)을 둥글게 재계산
+                if (node.geometry) {
+                  node.geometry.computeVertexNormals();
+                }
+              }
+            });
+          }
+        });
+      }
+    });
+  </script>
 </head>
 <body>
   <a-scene
@@ -180,7 +204,8 @@
     <!-- 🛠️ 금속 반사는 ambient 로는 표현되지 않는다.
          ambient 를 낮추고 directional 을 올려 하이라이트를 살림 -->
     <a-light type="directional" intensity="1.4" position="1 2 1"></a-light>
-    <a-light type="ambient" intensity="0.35"></a-light>
+    <a-light type="ambient" intensity="0.6"></a-light>
+    <a-light type="hemisphere" color="#ffffff" groundColor="#aaaaaa" intensity="0.7"></a-light>
 
     <!-- 이미지 타겟 앵커 (부모) -->
     <a-entity
@@ -198,6 +223,7 @@
         rotation="90 0 0"
         shadow
         metal-material="metalness: 0.35; roughness: 0.45; envMapIntensity: 1.2; doubleSide: false"
+        smooth-model
         animation-mixer>
       </a-entity>
 
@@ -209,6 +235,7 @@
         position="0.1 1.6 -1"
         rotation="90 0 0"
         metal-material="metalness: 1.0; roughness: 0.22; envMapIntensity: 1.8"
+        smooth-model
         animation-mixer="loop: repeat; timeScale: 1">
       </a-entity>
     </a-entity>
