@@ -616,7 +616,45 @@ const Selfie = {
   },
 
   // ── 4) AR 씬 시작 ─────────────────────────────────
-  launchAR() {
+  async launchAR() {
+    // ★ iOS 13+ 모션·방향 센서 권한 요청
+    //   반드시 사용자 제스처(버튼 클릭) 컨텍스트에서 호출해야 함.
+    //   8th Wall 이 자체적으로 요청하기 전에 먼저 처리해야
+    //   셀카 패널이 열려있어도 권한 팝업이 정상 동작함.
+    const requestMotion = async () => {
+      if (typeof DeviceMotionEvent !== 'undefined' &&
+          typeof DeviceMotionEvent.requestPermission === 'function') {
+        try {
+          const perm = await DeviceMotionEvent.requestPermission();
+          if (perm !== 'granted') {
+            alert('AR 실행을 위해 동작 센서 권한이 필요합니다.\n설정 > Safari > 동작 및 방향 접근을 허용해 주세요.');
+            return false;
+          }
+        } catch (e) { console.warn('[motion permission]', e); }
+      }
+      return true;
+    };
+
+    const requestOrientation = async () => {
+      if (typeof DeviceOrientationEvent !== 'undefined' &&
+          typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const perm = await DeviceOrientationEvent.requestPermission();
+          if (perm !== 'granted') {
+            alert('AR 실행을 위해 방향 센서 권한이 필요합니다.');
+            return false;
+          }
+        } catch (e) { console.warn('[orientation permission]', e); }
+      }
+      return true;
+    };
+
+    // 권한 요청 — 실패 시 AR 전환 중단
+    const motionOk      = await requestMotion();
+    if (!motionOk) return;
+    const orientationOk = await requestOrientation();
+    if (!orientationOk) return;
+
     // 전면 카메라 스트림 종료 (8th Wall 카메라와 충돌 방지)
     if (this.stream) {
       this.stream.getTracks().forEach(t => t.stop());
