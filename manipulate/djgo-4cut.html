@@ -483,7 +483,6 @@
     xrextras-two-finger-rotate
     xrextras-pinch-scale
     proximity
-    apply-photos
     fix-metal-material
     enable-drag-raycast
     hit-proxy="padding: 0.15; debug: false"
@@ -512,6 +511,13 @@ const Selfie = {
 
   // ── 1) 패널 열기 + 전면 카메라 시작 ─────────────
   async open() {
+    // ★ 8th Wall 카메라 파이프라인 일시 정지 (front camera 충돌 방지)
+    //   iOS/Android 는 카메라를 하나만 점유할 수 있어 XR8 를 먼저 해제해야 함
+    if (window.XR8) {
+      try { XR8.pause(); } catch(e) { console.warn('[XR8.pause]', e); }
+      await new Promise(r => setTimeout(r, 400));
+    }
+
     document.getElementById('container').style.opacity = '0';
     await new Promise(r => setTimeout(r, 350));
     document.getElementById('container').style.display = 'none';
@@ -525,6 +531,8 @@ const Selfie = {
       document.getElementById('selfie-video').srcObject = this.stream;
     } catch (e) {
       alert('카메라 권한이 필요합니다.\n브라우저 설정에서 카메라를 허용해 주세요.');
+      // 카메라 획득 실패 시 XR8 재개
+      if (window.XR8) { try { XR8.resume(); } catch(e2) {} }
     }
   },
 
@@ -655,22 +663,96 @@ const Selfie = {
     const orientationOk = await requestOrientation();
     if (!orientationOk) return;
 
-    // 전면 카메라 스트림 종료 (8th Wall 카메라와 충돌 방지)
+    // 전면 카메라 스트림 종료 + video 엘리먼트 초기화
     if (this.stream) {
       this.stream.getTracks().forEach(t => t.stop());
       this.stream = null;
     }
+    const vid = document.getElementById('selfie-video');
+    if (vid) { vid.pause(); vid.srcObject = null; }
 
-    // photos-ready 이벤트 발행 → apply-photos 컴포넌트가 수신
+    // photos-ready 이벤트 발행
     window.photosReady = true;
-    window.dispatchEvent(new CustomEvent('photos-ready', {
-      detail: { photos: window.capturedPhotos }
-    }));
+    window.dispatchEvent(new CustomEvent('photos-ready', { detail: { photos: window.capturedPhotos } }));
 
-    // AR 네비게이션 시작
+    // ★ 카메라 완전 해제 대기 후 XR8 재개 (후면 카메라 복원)
+    await new Promise(r => setTimeout(r, 600));
+    if (window.XR8) {
+      try { XR8.resume(); } catch(e) { console.warn('[XR8.resume]', e); }
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    // AR 씬 전환
     startNavigation();
   }
 };
+
+/* ════════════════════════════════════════════════════
+   포토 텍스처 직접 적용 함수
+   cut_01~04 메시에 selfie 사진을 MeshBasicMaterial 로 적용.
+   MeshBasicMaterial: 조명 영향 없음 → 어떤 환경에서도 사진이 선명하게 표시됨.
+   flipY=false: GLTF UV 좌표계(V=0이 상단) 기준
+════════════════════════════════════════════════════ */
+function applyPhotosToModel() {
+  const el     = document.getElementById('photo-frame');
+  const photos = window.capturedPhotos;
+  if (!el || !photos || photos.length < 4) {
+    console.warn('[applyPhotos] 조건 미충족 — el:', !!el, 'photos:', photos ? photos.length : 0);
+    return;
+  }
+
+  const tryApply = (attempt) => {
+    const mesh = el.getObject3D('mesh');
+    if (!mesh) {
+      if (attempt < 30) { setTimeout(() => tryApply(attempt + 1), 400); }
+      else { console.error('[applyPhotos] mesh 취득 실패 (최대 재시도 초과)'); }
+      return;
+    }
+
+    // cut_01 ~ cut_04 노드 수집
+    const targets = {};
+    mesh.traverse(node => {
+      if (node.isMesh && /^cut_0[1-4]$/.test(node.name)) {
+        targets[node.name] = node;
+      }
+    });
+    console.log('[applyPhotos] 발견 슬롯:', Object.keys(targets), '/ 사진 수:', photos.length);
+
+    const THREE = AFRAME.THREE;
+    ['cut_01','cut_02','cut_03','cut_04'].forEach((name, i) => {
+      const node = targets[name];
+      if (!node) { console.warn('[applyPhotos] 슬롯 없음:', name); return; }
+      if (!photos[i]) { console.warn('[applyPhotos] 사진 없음 idx:', i); return; }
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width  = img.naturalWidth  || 512;
+        canvas.height = img.naturalHeight || 512;
+        canvas.getContext('2d').drawImage(img, 0, 0);
+
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.flipY       = false;           // GLTF UV 좌표계
+        tex.colorSpace  = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+
+        // 조명 독립적인 MeshBasicMaterial 로 교체 → 항상 선명하게 표시
+        node.material = new THREE.MeshBasicMaterial({
+          map:         tex,
+          side:        THREE.DoubleSide,
+          transparent: false,
+          toneMapped:  false
+        });
+        node.material.needsUpdate = true;
+        console.log(`[applyPhotos] ${name} 적용 완료 (${canvas.width}×${canvas.height})`);
+      };
+      img.onerror = () => console.error('[applyPhotos] 이미지 로드 실패:', name, i);
+      img.src = photos[i];
+    });
+  };
+
+  tryApply(0);
+}
 
 /* ════════════════════════════════════════════════════
    AR 씬 제어 (원본 소스 패턴 유지)
@@ -720,6 +802,9 @@ function startNavigation() {
     setTimeout(() => {
       if (el.components && el.components['hit-proxy']) el.components['hit-proxy'].fit();
       refreshRaycaster();
+
+      // ★ 포토 텍스처 적용 — model 로드 완료 확인 후 즉시 실행
+      applyPhotosToModel();
     }, 200);
 
   }, 400);
@@ -788,13 +873,6 @@ window.addEventListener('DOMContentLoaded', () => {
         document.getElementById('shot-info').textContent = '1 / 4';
         document.getElementById('shoot-start-btn').style.display = '';
         document.getElementById('ar-go-btn').style.display        = 'none';
-
-        // apply-photos 컴포넌트 재설정
-        const frameEl = document.getElementById(frameId);
-        if (frameEl && frameEl.components['apply-photos']) {
-          frameEl.components['apply-photos']._modelReady  = !!frameEl.getObject3D('mesh');
-          frameEl.components['apply-photos']._photosReady = false;
-        }
 
         // 시작화면 복귀
         const container = document.getElementById('container');
