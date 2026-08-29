@@ -56,10 +56,7 @@
     }
     .start-btn:active { opacity:.9; transform:scale(.97); }
 
-    /* ── 셀카 촬영 패널 ─────────────────────────────
-       ★ getUserMedia 대신 <input capture="user"> 사용
-         → XR8 카메라와 충돌 없음, AR 화면 정지 없음, 조작 정상
-    ──────────────────────────────────────────────── */
+    /* ── 셀카 촬영 패널 ───────────────────────────── */
     #selfie-panel {
       position:fixed; inset:0; z-index:9999998;
       display:none; flex-direction:column; align-items:center;
@@ -132,9 +129,6 @@
   </style>
 
   <script>
-    /* =========================================================
-     *  원본 소스 컴포넌트 (제공된 소스 그대로)
-     * ========================================================= */
     AFRAME.registerComponent('auto-play-animation', {
       schema: { preferredClip: { type:'string', default:'' } },
       init() {
@@ -202,7 +196,8 @@
         this.fit(); refreshRaycaster();
       },
       fit() {
-        const obj = this.el.object3D; if (!obj) return;
+        const obj = this.el.object3D; 
+        if (!obj || !obj.visible) return;
         obj.updateMatrixWorld(true);
         const box = this._box; box.makeEmpty();
         let bones = 0;
@@ -214,14 +209,18 @@
         if (bones===0||box.isEmpty()) { this.mesh.visible=false; box.setFromObject(obj); this.mesh.visible=true; }
         if (box.isEmpty()) return;
         box.getSize(this._size); box.getCenter(this._center);
+        if (this._size.x === 0 || this._size.y === 0) return;
+
         const pad = Math.max(this._size.x,this._size.y,this._size.z)*this.data.padding;
         this._size.addScalar(pad*2);
         obj.getWorldScale(this._scale);
-        this.mesh.scale.set(
-          this._size.x/(this._scale.x||1),
-          this._size.y/(this._scale.y||1),
-          this._size.z/(this._scale.z||1)
-        );
+
+        /* 🛠️ 나누기 연산 시 NaN/Infinity 방지 */
+        const sx = Math.max(0.0001, Math.abs(this._scale.x));
+        const sy = Math.max(0.0001, Math.abs(this._scale.y));
+        const sz = Math.max(0.0001, Math.abs(this._scale.z));
+
+        this.mesh.scale.set(this._size.x/sx, this._size.y/sy, this._size.z/sz);
         obj.worldToLocal(this._center); this.mesh.position.copy(this._center);
       },
       tick(time,dt) {
@@ -233,9 +232,6 @@
       remove() { this.el.removeObject3D('hitproxy'); }
     });
 
-    /* =========================================================
-     *  유틸 함수
-     * ========================================================= */
     function refreshRaycaster() {
       const cam = document.getElementById('camera');
       if (cam && cam.components && cam.components.raycaster)
@@ -271,14 +267,9 @@
   </div>
 </div>
 
-<!-- ══════════════════════ 셀카 촬영 패널 ══════════════════════
-  ★ getUserMedia 완전 제거 — <input capture="user"> 방식 사용
-    → 8th Wall XR 카메라와 충돌 없음
-    → AR 화면 정지·조작 불가 문제 해결
-═══════════════════════════════════════════════════════════════ -->
+<!-- ══════════════════════ 셀카 촬영 패널 ══════════════════════ -->
 <div id="selfie-panel">
   <div class="selfie-inner">
-
     <div class="selfie-title">
       인생네컷 셀카 촬영 📸
       <span>버튼을 누르면 카메라가 열립니다.<br>4장을 모두 찍어주세요!</span>
@@ -291,7 +282,6 @@
       <div class="sdot"        id="d3"></div>
     </div>
 
-    <!-- 2 × 2 썸네일 그리드 -->
     <div class="thumb-grid">
       <div class="tslot" id="t0"><span class="num">1</span></div>
       <div class="tslot" id="t1"><span class="num">2</span></div>
@@ -303,7 +293,6 @@
     <button id="ar-go-btn"      onclick="Selfie.launchAR()">🌟 AR 포토프레임 보기</button>
   </div>
 
-  <!-- OS 네이티브 전면 카메라 (invisible) -->
   <input type="file" accept="image/*" capture="user"
          id="file-capture" style="position:absolute;opacity:0;pointer-events:none;">
 </div>
@@ -319,7 +308,6 @@
   xrextras-capture-config="requestMic: none">
 
   <a-assets>
-    <!-- 인생네컷 3D 포토프레임 (빨래줄 + 폴라로이드 4장) -->
     <a-asset-item id="frame-glb" src="./4-photo-frame-x90.glb"></a-asset-item>
   </a-assets>
 
@@ -341,13 +329,6 @@
   </a-entity>
   <a-light type="ambient" intensity="0.9"></a-light>
 
-  <!--
-    GLB 메시 구조:
-      Clothesline        빨래줄
-      Clothespin_01~04   집게 4개
-      cut_01~04          ← selfie 사진 텍스처 적용
-      PolaroidCard_01~04 폴라로이드 프레임
-  -->
   <a-entity
     id="photo-frame"
     class="cantap"
@@ -371,30 +352,19 @@
 </a-scene>
 
 <script>
-/* ═══════════════════════════════════════════════════════════
-   전역 상태
-═══════════════════════════════════════════════════════════ */
 window.capturedPhotos = [];
 window.photosReady    = false;
 
-/* ═══════════════════════════════════════════════════════════
-   Selfie 모듈 — 네이티브 카메라(<input capture>) 방식
-   ★ getUserMedia 완전 미사용 → XR8 카메라 충돌 없음
-   ★ XR8.pause()/resume() 불필요
-═══════════════════════════════════════════════════════════ */
 const Selfie = {
   shotIdx: 0,
 
-  /* 1) 패널 열기 */
   async open() {
     document.getElementById('container').style.opacity = '0';
     await new Promise(r => setTimeout(r, 350));
     document.getElementById('container').style.display   = 'none';
     document.getElementById('selfie-panel').style.display = 'flex';
-    // XR8 건드리지 않음 — 후면 카메라는 AR 씬에서만 사용
   },
 
-  /* 2) 네이티브 카메라로 사진 1장 촬영 */
   takePhoto() {
     const idx = this.shotIdx;
     if (idx >= 4) return;
@@ -455,9 +425,7 @@ const Selfie = {
     }
   },
 
-  /* 3) AR 씬 시작 */
   async launchAR() {
-    /* iOS 13+ 모션·방향 센서 권한 (사용자 제스처 컨텍스트 필수) */
     const reqPerm = async (EventClass) => {
       if (typeof EventClass !== 'undefined' && typeof EventClass.requestPermission === 'function') {
         try { return await EventClass.requestPermission() === 'granted'; } catch { return true; }
@@ -465,7 +433,7 @@ const Selfie = {
       return true;
     };
     if (!await reqPerm(DeviceMotionEvent)) {
-      alert('AR 실행을 위해 동작 센서 권한이 필요합니다.\n설정 > Safari > 동작 및 방향 접근을 허용해 주세요.'); return;
+      alert('AR 실행을 위해 동작 센서 권한이 필요합니다.'); return;
     }
     if (!await reqPerm(DeviceOrientationEvent)) {
       alert('방향 센서 권한이 필요합니다.'); return;
@@ -477,82 +445,80 @@ const Selfie = {
 };
 
 /* ═══════════════════════════════════════════════════════════
-   포토 텍스처 직접 적용 (retry 내장)
-   GLB cut_01~04 메시에 MeshBasicMaterial 로 사진 텍스처 입힘.
-   MeshBasicMaterial: 조명 독립적 → 어두운 AR 환경에서도 선명하게 표시.
-   flipY=false: GLTF UV 좌표계 기준 (V=0 이 이미지 상단)
+   🛠️ 수정: 안전한 텍스처 입히기 (Three.js 호환 예외 차단 및 노드 탐색 강화)
 ═══════════════════════════════════════════════════════════ */
 function applyPhotosToModel() {
   const el     = document.getElementById('photo-frame');
   const photos = window.capturedPhotos;
-  if (!el || !photos || photos.length < 4) {
-    console.warn('[applyPhotos] 조건 미충족:', el ? 'el ok' : 'no el', photos ? photos.length+'장' : 'no photos');
-    return;
-  }
+  if (!el || !photos || photos.length < 4) return;
 
   const tryApply = (attempt) => {
     const mesh = el.getObject3D('mesh');
     if (!mesh) {
-      if (attempt < 40) setTimeout(() => tryApply(attempt + 1), 300);
-      else console.error('[applyPhotos] mesh 취득 실패 (최대 재시도 초과)');
-      return;
-    }
-
-    /* cut_01 ~ cut_04 노드 수집 */
-    const targets = {};
-    mesh.traverse(node => {
-      if (node.isMesh && /^cut_0[1-4]$/.test(node.name)) targets[node.name] = node;
-    });
-    console.log('[applyPhotos] 슬롯 발견:', Object.keys(targets), '사진 수:', photos.length);
-
-    if (Object.keys(targets).length === 0) {
-      /* 이름 매칭 실패 시 콘솔에 전체 목록 출력 */
-      const allNames = [];
-      mesh.traverse(n => { if (n.isMesh) allNames.push(n.name); });
-      console.warn('[applyPhotos] 슬롯 없음. 전체 메시:', allNames);
+      if (attempt < 40) setTimeout(() => tryApply(attempt + 1), 250);
       return;
     }
 
     const THREE = AFRAME.THREE;
-    ['cut_01','cut_02','cut_03','cut_04'].forEach((name, i) => {
-      const node = targets[name];
-      if (!node || !photos[i]) { console.warn('[applyPhotos] 없음:', name, i); return; }
+    const targets = [null, null, null, null];
 
-      const img = new Image();
-      img.onload = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width  = img.naturalWidth  || 512;
-        canvas.height = img.naturalHeight || 512;
-        canvas.getContext('2d').drawImage(img, 0, 0);
+    /* 1단계: 노드명에 cut_01~04 / cut_1~4 패턴 탐색 */
+    mesh.traverse(node => {
+      if (!node.isMesh) return;
+      const name = node.name.toLowerCase();
+      if (name.includes('cut_01') || name.includes('cut_1') || name.includes('cut01') || name.includes('cut1')) targets[0] = node;
+      else if (name.includes('cut_02') || name.includes('cut_2') || name.includes('cut02') || name.includes('cut2')) targets[1] = node;
+      else if (name.includes('cut_03') || name.includes('cut_3') || name.includes('cut03') || name.includes('cut3')) targets[2] = node;
+      else if (name.includes('cut_04') || name.includes('cut_4') || name.includes('cut04') || name.includes('cut4')) targets[3] = node;
+    });
 
-        const tex = new THREE.CanvasTexture(canvas);
-        tex.flipY      = false;
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.needsUpdate = true;
-
-        /* 기존 material 완전 교체 → 조명 영향 없이 항상 선명 */
-        if (Array.isArray(node.material)) {
-          node.material.forEach(m => m.dispose());
-        } else if (node.material) {
-          node.material.dispose();
+    /* 2단계: 매칭 미완료 시 'cut' 또는 'photo' 키워드 순서대로 할당 */
+    if (!targets[0] || !targets[1] || !targets[2] || !targets[3]) {
+      const cutMeshes = [];
+      mesh.traverse(node => {
+        if (node.isMesh && (node.name.toLowerCase().includes('cut') || node.name.toLowerCase().includes('photo'))) {
+          if (!cutMeshes.includes(node)) cutMeshes.push(node);
         }
-        node.material = new THREE.MeshBasicMaterial({
-          map: tex, side: THREE.DoubleSide,
-          transparent: false, toneMapped: false
-        });
-        console.log(`[applyPhotos] ${name} 완료 (${canvas.width}×${canvas.height})`);
-      };
-      img.onerror = () => console.error('[applyPhotos] 이미지 로드 실패:', name, i);
-      img.src = photos[i];
+      });
+      for (let i = 0; i < 4; i++) {
+        if (!targets[i] && cutMeshes[i]) targets[i] = cutMeshes[i];
+      }
+    }
+
+    const loader = new THREE.TextureLoader();
+    targets.forEach((node, i) => {
+      if (!node || !photos[i]) return;
+
+      loader.load(
+        photos[i],
+        (tex) => {
+          tex.flipY = false;
+          if (THREE.sRGBEncoding) tex.encoding = THREE.sRGBEncoding;
+
+          if (node.material) {
+            if (Array.isArray(node.material)) node.material.forEach(m => m && m.dispose && m.dispose());
+            else node.material.dispose && node.material.dispose();
+          }
+
+          node.material = new THREE.MeshBasicMaterial({
+            map: tex,
+            side: THREE.DoubleSide,
+            transparent: false
+          });
+          node.material.needsUpdate = true;
+          node.el = el; // 드래그 레이캐스터 바인딩 유지
+
+          refreshRaycaster();
+        },
+        undefined,
+        (err) => console.error(`[applyPhotos] 사진 ${i + 1} 입히기 에러:`, err)
+      );
     });
   };
 
   tryApply(0);
 }
 
-/* ═══════════════════════════════════════════════════════════
-   AR 씬 제어 (원본 소스 패턴 유지)
-═══════════════════════════════════════════════════════════ */
 const frameId = 'photo-frame';
 let initialTransform = null;
 
@@ -593,17 +559,14 @@ function startNavigation() {
     el.setAttribute('visible', 'true');
     el.emit('ar-start');
 
-    /* hit-proxy + raycaster 다중 갱신
-       ★ 모델 로드 타이밍 불확실성 대응 — 여러 시점에서 반복 갱신 */
-    [100, 500, 1200, 2500].forEach(d => {
+    [100, 400, 1000].forEach(d => {
       setTimeout(() => {
         if (el.components && el.components['hit-proxy']) el.components['hit-proxy'].fit();
         refreshRaycaster();
       }, d);
     });
 
-    /* ★ 포토 텍스처 적용 — 모델 확정 후 실행 (내부 retry 최대 12초) */
-    setTimeout(() => applyPhotosToModel(), 800);
+    setTimeout(() => applyPhotosToModel(), 400);
 
   }, 400);
 
@@ -611,9 +574,6 @@ function startNavigation() {
   if (bgm) bgm.play().catch(() => {});
 }
 
-/* ═══════════════════════════════════════════════════════════
-   버튼 이벤트
-═══════════════════════════════════════════════════════════ */
 window.addEventListener('DOMContentLoaded', () => {
   const scene = document.querySelector('a-scene');
   (scene.hasLoaded
@@ -621,7 +581,14 @@ window.addEventListener('DOMContentLoaded', () => {
     : new Promise(r => scene.addEventListener('loaded', r))
   ).then(captureInitial);
 
-  /* 오디오 토글 */
+  /* 모델 로드 후 포토 재적용 리스너 */
+  const photoFrameEl = document.getElementById(frameId);
+  if (photoFrameEl) {
+    photoFrameEl.addEventListener('model-loaded', () => {
+      if (window.photosReady) applyPhotosToModel();
+    });
+  }
+
   const audioBtn = document.getElementById('audio-toggle-btn');
   const bgm      = document.getElementById('bgm');
   if (audioBtn && bgm) {
@@ -639,7 +606,6 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  /* 리셋 버튼 */
   const resetBtn = document.getElementById('ar-reset-btn');
   if (resetBtn) {
     ['click','touchstart'].forEach(ev => {
@@ -650,16 +616,13 @@ window.addEventListener('DOMContentLoaded', () => {
         audioBtn.style.display = 'none';
         resetBtn.style.display = 'none';
 
-        /* 포토프레임 숨기기 & 위치 복원 */
         const el = document.getElementById(frameId);
         if (el) { el.setAttribute('visible','false'); restoreTransform(); }
 
-        /* 상태 초기화 */
         window.capturedPhotos = [];
         window.photosReady    = false;
         Selfie.shotIdx        = 0;
 
-        /* 썸네일·도트 초기화 */
         [0,1,2,3].forEach(i => {
           const t = document.getElementById(`t${i}`);
           if (t) {
@@ -682,7 +645,6 @@ window.addEventListener('DOMContentLoaded', () => {
         const fi = document.getElementById('file-capture');
         if (fi) fi.value = '';
 
-        /* 시작화면 복귀 */
         const c = document.getElementById('container');
         c.style.display    = 'flex';
         c.style.visibility = 'visible';
