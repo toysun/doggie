@@ -250,7 +250,8 @@
         box-shadow: 0 4px 15px rgba(60, 168, 158, 0.4);
     }
 
-    #audio-toggle-btn, #ar-reset-btn {
+    /* 좌측 하단 컨트롤 버튼 (음악 / 성능모니터링 / 리셋) */
+    #audio-toggle-btn, #stats-toggle-btn, #ar-reset-btn {
       position: fixed !important;
       left: 16px !important;
       width: 54px !important;
@@ -265,16 +266,24 @@
       cursor: pointer !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
       z-index: 9990 !important;        
-      transition: transform 0.1s ease !important;
+      transition: transform 0.1s ease, background-color 0.2s ease !important;
       padding: 0 !important;
     }
-    #audio-toggle-btn { bottom: 95px !important; }
+    #audio-toggle-btn { bottom: 165px !important; }
+    #stats-toggle-btn { bottom: 95px !important; }
     #ar-reset-btn { bottom: 25px !important; }
-    #audio-toggle-btn:active, #ar-reset-btn:active { transform: scale(0.92) !important; }
+    #audio-toggle-btn:active, #stats-toggle-btn:active, #ar-reset-btn:active { transform: scale(0.92) !important; }
+
+    /* A-Frame 스탯 패널 위치 및 레이어 보정 */
+    .rs-base {
+      top: 10px !important;
+      left: 10px !important;
+      z-index: 9995 !important;
+    }
   </style>
 
   <script>
-    // 🛠️ 금속 왜곡 방지
+    // 금속 재질 시각 보정
     AFRAME.registerComponent('fix-metal-material', {
       init() {
         this.el.addEventListener('model-loaded', () => {
@@ -292,7 +301,7 @@
       }
     });
 
-    // 🛠️ 4컷 메쉬 사진 매핑 (UV 자동 생성 및 밝은 머티리얼 적용 로직 추가)
+    // 4컷 사진 매핑 및 dynamic UV 생성
     AFRAME.registerComponent('apply-photo-textures', {
       init() {
         this.updateTextures = this.updateTextures.bind(this);
@@ -311,7 +320,6 @@
             const photoIndex = targetMeshNames.findIndex(name => node.name.includes(name));
             
             if (photoIndex !== -1 && window.capturedPhotos[photoIndex]) {
-              // 1. 모델 내 해당 메쉬에 UV 좌표가 없을 경우 Bounding Box 기준으로 동적 생성
               if (!node.geometry.attributes.uv) {
                 node.geometry.computeBoundingBox();
                 const min = node.geometry.boundingBox.min;
@@ -330,7 +338,6 @@
                 node.geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
               }
 
-              // 2. 촬영된 텍스처를 선명하게 렌더링하기 위해 어두운 기존 재질 대신 밝은 MeshBasicMaterial로 교체
               textureLoader.load(window.capturedPhotos[photoIndex], (texture) => {
                 texture.flipY = false;
                 if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
@@ -353,9 +360,10 @@
   <audio id="bgm" src="./Chasing_the_Morning_Sun.mp3" loop></audio>
 
   <button id="audio-toggle-btn" aria-label="음악 끄기 및 켜기">🎵</button>
+  <button id="stats-toggle-btn" aria-label="성능 측정 모듈 켜기/끄기">📊</button>
   <button id="ar-reset-btn" aria-label="처음으로 돌아가기">🔄</button>
 
-  <!-- 메인 안내 -->
+  <!-- Step 1: 메인 안내 -->
   <div id="container">
     <div id="start_area">
       <img src="./djgo-photo-auth.png" alt="AR 포토존 인증" width="200" class="main-guide-img">
@@ -372,7 +380,7 @@
     </div>
   </div> 
 
-  <!-- 셀카 모드 -->
+  <!-- Step 2: 셀카 모드 -->
   <div id="selfie-modal">
     <div class="camera-wrapper">
       <span class="capture-status-badge" id="capture-status">준비중...</span>
@@ -394,10 +402,13 @@
     </div>
   </div>
 
+  <!-- 🛠️ 8th Wall xrextras-stats 모듈 및 stats 속성 추가 -->
   <a-scene
     xrextras-gesture-detector
     xrextras-loading
     xrextras-runtime-error
+    xrextras-stats
+    stats
     renderer="colorManagement: true"
     xrweb="allowedDevices: any"
     postprocessing="bloomStrength: 0.2"
@@ -408,6 +419,8 @@
       <a-asset-item id="bubble" src="./gold-confetti-300.glb"></a-asset-item>
       <a-asset-item id="photo-frame-model" src="./4-photo-frame-x90.glb"></a-asset-item>
     </a-assets>
+
+    <!-- 🛠️ 8th Wall 전용 스탯 UI 컴포넌트 -->
     <xrextras-stats></xrextras-stats>
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
@@ -425,7 +438,6 @@
     </a-entity>
     <a-light type="ambient" intensity="0.9"></a-light>
 
-    <!-- 🛠️ 기존 캐릭터 엔티티 (AR시 포토프레임과 함께 노출되도록 위치 분산) -->
     <a-entity
       id="kkebi"
       visible="false"
@@ -439,12 +451,11 @@
       animation-mixer>
     </a-entity>
 
-    <!-- 🛠️ 인생네컷 포토프레임 (AR시 도깨비와 함께 노출) -->
     <a-entity
       id="four-cut-frame"
       visible="false"
       gltf-model="#photo-frame-model"
-      position="0 3 -1"
+      position="0 1.5 -1"
       rotation="0 0 0"
       scale="0 0 0"
       xrextras-hold-drag
@@ -458,7 +469,7 @@
       gltf-model="#bubble"
       position="0 0 -1"
       rotation="0 90 0"
-      scale="3 3 3"
+      scale="1 1 1"
       animation-mixer
       fix-metal-material>
     </a-entity>
@@ -540,7 +551,6 @@
       slot.innerHTML = `<img src="${dataUrl}" alt="컷 ${index+1}">`;
     }
 
-    // 🛠️ AR 전환: 촬영 완료 데이터를 프레임에 적용하고 모든 엔티티 띄우기
     function applyToARScene() {
       document.getElementById('selfie-modal').style.display = 'none';
       window.dispatchEvent(new Event('photos-updated'));
@@ -559,15 +569,17 @@
           uiContainer.style.display = 'none';
 
           const audioBtn = document.getElementById('audio-toggle-btn');
+          const statsBtn = document.getElementById('stats-toggle-btn');
           const resetBtn = document.getElementById('ar-reset-btn');
+
           if (audioBtn) audioBtn.style.display = 'flex';
+          if (statsBtn) statsBtn.style.display = 'flex';
           if (resetBtn) resetBtn.style.display = 'flex';
 
-          // 도깨비 모델과 포토프레임 모두 표시 (각각의 적정 스케일 지정)
           const kkebi = document.getElementById('kkebi');
           if (kkebi) {
             kkebi.setAttribute('visible', 'true');
-            kkebi.setAttribute('scale', '4 4 4'); 
+            kkebi.setAttribute('scale', '3 3 3'); 
             kkebi.emit('ar-start');
           }
 
@@ -586,10 +598,36 @@
 
     window.addEventListener('DOMContentLoaded', () => {
       const audioBtn = document.getElementById('audio-toggle-btn');
+      const statsBtn = document.getElementById('stats-toggle-btn');
       const resetBtn = document.getElementById('ar-reset-btn');
       const bgm = document.getElementById('bgm');
       const uiContainer = document.getElementById('container');
       const startArea = document.getElementById('start_area');
+
+      // 🛠️ 성능 측정 모듈 토글 기능 핸들러
+      if (statsBtn) {
+        ['click', 'touchstart'].forEach(eventType => {
+          statsBtn.addEventListener(eventType, (e) => {
+            e.preventDefault(); e.stopPropagation();
+
+            const scene = document.querySelector('a-scene');
+            const statsPanel = document.querySelector('.rs-base');
+            const xrStatsPanel = document.querySelector('.xrextras-stats-container') || document.querySelector('#xrextras-stats');
+
+            const isVisible = (statsPanel && statsPanel.style.display !== 'none') || (xrStatsPanel && xrStatsPanel.style.display !== 'none');
+
+            if (isVisible) {
+              if (statsPanel) statsPanel.style.display = 'none';
+              if (xrStatsPanel) xrStatsPanel.style.display = 'none';
+              statsBtn.style.backgroundColor = '#ffffff';
+            } else {
+              if (statsPanel) statsPanel.style.display = 'block';
+              if (xrStatsPanel) xrStatsPanel.style.display = 'block';
+              statsBtn.style.backgroundColor = '#79cb83';
+            }
+          }, { passive: false });
+        });
+      }
 
       if (audioBtn && bgm) {
         ['click', 'touchstart'].forEach(eventType => {
@@ -620,7 +658,6 @@
               audioBtn.style.backgroundColor = '#ffffff';
             }
 
-            // 리셋 시 씬 안의 모든 AR 객체 비가시화
             zoneIds.forEach((id) => {
               const entity = document.getElementById(id);
               if (entity) {
@@ -630,6 +667,7 @@
             });
 
             if (audioBtn) audioBtn.style.display = 'none';
+            if (statsBtn) statsBtn.style.display = 'none';
             resetBtn.style.display = 'none';
 
             if (startArea) startArea.style.display = 'block';
