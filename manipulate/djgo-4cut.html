@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>8th Wall Web: Manipulate</title>
+  <title>8th Wall Web: 인생네컷 AR 포토존</title>
 
   <script src="//cdn.8thwall.com/web/aframe/8frame-1.4.1.min.js"></script>
   <script src="./../xr_st/xrextras.js"></script>
@@ -28,8 +28,10 @@
       height: 100% !important;
       display: block !important;
       position: relative !important;
+      overflow: hidden;
     }
 
+    /* Step 1: 메인 안내 팝업 UI */
     #container {
         position: fixed !important;
         top: 0 !important;
@@ -53,9 +55,6 @@
 
     #start_area {
         position: relative !important;
-        top: 0 !important;
-        left: 0 !important;
-        transform: none !important;
         width: 100%;
         max-width: 450px;
         text-align: center;
@@ -101,18 +100,6 @@
         transition: transform 0.2s ease, border-color 0.2s ease;
     }
 
-    .photozone-card:active {
-        transform: scale(0.98);
-        border-color: #419c92;
-    }
-
-    .photozone-card img {
-        max-width: 70%;
-        height: auto;
-        margin-bottom: 15px;
-        border-radius: 8px;
-    }
-
     .photozone-title {
         font-size: 16px;
         font-weight: 700;
@@ -122,26 +109,155 @@
 
     .start-zone-btn {
         width: 100%;
-        max-width: 200px;
-        height: 44px;
+        max-width: 220px;
+        height: 48px;
         background: linear-gradient(to right, #79cb83, #3ca89e);
         color: #ffffff;
         border: none;
-        border-radius: 22px;
+        border-radius: 24px;
         font-size: 15px;
         font-weight: 700;
         cursor: pointer;
         box-shadow: 0 4px 10px rgba(60, 168, 158, 0.2);
-        transition: opacity 0.2s;
+        transition: opacity 0.2s, transform 0.1s;
     }
-    .start-zone-btn:hover {
-        opacity: 0.95;
+    .start-zone-btn:active {
+        transform: scale(0.96);
     }
 
-    #audio-toggle-btn {
+    /* Step 2: 셀카 촬영 레이어 */
+    #selfie-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
+        background: #000000;
+        z-index: 1000000;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 15px 30px;
+    }
+
+    .camera-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 400px;
+        height: 60vh;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #111;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    }
+
+    #webcam-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1); /* 셀카 좌우반전 반사 효과 */
+    }
+
+    /* 카운트다운 오버레이 */
+    #countdown-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.25);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 10;
+    }
+
+    #countdown-text {
+        font-size: 90px;
+        font-weight: 900;
+        color: #ffffff;
+        text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        animation: pulse 0.8s infinite alternate;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(0.8); opacity: 0.7; }
+        100% { transform: scale(1.1); opacity: 1; }
+    }
+
+    .capture-status-badge {
+        position: absolute;
+        top: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(36, 87, 82, 0.85);
+        color: #fff;
+        padding: 6px 16px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 700;
+        backdrop-filter: blur(4px);
+    }
+
+    /* 촬영 결과 썸네일 바 */
+    .photo-preview-bar {
+        display: flex;
+        gap: 8px;
+        margin-top: 15px;
+        justify-content: center;
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .thumb-slot {
+        width: 65px;
+        height: 85px;
+        background: #222;
+        border: 2px solid #3ca89e;
+        border-radius: 8px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        font-weight: 700;
+        font-size: 12px;
+    }
+
+    .thumb-slot img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Step 3: AR 적용 보기 버튼 영역 */
+    .action-bottom-area {
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+        margin-top: 15px;
+    }
+
+    #apply-ar-btn {
+        display: none;
+        width: 100%;
+        height: 50px;
+        background: linear-gradient(to right, #79cb83, #3ca89e);
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(60, 168, 158, 0.4);
+    }
+
+    /* 컨트롤 버튼 (BGM / 리셋) */
+    #audio-toggle-btn, #ar-reset-btn {
       position: fixed !important;
       left: 16px !important;
-      bottom: 95px !important;        
       width: 54px !important;
       height: 54px !important;
       border-radius: 50% !important;
@@ -154,35 +270,14 @@
       cursor: pointer !important;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
       z-index: 9990 !important;        
-      transition: transform 0.1s ease, background-color 0.2s ease !important;
-      padding: 0 !important;
-    }
-
-    #ar-reset-btn {
-      position: fixed !important;
-      left: 16px !important;
-      bottom: 25px !important;          
-      width: 54px !important;
-      height: 54px !important;
-      border-radius: 50% !important;
-      border: 3px solid #ffffff !important;
-      background-color: #ffffff !important;
-      font-size: 20px !important;
-      display: none;                  
-      justify-content: center !important;
-      align-items: center !important;
-      cursor: pointer !important;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
-      z-index: 9990 !important;
       transition: transform 0.1s ease !important;
       padding: 0 !important;
     }
-    #audio-toggle-btn:active, #ar-reset-btn:active {
-      transform: scale(0.92) !important;
-    }
+    #audio-toggle-btn { bottom: 95px !important; }
+    #ar-reset-btn { bottom: 25px !important; }
+    #audio-toggle-btn:active, #ar-reset-btn:active { transform: scale(0.92) !important; }
   </style>
 
-  <!-- 🛠️ 금속 재질 흑색 왜곡 방지 커스텀 컴포넌트 등록 -->
   <script>
     AFRAME.registerComponent('fix-metal-material', {
       init() {
@@ -192,12 +287,53 @@
 
           mesh.traverse((node) => {
             if (node.isMesh && node.material) {
-              // 환경 반사맵이 없는 환경에서 금속(metalness 1.0)이 검게 반사되는 현상 보정
-              node.material.metalness = 0.1;  // 금속성 비중 보정
-              node.material.roughness = 0.35; // 거칠기 값 보정
+              node.material.metalness = 0.1;
+              node.material.roughness = 0.35;
               node.material.needsUpdate = true;
             }
           });
+        });
+      }
+    });
+
+    // Step 3: 촬영한 4장의 사진을 GLTF cut_01 ~ cut_04 메쉬에 dynamic texture로 로드
+    AFRAME.registerComponent('apply-photo-textures', {
+      init() {
+        this.el.addEventListener('model-loaded', () => {
+          this.updateTextures();
+        });
+
+        window.addEventListener('photos-updated', () => {
+          this.updateTextures();
+        });
+      },
+      updateTextures() {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh || !window.capturedPhotos || window.capturedPhotos.length < 4) return;
+
+        const targetMeshNames = ['cut_01', 'cut_02', 'cut_03', 'cut_04'];
+        const textureLoader = new THREE.TextureLoader();
+
+        mesh.traverse((node) => {
+          if (node.isMesh) {
+            const photoIndex = targetMeshNames.indexOf(node.name);
+            if (photoIndex !== -1 && window.capturedPhotos[photoIndex]) {
+              textureLoader.load(window.capturedPhotos[photoIndex], (texture) => {
+                // GLTF UV 맵에 알맞게 매핑 보정
+                texture.flipY = false;
+                if (THREE.SRGBColorSpace) {
+                  texture.colorSpace = THREE.SRGBColorSpace;
+                }
+
+                // 기존 머티리얼 개별 분리 후 텍스처 입히기
+                node.material = node.material.clone();
+                node.material.map = texture;
+                node.material.roughness = 0.3;
+                node.material.metalness = 0.0;
+                node.material.needsUpdate = true;
+              });
+            }
+          }
         });
       }
     });
@@ -217,18 +353,38 @@
 
       <p class="guide-text">
         김삿갓유적지를 배경으로 <br>
-        사진을 찍고 업로드 하시면 최종 인증이 완료됩니다.
+        나만의 인생네컷 사진을 찍고 AR로 확인해보세요!
       </p>
 
       <div class="photozone-container">
         <div class="photozone-card">
-          <div class="photozone-title">✨ AR 포토존</div>
-          <img src="./kim-satgat.png" alt="AR 포토" width="200">
-          <button class="start-zone-btn" onclick="startNavigation('kkebi')">포토존 시작</button>
+          <div class="photozone-title">📸 인생네컷 AR 포토프레임</div>
+          <button class="start-zone-btn" onclick="openSelfieCamera()">촬영 시작하기</button>
         </div>
       </div>
     </div>
   </div> 
+
+  <div id="selfie-modal">
+    <div class="camera-wrapper">
+      <span class="capture-status-badge" id="capture-status">준비중...</span>
+      <video id="webcam-preview" autoplay playsinline muted></video>
+      <div id="countdown-overlay">
+        <div id="countdown-text">3</div>
+      </div>
+    </div>
+
+    <div class="photo-preview-bar">
+      <div class="thumb-slot" id="slot-1">1</div>
+      <div class="thumb-slot" id="slot-2">2</div>
+      <div class="thumb-slot" id="slot-3">3</div>
+      <div class="thumb-slot" id="slot-4">4</div>
+    </div>
+
+    <div class="action-bottom-area">
+      <button id="apply-ar-btn" onclick="applyToARScene()">✨ AR 서비스 적용 보기</button>
+    </div>
+  </div>
 
   <a-scene
     xrextras-gesture-detector
@@ -240,8 +396,9 @@
     xrextras-capture-config="requestMic: none">
 
     <a-assets>
-      <a-asset-item id="kkebi-appear" src="./4-photo-frame-x90.glb"></a-asset-item>
+      <a-asset-item id="kkebi-appear" src="./kim-satgat.glb"></a-asset-item>
       <a-asset-item id="bubble" src="./hangle-notes.glb"></a-asset-item>
+      <a-asset-item id="photo-frame-model" src="./4-photo-frame-x90.glb"></a-asset-item>
     </a-assets>
 
     <xrextras-capture-button></xrextras-capture-button>
@@ -269,22 +426,32 @@
 
     <a-light type="ambient" intensity="0.9"></a-light>
 
-    <!-- 🛠️ 불필요한 닫는 태그 </a-sphere> 제거 -->
     <a-entity
       id="kkebi"
       visible="false"
       gltf-model="#kkebi-appear"
       rotation="0 0 0"
-      scale="5 5 5"
+      scale="0 0 0"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
-      proximity
-      animation-mixer
-      shadow="receive: false">
+      animation-mixer>
     </a-entity>
 
-    <!-- 🛠️ fix-metal-material 컴포넌트 적용으로 금속 재질 밝게 재현 -->
+    <a-entity
+      id="four-cut-frame"
+      visible="false"
+      gltf-model="#photo-frame-model"
+      position="0 1.5 -3"
+      rotation="0 0 0"
+      scale="0 0 0"
+      xrextras-hold-drag
+      xrextras-two-finger-rotate
+      xrextras-pinch-scale
+      apply-photo-textures
+      fix-metal-material>
+    </a-entity>
+
     <a-entity
       id="flash1"
       gltf-model="#bubble"
@@ -292,8 +459,6 @@
       rotation="0 90 0"
       scale="3 3 3"
       animation-mixer
-      shadow="receive: false"
-      confetti-once
       fix-metal-material>
     </a-entity>
 
@@ -308,7 +473,139 @@
   </a-scene>
 
   <script>
-    const zoneIds = ['kkebi'];
+    const zoneIds = ['kkebi', 'four-cut-frame'];
+    window.capturedPhotos = [];
+    let mediaStream = null;
+
+    // Step 2: 웹캠 실행 및 연속 4회 카운트다운 촬영
+    async function openSelfieCamera() {
+      document.getElementById('container').style.display = 'none';
+      document.getElementById('selfie-modal').style.display = 'flex';
+      document.getElementById('apply-ar-btn').style.display = 'none';
+
+      window.capturedPhotos = [];
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`slot-${i}`).innerHTML = i;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1440 } },
+          audio: false
+        });
+        const video = document.getElementById('webcam-preview');
+        video.srcObject = mediaStream;
+        await video.play();
+
+        startAutoCaptureSequence();
+      } catch (err) {
+        alert("카메라 권한을 허용해야 인생네컷 촬영이 가능합니다.");
+        console.error(err);
+      }
+    }
+
+    async function startAutoCaptureSequence() {
+      const overlay = document.getElementById('countdown-overlay');
+      const countText = document.getElementById('countdown-text');
+      const statusBadge = document.getElementById('capture-status');
+
+      for (let shot = 0; shot < 4; shot++) {
+        statusBadge.innerText = `${shot + 1}번째 포즈를 준비하세요!`;
+
+        // 3 -> 2 -> 1 카운트다운
+        overlay.style.display = 'flex';
+        for (let c = 3; c > 0; c--) {
+          countText.innerText = c;
+          await new Promise(res => setTimeout(res, 1000));
+        }
+
+        countText.innerText = '📸';
+        capturePhoto(shot);
+        await new Promise(res => setTimeout(res, 400));
+        overlay.style.display = 'none';
+
+        // 다음 컷 준비 시간 (1.5초)
+        if (shot < 3) {
+          await new Promise(res => setTimeout(res, 1500));
+        }
+      }
+
+      // 4컷 촬영 완료
+      statusBadge.innerText = '🎉 촬영 완벽 성공!';
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+      document.getElementById('apply-ar-btn').style.display = 'block';
+    }
+
+    function capturePhoto(index) {
+      const video = document.getElementById('webcam-preview');
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 720;
+      canvas.height = video.videoHeight || 960;
+      const ctx = canvas.getContext('2d');
+
+      // 셀카 좌우 반전 보정 후 캔버스 캡처
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      window.capturedPhotos.push(dataUrl);
+
+      // 썸네일 노출
+      const slot = document.getElementById(`slot-${index + 1}`);
+      slot.innerHTML = `<img src="${dataUrl}" alt="컷 ${index+1}">`;
+    }
+
+    // Step 3 & 4: AR 포토프레임 전환 및 AR 구동
+    function applyToARScene() {
+      document.getElementById('selfie-modal').style.display = 'none';
+      window.dispatchEvent(new Event('photos-updated'));
+      startNavigation('four-cut-frame');
+    }
+
+    function startNavigation(zoneType) {
+      console.log("선택된 포토존 형태: " + zoneType);
+
+      const uiContainer = document.getElementById('container');
+      const startArea = document.getElementById('start_area');
+      
+      if (uiContainer) {
+        uiContainer.style.opacity = '0';
+        setTimeout(() => {
+          if (startArea) startArea.style.display = 'none';
+          uiContainer.style.visibility = 'hidden';
+          uiContainer.style.display = 'none';
+
+          const audioBtn = document.getElementById('audio-toggle-btn');
+          const resetBtn = document.getElementById('ar-reset-btn');
+          if (audioBtn) audioBtn.style.display = 'flex';
+          if (resetBtn) resetBtn.style.display = 'flex';
+
+          const activeEntity = document.getElementById(zoneType);
+          if (activeEntity) {
+            activeEntity.setAttribute('visible', 'true');
+            activeEntity.setAttribute('scale', '1 1 1'); 
+            activeEntity.emit('ar-start');
+            console.log(zoneType + " AR 로드 개시");
+          }
+        }, 400);
+      }
+
+      const bgm = document.getElementById('bgm');
+      if (bgm) {
+        bgm.play().catch(err => console.log("BGM 재생 정책 핸들링:", err));
+      }
+
+      zoneIds.forEach((id) => {
+        const entity = document.getElementById(id);
+        if (entity && id !== zoneType) {
+          entity.setAttribute('visible', 'false');
+          entity.setAttribute('scale', '0 0 0');
+        }
+      });
+    }
 
     window.addEventListener('DOMContentLoaded', () => {
       const audioBtn = document.getElementById('audio-toggle-btn');
@@ -342,8 +639,6 @@
             e.preventDefault();
             e.stopPropagation();
 
-            console.log("메인 분기 화면으로 안전하게 초기화 복귀합니다.");
-
             bgm.pause();
             bgm.currentTime = 0;
             if (audioBtn) {
@@ -372,48 +667,6 @@
         });
       }
     });
-
-    function startNavigation(zoneType) {
-      console.log("선택된 포토존 형태: " + zoneType);
-
-      const uiContainer = document.getElementById('container');
-      const startArea = document.getElementById('start_area');
-      
-      if (uiContainer) {
-        uiContainer.style.opacity = '0';
-        setTimeout(() => {
-          if (startArea) startArea.style.display = 'none';
-          uiContainer.style.visibility = 'hidden';
-          uiContainer.style.display = 'none';
-
-          const audioBtn = document.getElementById('audio-toggle-btn');
-          const resetBtn = document.getElementById('ar-reset-btn');
-          if (audioBtn) audioBtn.style.display = 'flex';
-          if (resetBtn) resetBtn.style.display = 'flex';
-
-          const activeEntity = document.getElementById(zoneType);
-          if (activeEntity) {
-            activeEntity.setAttribute('visible', 'true');
-            activeEntity.setAttribute('scale', '2 2 2'); 
-            activeEntity.emit('ar-start');
-            console.log(zoneType + " 애니메이션 시퀀스 개시");
-          }
-        }, 400);
-      }
-
-      const bgm = document.getElementById('bgm');
-      if (bgm) {
-        bgm.play().catch(err => console.log("BGM 오토 플레이 정책 핸들링:", err));
-      }
-
-      zoneIds.forEach((id) => {
-        const entity = document.getElementById(id);
-        if (entity && id !== zoneType) {
-          entity.setAttribute('visible', 'false');
-          entity.setAttribute('scale', '0 0 0');
-        }
-      });
-    }
   </script>
 </body>
 </html>
