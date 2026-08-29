@@ -124,7 +124,7 @@
         transform: scale(0.96);
     }
 
-    /* 웹캠 셀카 레이어 */
+    /* 웹캠 촬영 모달 레이어 */
     #selfie-modal {
         display: none;
         position: fixed;
@@ -156,7 +156,42 @@
         width: 100%;
         height: 100%;
         object-fit: cover;
+        transition: transform 0.2s ease;
+    }
+
+    /* 전면 카메라일 때 반사 반전 클래스 */
+    #webcam-preview.user-mode {
         transform: scaleX(-1);
+    }
+
+    /* 후면 카메라일 때 기본 유지 */
+    #webcam-preview.environment-mode {
+        transform: scaleX(1);
+    }
+
+    /* 🛠️ 카메라 방향 전환 버튼 추가 */
+    #camera-flip-btn {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.5);
+        color: #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        font-size: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 20;
+        backdrop-filter: blur(4px);
+        transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    #camera-flip-btn:active {
+        transform: rotate(180deg) scale(0.9);
+        background: rgba(60, 168, 158, 0.8);
     }
 
     #countdown-overlay {
@@ -188,15 +223,15 @@
     .capture-status-badge {
         position: absolute;
         top: 15px;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 15px;
         background: rgba(36, 87, 82, 0.85);
         color: #fff;
-        padding: 6px 16px;
+        padding: 6px 14px;
         border-radius: 20px;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
         backdrop-filter: blur(4px);
+        z-index: 15;
     }
 
     .photo-preview-bar {
@@ -274,7 +309,6 @@
     #ar-reset-btn { bottom: 25px !important; }
     #audio-toggle-btn:active, #stats-toggle-btn:active, #ar-reset-btn:active { transform: scale(0.92) !important; }
 
-    /* A-Frame 스탯 패널 위치 및 레이어 보정 */
     .rs-base {
       top: 10px !important;
       left: 10px !important;
@@ -380,11 +414,15 @@
     </div>
   </div> 
 
-  <!-- Step 2: 셀카 모드 -->
+  <!-- Step 2: 카메라 촬영 모드 (카메라 전환 버튼 추가) -->
   <div id="selfie-modal">
     <div class="camera-wrapper">
       <span class="capture-status-badge" id="capture-status">준비중...</span>
-      <video id="webcam-preview" autoplay playsinline muted></video>
+      
+      <!-- 🛠️ 전/후면 카메라 방향 전환 버튼 -->
+      <button id="camera-flip-btn" onclick="toggleCameraFacing()" aria-label="카메라 방향 전환" title="카메라 전환">🔄</button>
+      
+      <video id="webcam-preview" class="user-mode" autoplay playsinline muted></video>
       <div id="countdown-overlay">
         <div id="countdown-text">3</div>
       </div>
@@ -402,7 +440,6 @@
     </div>
   </div>
 
-  <!-- 🛠️ 8th Wall xrextras-stats 모듈 및 stats 속성 추가 -->
   <a-scene
     xrextras-gesture-detector
     xrextras-loading
@@ -420,7 +457,6 @@
       <a-asset-item id="photo-frame-model" src="./4-photo-frame-x90.glb"></a-asset-item>
     </a-assets>
 
-    <!-- 🛠️ 8th Wall 전용 스탯 UI 컴포넌트 -->
     <xrextras-stats></xrextras-stats>
     <xrextras-capture-button></xrextras-capture-button>
     <xrextras-capture-preview></xrextras-capture-preview>
@@ -481,6 +517,35 @@
     const zoneIds = ['kkebi', 'four-cut-frame'];
     window.capturedPhotos = [];
     let mediaStream = null;
+    let currentFacingMode = 'user'; // 'user': 셀카(전면), 'environment': 일반(후면)
+
+    // 🛠️ 카메라 스트림 초기화/재시작 핸들러
+    async function startCameraStream() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+
+      const video = document.getElementById('webcam-preview');
+      video.className = currentFacingMode === 'user' ? 'user-mode' : 'environment-mode';
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: currentFacingMode, width: { ideal: 1080 }, height: { ideal: 1440 } },
+          audio: false
+        });
+        video.srcObject = mediaStream;
+        await video.play();
+      } catch (err) {
+        alert("카메라 권한을 허용해야 인생네컷 촬영이 가능합니다.");
+        console.error(err);
+      }
+    }
+
+    // 🛠️ 카메라 방향 전환 (전면 ↔ 후면)
+    async function toggleCameraFacing() {
+      currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+      await startCameraStream();
+    }
 
     async function openSelfieCamera() {
       document.getElementById('container').style.display = 'none';
@@ -490,20 +555,8 @@
       window.capturedPhotos = [];
       for (let i = 1; i <= 4; i++) document.getElementById(`slot-${i}`).innerHTML = i;
 
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: 'user', width: { ideal: 1080 }, height: { ideal: 1440 } },
-          audio: false
-        });
-        const video = document.getElementById('webcam-preview');
-        video.srcObject = mediaStream;
-        await video.play();
-
-        startAutoCaptureSequence();
-      } catch (err) {
-        alert("카메라 권한을 허용해야 인생네컷 촬영이 가능합니다.");
-        console.error(err);
-      }
+      await startCameraStream();
+      startAutoCaptureSequence();
     }
 
     async function startAutoCaptureSequence() {
@@ -533,18 +586,40 @@
       document.getElementById('apply-ar-btn').style.display = 'block';
     }
 
+    // 🛠️ 텍스처 용량/해상도 경량화 압축 캡처 로직
     function capturePhoto(index) {
       const video = document.getElementById('webcam-preview');
+
+      // 1. 3D 텍스처 최적화: 가로/세로 최대 길이를 640px 이하로 제한 (Downsizing)
+      const MAX_DIMENSION = 640;
+      let width = video.videoWidth || 720;
+      let height = video.videoHeight || 960;
+
+      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
+        if (width > height) {
+          height = Math.round((height * MAX_DIMENSION) / width);
+          width = MAX_DIMENSION;
+        } else {
+          width = Math.round((width * MAX_DIMENSION) / height);
+          height = MAX_DIMENSION;
+        }
+      }
+
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 720;
-      canvas.height = video.videoHeight || 960;
+      canvas.width = width;
+      canvas.height = height;
       const ctx = canvas.getContext('2d');
 
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
+      // 2. 전면 카메라(셀카) 모드일 때만 캔버스 좌우 반전
+      if (currentFacingMode === 'user') {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+      }
+
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+      // 3. JPEG 압축률 68%(0.68) 적용으로 Base64 DataURL 용량 대폭 감소 (Compression)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.68);
       window.capturedPhotos.push(dataUrl);
 
       const slot = document.getElementById(`slot-${index + 1}`);
@@ -604,16 +679,13 @@
       const uiContainer = document.getElementById('container');
       const startArea = document.getElementById('start_area');
 
-      // 🛠️ 성능 측정 모듈 토글 기능 핸들러
       if (statsBtn) {
         ['click', 'touchstart'].forEach(eventType => {
           statsBtn.addEventListener(eventType, (e) => {
             e.preventDefault(); e.stopPropagation();
 
-            const scene = document.querySelector('a-scene');
             const statsPanel = document.querySelector('.rs-base');
             const xrStatsPanel = document.querySelector('.xrextras-stats-container') || document.querySelector('#xrextras-stats');
-
             const isVisible = (statsPanel && statsPanel.style.display !== 'none') || (xrStatsPanel && xrStatsPanel.style.display !== 'none');
 
             if (isVisible) {
