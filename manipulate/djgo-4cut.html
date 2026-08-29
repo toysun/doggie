@@ -159,17 +159,14 @@
         transition: transform 0.2s ease;
     }
 
-    /* 전면 카메라일 때 반사 반전 클래스 */
     #webcam-preview.user-mode {
         transform: scaleX(-1);
     }
 
-    /* 후면 카메라일 때 기본 유지 */
     #webcam-preview.environment-mode {
         transform: scaleX(1);
     }
 
-    /* 🛠️ 카메라 방향 전환 버튼 추가 */
     #camera-flip-btn {
         position: absolute;
         top: 15px;
@@ -285,7 +282,7 @@
         box-shadow: 0 4px 15px rgba(60, 168, 158, 0.4);
     }
 
-    /* 좌측 하단 컨트롤 버튼 (음악 / 성능모니터링 / 리셋) */
+    /* 컨트롤 버튼 */
     #audio-toggle-btn, #stats-toggle-btn, #ar-reset-btn {
       position: fixed !important;
       left: 16px !important;
@@ -335,7 +332,7 @@
       }
     });
 
-    // 4컷 사진 매핑 및 dynamic UV 생성
+    // 🛠️ 4컷 사진 매핑 및 또렷한 색상/비율 매핑 보정 컴포넌트
     AFRAME.registerComponent('apply-photo-textures', {
       init() {
         this.updateTextures = this.updateTextures.bind(this);
@@ -354,6 +351,7 @@
             const photoIndex = targetMeshNames.findIndex(name => node.name.includes(name));
             
             if (photoIndex !== -1 && window.capturedPhotos[photoIndex]) {
+              // 1. 정확한 UV 매핑 계산 (V축 반전 보정)
               if (!node.geometry.attributes.uv) {
                 node.geometry.computeBoundingBox();
                 const min = node.geometry.boundingBox.min;
@@ -367,46 +365,30 @@
                   const x = pos.getX(i);
                   const z = pos.getZ(i);
                   uvs[i * 2] = rangeX === 0 ? 0 : (x - min.x) / rangeX;
-                  uvs[i * 2 + 1] = rangeZ === 0 ? 0 : (z - min.z) / rangeZ;
+                  uvs[i * 2 + 1] = rangeZ === 0 ? 0 : 1.0 - ((z - min.z) / rangeZ); // V축 역방향 반전
                 }
                 node.geometry.setAttribute('uv', new THREE.BufferAttribute(uvs, 2));
               }
 
               textureLoader.load(window.capturedPhotos[photoIndex], (texture) => {
-                texture.flipY = false;
-                if (THREE.SRGBColorSpace) texture.colorSpace = THREE.SRGBColorSpace;
+                texture.flipY = true;
+                if (THREE.SRGBColorSpace) {
+                  texture.colorSpace = THREE.SRGBColorSpace;
+                } else if (THREE.sRGBEncoding) {
+                  texture.encoding = THREE.sRGBEncoding;
+                }
                 
+                // 2. 톤매핑(toneMapped: false) 차단으로 물빠짐/희미함 현상 완벽 방지
                 node.material = new THREE.MeshBasicMaterial({ 
                   map: texture,
-                  side: THREE.DoubleSide
+                  side: THREE.DoubleSide,
+                  transparent: false,
+                  opacity: 1.0,
+                  toneMapped: false // 🌟 핵심: 씬 조명 및 톤매핑에 의한 물빠짐 방지
                 });
                 node.material.needsUpdate = true;
               });
             }
-          }
-        });
-      }
-    });
-  </script>
-  <script>
-    // 🌟 각진 로우폴리 모델을 둥글고 부드럽게 렌더링해주는 마법의 컴포넌트
-    AFRAME.registerComponent('smooth-model', {
-      init: function () {
-        this.el.addEventListener('model-loaded', () => {
-          const mesh = this.el.getObject3D('mesh');
-          if (mesh) {
-            mesh.traverse((node) => {
-              if (node.isMesh && node.material) {
-                // 1. 각진 쉐이딩 끄고 표면 빛 반사를 부드럽게 조절
-                node.material.flatShading = false;
-                node.material.roughness = 0.7; // 너무 번쩍거리지 않게 매트하게
-                node.material.needsUpdate = true;
-                // 2. 모델의 각진 정점(Vertex)을 둥글게 재계산
-                if (node.geometry) {
-                  node.geometry.computeVertexNormals();
-                }
-              }
-            });
           }
         });
       }
@@ -438,12 +420,10 @@
     </div>
   </div> 
 
-  <!-- Step 2: 카메라 촬영 모드 (카메라 전환 버튼 추가) -->
+  <!-- Step 2: 카메라 촬영 모드 -->
   <div id="selfie-modal">
     <div class="camera-wrapper">
       <span class="capture-status-badge" id="capture-status">준비중...</span>
-      
-      <!-- 🛠️ 전/후면 카메라 방향 전환 버튼 -->
       <button id="camera-flip-btn" onclick="toggleCameraFacing()" aria-label="카메라 방향 전환" title="카메라 전환">🔄</button>
       
       <video id="webcam-preview" class="user-mode" autoplay playsinline muted></video>
@@ -491,12 +471,12 @@
       raycaster="objects: .cantap"
       cursor="fuse: false; rayOrigin: mouse;">
     </a-camera>
-    <a-light type="hemisphere" color="#ffffff" groundColor="#aaaaaa" intensity="0.7"></a-light>
+
     <a-entity
       light="type: directional; intensity: 1.2; castShadow: true; shadowMapHeight:2048; shadowMapWidth:2048; shadowCameraTop: 10; target: #model;"
       xrextras-attach="target: model; offset: 1 15 3;" shadow>
     </a-entity>
-    <a-light type="ambient" intensity="0.6"></a-light>
+    <a-light type="ambient" intensity="0.9"></a-light>
 
     <a-entity
       id="kkebi"
@@ -508,7 +488,6 @@
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
-      smooth-model
       animation-mixer>
     </a-entity>
 
@@ -516,24 +495,22 @@
       id="four-cut-frame"
       visible="false"
       gltf-model="#photo-frame-model"
-      position="0 3.5 -1"
+      position="0 1.5 -1"
       rotation="0 0 0"
       scale="0 0 0"
       xrextras-hold-drag
       xrextras-two-finger-rotate
       xrextras-pinch-scale
-      smooth-model
       apply-photo-textures>
     </a-entity>
 
     <a-entity
       id="flash1"
       gltf-model="#bubble"
-      position="1.5 2.5 -2"
+      position="0.5 1.5 -2"
       rotation="0 0 0"
       scale="5 5 5"
       animation-mixer
-      smooth-model
       fix-metal-material>
     </a-entity>
 
@@ -544,9 +521,8 @@
     const zoneIds = ['kkebi', 'four-cut-frame'];
     window.capturedPhotos = [];
     let mediaStream = null;
-    let currentFacingMode = 'user'; // 'user': 셀카(전면), 'environment': 일반(후면)
+    let currentFacingMode = 'user';
 
-    // 🛠️ 카메라 스트림 초기화/재시작 핸들러
     async function startCameraStream() {
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
@@ -568,7 +544,6 @@
       }
     }
 
-    // 🛠️ 카메라 방향 전환 (전면 ↔ 후면)
     async function toggleCameraFacing() {
       currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
       await startCameraStream();
@@ -613,40 +588,47 @@
       document.getElementById('apply-ar-btn').style.display = 'block';
     }
 
-    // 🛠️ 텍스처 용량/해상도 경량화 압축 캡처 로직
+    // 🛠️ 비율 왜곡 방지 Center Crop(3:4 비율) 및 최적화 캡처 함수
     function capturePhoto(index) {
       const video = document.getElementById('webcam-preview');
+      const vw = video.videoWidth || 720;
+      const vh = video.videoHeight || 960;
 
-      // 1. 3D 텍스처 최적화: 가로/세로 최대 길이를 640px 이하로 제한 (Downsizing)
-      const MAX_DIMENSION = 640;
-      let width = video.videoWidth || 720;
-      let height = video.videoHeight || 960;
+      // 인생네컷 메쉬 슬롯 목표 비율 (3:4)
+      const targetAspect = 3 / 4; 
+      const canvasWidth = 600;
+      const canvasHeight = Math.round(canvasWidth / targetAspect); // 800px
 
-      if (width > MAX_DIMENSION || height > MAX_DIMENSION) {
-        if (width > height) {
-          height = Math.round((height * MAX_DIMENSION) / width);
-          width = MAX_DIMENSION;
-        } else {
-          width = Math.round((width * MAX_DIMENSION) / height);
-          height = MAX_DIMENSION;
-        }
+      // 비디오 비율에 맞춰 중앙 크롭(Center Crop) 영역 계산
+      let cropWidth, cropHeight, cropX, cropY;
+      const videoAspect = vw / vh;
+
+      if (videoAspect > targetAspect) {
+        cropHeight = vh;
+        cropWidth = vh * targetAspect;
+        cropX = (vw - cropWidth) / 2;
+        cropY = 0;
+      } else {
+        cropWidth = vw;
+        cropHeight = vw / targetAspect;
+        cropX = 0;
+        cropY = (vh - cropHeight) / 2;
       }
 
       const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
       const ctx = canvas.getContext('2d');
 
-      // 2. 전면 카메라(셀카) 모드일 때만 캔버스 좌우 반전
       if (currentFacingMode === 'user') {
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
       }
 
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // 비디오 중앙 영역만 크롭하여 캔버스에 그리기 (늘어남 방지)
+      ctx.drawImage(video, cropX, cropY, cropWidth, cropHeight, 0, 0, canvasWidth, canvasHeight);
 
-      // 3. JPEG 압축률 68%(0.68) 적용으로 Base64 DataURL 용량 대폭 감소 (Compression)
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.68);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
       window.capturedPhotos.push(dataUrl);
 
       const slot = document.getElementById(`slot-${index + 1}`);
