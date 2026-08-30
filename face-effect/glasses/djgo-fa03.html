@@ -15,101 +15,183 @@
     body {
       margin: 0;
       overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    /* 포토프레임 오버레이 스타일 */
+    #frame-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      pointer-events: none; /* 터치 이벤트가 AR 화면으로 통과하도록 설정 */
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #frame-img {
+      width: 100%;
+      height: 100%;
+      object-fit: fill; /* 화면 전체에 프레임 맞춤 (필요시 contain / cover로 변경 가능) */
+    }
+
+    /* 카메라 전환 버튼 스타일 */
+    #cam-flip-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.85);
+      border: 2px solid #ffffff;
+      font-size: 22px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 20;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.1s ease;
+      padding: 0;
+    }
+
+    #cam-flip-btn:active {
+      transform: scale(0.9);
     }
   </style>
 </head>
 
 <body>
 
-<a-scene
-  landing-page
-  xrextras-loading
-  xrextras-runtime-error
-  xrextras-pause-on-hidden
-  renderer="maxCanvasWidth: 960; maxCanvasHeight: 960"
-  xrface="mirroredDisplay: true; maxDetections: 3; meshGeometry: eyes, face, mouth; cameraDirection: front; allowedDevices: any;">
+  <!-- 1. 포토프레임 오버레이 (이미지 경로를 원하시는 프레임 파일로 변경하세요) -->
+  <div id="frame-container">
+    <img id="frame-img" src="./djgo-pf01.png" alt="포토프레임">
+  </div>
 
-  <a-assets>
-    <!-- 오클루더(얼굴 차폐) 모델 -->
-    <a-asset-item id="head-occluder" src="./headOccluder.glb"></a-asset-item>
-    <!-- 단종 헤드 GLB 모델 -->
-    <a-asset-item id="danjong-head" src="./danjong_head.glb"></a-asset-item>
-    <a-asset-item id="jungsun-head" src="./jungsun_head.glb"></a-asset-item>
-    <a-asset-item id="kkebi-head" src="./kkebi_head.glb"></a-asset-item>
-  </a-assets>
+  <!-- 2. 카메라 전/후면 전환 버튼 -->
+  <button id="cam-flip-btn" aria-label="카메라 전환">🔄</button>
 
-  <!-- 화면 캡처 및 미리보기 UI -->
-  <xrextras-capture-button></xrextras-capture-button>
-  <xrextras-capture-preview></xrextras-capture-preview>
+  <a-scene
+    landing-page
+    xrextras-loading
+    xrextras-runtime-error
+    xrextras-pause-on-hidden
+    renderer="maxCanvasWidth: 960; maxCanvasHeight: 960"
+    xrface="mirroredDisplay: true; maxDetections: 3; meshGeometry: eyes, face, mouth; cameraDirection: front; allowedDevices: any;">
 
-  <a-camera
-    look-controls="enabled: false"
-    wasd-controls="enabled: false"
-    position="0 1.6 0"></a-camera>
+    <a-assets>
+      <!-- 오클루더(얼굴 차폐) 모델 -->
+      <a-asset-item id="head-occluder" src="./headOccluder.glb"></a-asset-item>
+      <!-- 단종 헤드 GLB 모델 -->
+      <a-asset-item id="danjong-head" src="./danjong_head.glb"></a-asset-item>
+      <a-asset-item id="jungsun-head" src="./jungsun_head.glb"></a-asset-item>
+      <a-asset-item id="kkebi-head" src="./kkebi_head.glb"></a-asset-item>
+    </a-assets>
 
-  <!-- [얼굴 1] -->
-  <xrextras-faceanchor face-id="1">
-    <!-- 1. 8th Wall 오클루더 (머리 뒷부분 차폐) -->
-    <a-entity 
-      gltf-model="#head-occluder" 
-      position="0 0 0.02" 
-      scale="1 1 1"
-      xrextras-hider-material>
-    </a-entity>
+    <!-- 화면 캡처 및 미리보기 UI -->
+    <xrextras-capture-button></xrextras-capture-button>
+    <xrextras-capture-preview></xrextras-capture-preview>
 
-    <!-- 2. 단종 헤드 모델 (오클루더 위치 및 정면 기준과 일치) -->
-    <xrextras-face-attachment point="noseBridge">
+    <a-camera
+      look-controls="enabled: false"
+      wasd-controls="enabled: false"
+      position="0 1.6 0"></a-camera>
+
+    <!-- [얼굴 1] -->
+    <xrextras-faceanchor face-id="1">
       <a-entity 
-        gltf-model="#danjong-head" 
-        position="0 0.4 1" 
-        rotation="0 180 0" 
-        scale="12 12 12">
+        gltf-model="#head-occluder" 
+        position="0 0 0.02" 
+        scale="1 1 1"
+        xrextras-hider-material>
       </a-entity>
-    </xrextras-face-attachment>
-  </xrextras-faceanchor>
 
-  <!-- [얼굴 2] 다중 인식 지원 -->
-  <xrextras-faceanchor face-id="2">
-    <a-entity 
-      gltf-model="#head-occluder" 
-      position="0 0 0.02" 
-      scale="1 1 1"
-      xrextras-hider-material>
-    </a-entity>
+      <xrextras-face-attachment point="noseBridge">
+        <a-entity 
+          gltf-model="#danjong-head" 
+          position="0 0.4 1" 
+          rotation="0 180 0" 
+          scale="12 12 12">
+        </a-entity>
+      </xrextras-face-attachment>
+    </xrextras-faceanchor>
 
-    <xrextras-face-attachment point="noseBridge">
+    <!-- [얼굴 2] -->
+    <xrextras-faceanchor face-id="2">
       <a-entity 
-        gltf-model="#jungsun-head" 
-        position="0 0.4 1" 
-        rotation="0 180 0" 
-        scale="12 12 12">
+        gltf-model="#head-occluder" 
+        position="0 0 0.02" 
+        scale="1 1 1"
+        xrextras-hider-material>
       </a-entity>
-    </xrextras-face-attachment>
-  </xrextras-faceanchor>
 
-  <!-- [얼굴 3] 다중 인식 지원 -->
-  <xrextras-faceanchor face-id="3">
-    <a-entity 
-      gltf-model="#head-occluder" 
-      position="0 0 0.02" 
-      scale="1 1 1"
-      xrextras-hider-material>
-    </a-entity>
+      <xrextras-face-attachment point="noseBridge">
+        <a-entity 
+          gltf-model="#jungsun-head" 
+          position="0 0.4 1" 
+          rotation="0 180 0" 
+          scale="12 12 12">
+        </a-entity>
+      </xrextras-face-attachment>
+    </xrextras-faceanchor>
 
-    <xrextras-face-attachment point="noseBridge">
+    <!-- [얼굴 3] -->
+    <xrextras-faceanchor face-id="3">
       <a-entity 
-        gltf-model="#kkebi-head" 
-        position="0 0.4 1" 
-        rotation="0 180 0" 
-        scale="12 12 12">
+        gltf-model="#head-occluder" 
+        position="0 0 0.02" 
+        scale="1 1 1"
+        xrextras-hider-material>
       </a-entity>
-    </xrextras-face-attachment>
-  </xrextras-faceanchor>
 
-  <!-- 조명 세팅 -->
-  <a-light type="directional" position="0 1.8 3" intensity="0.8"></a-light>
-  <a-light type="ambient" intensity="0.8"></a-light>
-</a-scene>
+      <xrextras-face-attachment point="noseBridge">
+        <a-entity 
+          gltf-model="#kkebi-head" 
+          position="0 0.4 1" 
+          rotation="0 180 0" 
+          scale="12 12 12">
+        </a-entity>
+      </xrextras-face-attachment>
+    </xrextras-faceanchor>
+
+    <!-- 조명 세팅 -->
+    <a-light type="directional" position="0 1.8 3" intensity="0.8"></a-light>
+    <a-light type="ambient" intensity="0.8"></a-light>
+  </a-scene>
+
+  <!-- 스크립트 제어: 카메라 전환 기능 -->
+  <script>
+    let currentCameraDir = 'front';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const flipBtn = document.getElementById('cam-flip-btn');
+
+      if (flipBtn) {
+        ['click', 'touchstart'].forEach(eventType => {
+          flipBtn.addEventListener(eventType, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 전면/후면 카메라 방향 토글
+            currentCameraDir = (currentCameraDir === 'front') ? 'back' : 'front';
+
+            // 8th Wall FaceController 카메라 설정 업데이트
+            if (window.XR8 && XR8.FaceController) {
+              XR8.FaceController.configure({
+                cameraDirection: currentCameraDir,
+                mirroredDisplay: (currentCameraDir === 'front') // 전면일 때만 좌우반전
+              });
+            }
+          }, { passive: false });
+        });
+      }
+    });
+  </script>
 
 </body>
 </html>
