@@ -18,27 +18,6 @@
       font-family: sans-serif;
     }
 
-    /* 포토프레임 오버레이 레이어 */
-    #frame-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      height: 100dvh;
-      pointer-events: none; /* 터치 이벤트가 하단 AR 화면 및 버튼으로 전달되도록 설정 */
-      z-index: 10;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    #frame-img {
-      width: 100%;
-      height: 100%;
-      object-fit: fill;
-    }
-
     /* 카메라 전환 버튼 */
     #cam-flip-btn {
       position: fixed;
@@ -68,12 +47,7 @@
 
 <body>
 
-  <!-- 1. 포토프레임 이미지 (사용할 이미지 경로로 수정하세요) -->
-  <div id="frame-container">
-    <img id="frame-img" src="./photo_frame.png" alt="포토프레임">
-  </div>
-
-  <!-- 2. 카메라 전/후면 전환 버튼 -->
+  <!-- 카메라 전/후면 전환 버튼 -->
   <button id="cam-flip-btn" aria-label="카메라 전환">🔄</button>
 
   <a-scene
@@ -179,19 +153,18 @@
           e.preventDefault();
           e.stopPropagation();
 
-          // 중복 클릭 방지 및 XR8 로드 확인
           if (isSwitching || !window.XR8) return;
           isSwitching = true;
 
-          // 방향 토글 (전면 ↔ 후면)
+          // 카메라 방향 토글 (전면 ↔ 후면)
           currentCameraDir = (currentCameraDir === 'front') ? 'back' : 'front';
           const isFront = (currentCameraDir === 'front');
 
           try {
-            // 1. 기존 8th Wall 카메라 엔진 세션만 정지 (DOM 및 A-Frame 컴포넌트 유지를 위해 removeAttribute 사용 안함)
+            // 1. 기존 8th Wall 카메라 엔진 세션 정지
             XR8.stop();
 
-            // 2. 8th Wall FaceController 엔진 구성 업데이트
+            // 2. 8th Wall FaceController 설정 구성 업데이트
             XR8.FaceController.configure({
               meshGeometry: [
                 XR8.FaceController.MeshGeometry.FACE,
@@ -203,7 +176,7 @@
               maxDetections: 3
             });
 
-            // 3. A-Frame xrface 컴포넌트 속성 동기화
+            // 3. A-Frame xrface 속성 동기화
             sceneEl.setAttribute('xrface', {
               cameraDirection: currentCameraDir,
               mirroredDisplay: isFront,
@@ -212,7 +185,7 @@
               allowedDevices: 'any'
             });
 
-            // 4. 새로운 카메라 스트림으로 XR8 세션 재개 (기존 A-Frame Canvas 활용)
+            // 4. 새로운 카메라 스트림으로 세션 재개
             setTimeout(() => {
               XR8.run({
                 canvas: sceneEl.canvas
