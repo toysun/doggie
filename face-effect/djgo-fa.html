@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>단종 헤드 Face AR 이펙트</title>
+  
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-face-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Pretendard', -apple-system, sans-serif;
+    }
+
+    #ar-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+
+    /* UI 안내 문구 */
+    .ui-header {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      color: #ffffff;
+      padding: 10px 22px;
+      border-radius: 20px;
+      font-size: 14px;
+      text-align: center;
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+  </style>
+</head>
+<body>
+  <div id="ar-container">
+    <div class="ui-header">
+      카메라에 얼굴을 비추면 단종 아바타 헤드가 합성됩니다.
+    </div>
+
+    <a-scene 
+      mindar-face="autoStart: true;" 
+      embedded 
+      color-space="sRGB" 
+      renderer="colorManagement: true, physicallyCorrectLights: true" 
+      vr-mode-ui="enabled: false" 
+      device-orientation-permission-ui="enabled: false">
+      
+      <a-assets>
+        <a-asset-item id="danjongHeadModel" src="danjong_head.glb"></a-asset-item>
+        
+        <a-asset-item id="headOccluder" src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/glTF/sparkar/headOccluder.glb"></a-asset-item>
+      </a-assets>
+
+      <a-camera active="false" position="0 0 0"></a-camera>
+
+      <a-entity mindar-face-target="anchorIndex: 168">
+        <a-gltf-model 
+          mindar-face-occluder 
+          src="#headOccluder" 
+          position="0 -0.3 0.15" 
+          rotation="0 0 0" 
+          scale="0.065 0.065 0.065">
+        </a-gltf-model>
+      </a-entity>
+
+      <a-entity mindar-face-target="anchorIndex: 1">
+        <a-gltf-model 
+          src="#danjongHeadModel" 
+          position="0 0 0" 
+          rotation="0 0 0" 
+          scale="1 1 1">
+        </a-gltf-model>
+      </a-entity>
+
+    </a-scene>
+  </div>
+</body>
+</html>
