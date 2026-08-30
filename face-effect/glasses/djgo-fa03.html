@@ -31,7 +31,7 @@
 
   <a-assets>
     <!-- 오클루더(얼굴 차폐) 모델 -->
-    <a-asset-item id="head-occluder" src="./head-occluder.glb"></a-asset-item>
+    <a-asset-item id="head-occluder" src="./headOccluder.glb"></a-asset-item>
     <!-- 단종 헤드 GLB 모델 (html 파일과 동일 폴더 기준) -->
     <a-asset-item id="danjong-head" src="./danjong_head.glb"></a-asset-item>
   </a-assets>
@@ -54,9 +54,9 @@
     <xrextras-face-attachment point="noseBridge">
       <a-entity 
         gltf-model="#danjong-head" 
-        position="0 0 -7" 
+        position="0 0 0" 
         rotation="0 0 0" 
-        scale="6.5 6.5 6.5">
+        scale="1 1 1">
       </a-entity>
     </xrextras-face-attachment>
   </xrextras-faceanchor>
