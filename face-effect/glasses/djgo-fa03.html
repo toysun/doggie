@@ -18,7 +18,7 @@
       font-family: sans-serif;
     }
 
-    /* 포토프레임 오버레이 스타일 */
+    /* 포토프레임 오버레이 레이어 */
     #frame-container {
       position: fixed;
       top: 0;
@@ -26,7 +26,7 @@
       width: 100vw;
       height: 100vh;
       height: 100dvh;
-      pointer-events: none; /* 터치 이벤트가 AR 화면으로 통과하도록 설정 */
+      pointer-events: none; /* 터치 이벤트가 하단 AR 화면 및 버튼으로 전달되도록 설정 */
       z-index: 10;
       display: flex;
       justify-content: center;
@@ -36,10 +36,10 @@
     #frame-img {
       width: 100%;
       height: 100%;
-      object-fit: fill; /* 화면 전체에 프레임 맞춤 (필요시 contain / cover로 변경 가능) */
+      object-fit: fill; /* 화면 전체에 프레임 맞춤 (필요시 contain/cover로 변경) */
     }
 
-    /* 카메라 전환 버튼 스타일 */
+    /* 카메라 전환 버튼 */
     #cam-flip-btn {
       position: fixed;
       top: 20px;
@@ -68,15 +68,16 @@
 
 <body>
 
-  <!-- 1. 포토프레임 오버레이 (이미지 경로를 원하시는 프레임 파일로 변경하세요) -->
+  <!-- 1. 포토프레임 이미지 (원하는 프레임 이미지 경로로 수정 가능) -->
   <div id="frame-container">
-    <img id="frame-img" src="./djgo-pf02.png" alt="포토프레임">
+    <img id="frame-img" src="./photo_frame.png" alt="포토프레임">
   </div>
 
   <!-- 2. 카메라 전/후면 전환 버튼 -->
   <button id="cam-flip-btn" aria-label="카메라 전환">🔄</button>
 
   <a-scene
+    id="scene"
     landing-page
     xrextras-loading
     xrextras-runtime-error
@@ -87,7 +88,7 @@
     <a-assets>
       <!-- 오클루더(얼굴 차폐) 모델 -->
       <a-asset-item id="head-occluder" src="./headOccluder.glb"></a-asset-item>
-      <!-- 단종 헤드 GLB 모델 -->
+      <!-- GLB 모델 목록 -->
       <a-asset-item id="danjong-head" src="./danjong_head.glb"></a-asset-item>
       <a-asset-item id="jungsun-head" src="./jungsun_head.glb"></a-asset-item>
       <a-asset-item id="kkebi-head" src="./kkebi_head.glb"></a-asset-item>
@@ -164,30 +165,40 @@
     <a-light type="ambient" intensity="0.8"></a-light>
   </a-scene>
 
-  <!-- 스크립트 제어: 카메라 전환 기능 -->
+  <!-- 스크립트: 카메라 스위칭 동작 제어 -->
   <script>
     let currentCameraDir = 'front';
 
     document.addEventListener('DOMContentLoaded', () => {
       const flipBtn = document.getElementById('cam-flip-btn');
+      const sceneEl = document.getElementById('scene');
 
-      if (flipBtn) {
+      if (flipBtn && sceneEl) {
+        const switchCamera = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // 방향 토글
+          currentCameraDir = (currentCameraDir === 'front') ? 'back' : 'front';
+          const isFront = (currentCameraDir === 'front');
+
+          // 1. 기존 xrface 컴포넌트 제거 (카메라 파이프라인 정지)
+          sceneEl.removeAttribute('xrface');
+
+          // 2. 새 속성 적용 후 xrface 컴포넌트 재할당 (카메라 재시작)
+          setTimeout(() => {
+            sceneEl.setAttribute('xrface', {
+              cameraDirection: currentCameraDir,
+              mirroredDisplay: isFront,
+              maxDetections: 3,
+              meshGeometry: 'eyes, face, mouth',
+              allowedDevices: 'any'
+            });
+          }, 100);
+        };
+
         ['click', 'touchstart'].forEach(eventType => {
-          flipBtn.addEventListener(eventType, (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // 전면/후면 카메라 방향 토글
-            currentCameraDir = (currentCameraDir === 'front') ? 'back' : 'front';
-
-            // 8th Wall FaceController 카메라 설정 업데이트
-            if (window.XR8 && XR8.FaceController) {
-              XR8.FaceController.configure({
-                cameraDirection: currentCameraDir,
-                mirroredDisplay: (currentCameraDir === 'front') // 전면일 때만 좌우반전
-              });
-            }
-          }, { passive: false });
+          flipBtn.addEventListener(eventType, switchCamera, { passive: false });
         });
       }
     });
