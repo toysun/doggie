@@ -36,7 +36,7 @@
     #frame-img {
       width: 100%;
       height: 100%;
-      object-fit: fill; /* 화면 전체에 프레임 맞춤 (필요시 contain/cover로 변경) */
+      object-fit: fill;
     }
 
     /* 카메라 전환 버튼 */
@@ -68,7 +68,7 @@
 
 <body>
 
-  <!-- 1. 포토프레임 이미지 (원하는 프레임 이미지 경로로 수정 가능) -->
+  <!-- 1. 포토프레임 이미지 (사용할 이미지 경로로 수정하세요) -->
   <div id="frame-container">
     <img id="frame-img" src="./photo_frame.png" alt="포토프레임">
   </div>
@@ -165,9 +165,10 @@
     <a-light type="ambient" intensity="0.8"></a-light>
   </a-scene>
 
-  <!-- 스크립트: 카메라 스위칭 동작 제어 -->
+  <!-- 스크립트: 안정적인 카메라 스위칭 및 AR 재개 -->
   <script>
     let currentCameraDir = 'front';
+    let isSwitching = false;
 
     document.addEventListener('DOMContentLoaded', () => {
       const flipBtn = document.getElementById('cam-flip-btn');
@@ -178,15 +179,31 @@
           e.preventDefault();
           e.stopPropagation();
 
-          // 방향 토글
+          // 중복 클릭 방지 및 XR8 로드 확인
+          if (isSwitching || !window.XR8) return;
+          isSwitching = true;
+
+          // 방향 토글 (전면 ↔ 후면)
           currentCameraDir = (currentCameraDir === 'front') ? 'back' : 'front';
           const isFront = (currentCameraDir === 'front');
 
-          // 1. 기존 xrface 컴포넌트 제거 (카메라 파이프라인 정지)
-          sceneEl.removeAttribute('xrface');
+          try {
+            // 1. 기존 8th Wall 카메라 엔진 세션만 정지 (DOM 및 A-Frame 컴포넌트 유지를 위해 removeAttribute 사용 안함)
+            XR8.stop();
 
-          // 2. 새 속성 적용 후 xrface 컴포넌트 재할당 (카메라 재시작)
-          setTimeout(() => {
+            // 2. 8th Wall FaceController 엔진 구성 업데이트
+            XR8.FaceController.configure({
+              meshGeometry: [
+                XR8.FaceController.MeshGeometry.FACE,
+                XR8.FaceController.MeshGeometry.EYES,
+                XR8.FaceController.MeshGeometry.MOUTH
+              ],
+              cameraDirection: currentCameraDir,
+              mirroredDisplay: isFront,
+              maxDetections: 3
+            });
+
+            // 3. A-Frame xrface 컴포넌트 속성 동기화
             sceneEl.setAttribute('xrface', {
               cameraDirection: currentCameraDir,
               mirroredDisplay: isFront,
@@ -194,7 +211,19 @@
               meshGeometry: 'eyes, face, mouth',
               allowedDevices: 'any'
             });
-          }, 100);
+
+            // 4. 새로운 카메라 스트림으로 XR8 세션 재개 (기존 A-Frame Canvas 활용)
+            setTimeout(() => {
+              XR8.run({
+                canvas: sceneEl.canvas
+              });
+              isSwitching = false;
+            }, 150);
+
+          } catch (err) {
+            console.error("Camera switch error:", err);
+            isSwitching = false;
+          }
         };
 
         ['click', 'touchstart'].forEach(eventType => {
