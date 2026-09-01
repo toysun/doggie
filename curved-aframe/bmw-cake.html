@@ -22,7 +22,7 @@
         onStart: async () => {
           try {
             const [json, json1, json2, json3] = await Promise.all([
-              fetch('./telannas.json').then(r => r.json()),
+              fetch('./bmw_target.json').then(r => r.json()),
               fetch('./d-engine.json').then(r => r.json()),
               fetch('./w1-engine.json').then(r => r.json()),
               fetch('./d1-engine.json').then(r => r.json())
