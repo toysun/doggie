@@ -83,7 +83,7 @@
     <a-light type="ambient" intensity="0.25"></a-light>
 
     <!-- telannas_target: 비디오 종료 후 3D 모델 등장 -->
-    <xrextras-named-image-target name="telannas_target">
+    <xrextras-named-image-target name="bmw_target">
       <a-entity
         id="video-plane-telannas"
         xrextras-play-video="video: #wine-label-video; canstop: true"
@@ -174,7 +174,7 @@
 
   // 타겟별 비디오/모델 매핑
   const targetMap = {
-    'telannas_target': {
+    'bmw_target': {
       video: document.getElementById('wine-label-video'),
       modelId: 'model-telannas'
     },
