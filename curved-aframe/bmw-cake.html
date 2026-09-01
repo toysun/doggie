@@ -10,23 +10,35 @@
   <script src="./../xr_st/xrextras.js"></script>
   <script src="./../xr_st/landing-page.js"></script>  
   <script src="//cdn.8thwall.com/web/aframe/aframe-extras-7.2.0.min.js"></script>
-  <script async src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
-  <script>
-     const onxrloaded = async () => {
-       const res = await fetch('./telannas.json')
-       const json = await res.json()
-       const res1 = await fetch('./d-engine.json')
-       const json1 = await res1.json()
-       const res2 = await fetch('./w1-engine.json')
-       const json2 = await res2.json()
-       const res3 = await fetch('./d1-engine.json')
-       const json3 = await res3.json()
+  
+  <!-- 🛠️ 수정 1: async 제거하여 xr.js 동기 로딩 보장 -->
+  <script src="./../xr_st/xr.js" data-preload-chunks="slam"></script>
 
-       XR8.XrController.configure({
-         imageTargetData: [json, json1, json2, json3],
-       })
-     }
-     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded)
+  <!-- 🛠️ 수정 2: 8th Wall 카메라 파이프라인 모듈을 통해 이미지 타겟 JSON 안전하게 설정 -->
+  <script>
+    const onxrloaded = () => {
+      XR8.addCameraPipelineModule({
+        name: 'custom-image-targets',
+        onStart: async () => {
+          try {
+            const [json, json1, json2, json3] = await Promise.all([
+              fetch('./telannas.json').then(r => r.json()),
+              fetch('./d-engine.json').then(r => r.json()),
+              fetch('./w1-engine.json').then(r => r.json()),
+              fetch('./d1-engine.json').then(r => r.json())
+            ]);
+
+            XR8.XrController.configure({
+              imageTargetData: [json, json1, json2, json3]
+            });
+            console.log("이미지 타겟 JSON 로드 및 설정 완료");
+          } catch (err) {
+            console.error("이미지 타겟 JSON 로드 실패:", err);
+          }
+        }
+      });
+    };
+    window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded);
   </script>
 </head>
 
@@ -49,11 +61,10 @@
       <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
       <a-asset-item id="words-glb" src="./assets/Models/error_text.glb"></a-asset-item>
 
-      <!-- loop 제거: 1회 재생 후 마지막 프레임 유지 -->
+      <!-- 🛠️ 수정 3: autoplay 제거 (스캔 전 사전 재생 방지) -->
       <video
         id="wine-label-video"
         muted
-        autoplay
         playsinline
         webkit-playsinline
         crossorigin="anonymous"
@@ -62,7 +73,6 @@
       <video
         id="wine-label-video1"
         muted
-        autoplay
         playsinline
         webkit-playsinline
         crossorigin="anonymous"
@@ -82,14 +92,13 @@
     <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
     <a-light type="ambient" intensity="0.25"></a-light>
 
-    <!-- telannas_target: 비디오 종료 후 3D 모델 등장 -->
+    <!-- bmw_target -->
     <xrextras-named-image-target name="bmw_target">
       <a-entity
         id="video-plane-telannas"
         xrextras-play-video="video: #wine-label-video; canstop: true"
         geometry="primitive: plane; height: 1.5; width: 1;">
       </a-entity>
-      <!-- 초기 visible: false로 대기 -->
       <a-entity 
         id="model-telannas"
         gltf-model="#bean-glb" 
@@ -172,7 +181,6 @@
 <script>
   const overlay = document.getElementById('scanning-overlay');
 
-  // 타겟별 비디오/모델 매핑
   const targetMap = {
     'bmw_target': {
       video: document.getElementById('wine-label-video'),
@@ -192,26 +200,24 @@
     }
   };
 
-  // 모델 페이드인 함수
+  // 🛠️ 수정 4: Three.js 머티리얼 페이드인 안전 처리 (mat.needsUpdate 추가)
   function fadeInModel(modelEntity) {
     modelEntity.setAttribute('visible', true);
 
-    // 모델 로드 완료 여부 확인 후 페이드인 실행
     function startFade() {
       const mesh = modelEntity.getObject3D('mesh');
       if (!mesh) {
-        // mesh 아직 없으면 재시도
         setTimeout(startFade, 100);
         return;
       }
 
-      // 머티리얼 투명도 0으로 초기화
       mesh.traverse((node) => {
         if (node.material) {
           const mats = Array.isArray(node.material) ? node.material : [node.material];
           mats.forEach((mat) => {
             mat.transparent = true;
             mat.opacity = 0;
+            mat.needsUpdate = true; // 머티리얼 쉐이더 재작성 강제
           });
         }
       });
@@ -244,11 +250,12 @@
     startFade();
   }
 
-  // 비디오에 ended 이벤트 연결 (타겟별)
   function bindVideoEnded(targetName) {
-    const { video, modelId } = targetMap[targetName];
+    const targetObj = targetMap[targetName];
+    if (!targetObj) return;
 
-    // 중복 바인딩 방지용 플래그
+    const { video, modelId } = targetObj;
+
     if (video._boundTargets) {
       if (video._boundTargets.includes(targetName)) return;
       video._boundTargets.push(targetName);
@@ -257,20 +264,18 @@
     }
 
     video.addEventListener('ended', () => {
-      // 현재 활성 타겟의 모델만 표시
       const modelEntity = document.getElementById(modelId);
       if (modelEntity) {
         fadeInModel(modelEntity);
       }
-    }, { once: false }); // 재스캔 대응을 위해 once: false 유지
+    }, { once: false });
   }
 
-  // xrimagefound: 이미지 인식 시
+  // 타겟 인식 시
   document.querySelector('a-scene').addEventListener('xrimagefound', (event) => {
     const name = event.detail.name;
     if (!targetMap[name]) return;
 
-    // 스캔 오버레이 숨김
     if (overlay) {
       overlay.style.animation = 'fadeOut 0.5s forwards';
       setTimeout(() => { overlay.style.display = 'none'; }, 500);
@@ -279,31 +284,28 @@
     const { video, modelId } = targetMap[name];
     const modelEntity = document.getElementById(modelId);
 
-    // 비디오 처음부터 재생 (재스캔 시에도 초기화)
+    // 비디오 시작
     video.currentTime = 0;
-    video.play();
+    video.play().catch(err => console.log("비디오 재생 터치 정책 보정:", err));
 
-    // 모델 숨김 상태로 초기화
     if (modelEntity) {
       modelEntity.setAttribute('visible', false);
 
-      // 머티리얼 opacity 초기화
       const mesh = modelEntity.getObject3D('mesh');
       if (mesh) {
         mesh.traverse((node) => {
           if (node.material) {
             const mats = Array.isArray(node.material) ? node.material : [node.material];
-            mats.forEach((mat) => { mat.transparent = true; mat.opacity = 0; });
+            mats.forEach((mat) => { mat.transparent = true; mat.opacity = 0; mat.needsUpdate = true; });
           }
         });
       }
     }
 
-    // 비디오 종료 이벤트 바인딩
     bindVideoEnded(name);
   });
 
-  // xrimagelost: 이미지 소실 시 오버레이 복구
+  // 타겟 이탈 시
   document.querySelector('a-scene').addEventListener('xrimagelost', (event) => {
     const name = event.detail.name;
     if (!targetMap[name]) return;
