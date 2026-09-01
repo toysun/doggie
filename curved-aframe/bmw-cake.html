@@ -40,6 +40,30 @@
     };
     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded);
   </script>
+   <script>
+    // 🌟 각진 로우폴리 모델을 둥글고 부드럽게 렌더링해주는 마법의 컴포넌트
+    AFRAME.registerComponent('smooth-model', {
+      init: function () {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (mesh) {
+            mesh.traverse((node) => {
+              if (node.isMesh && node.material) {
+                // 1. 각진 쉐이딩 끄고 표면 빛 반사를 부드럽게 조절
+                node.material.flatShading = false;
+                node.material.roughness = 0.7; // 너무 번쩍거리지 않게 매트하게
+                node.material.needsUpdate = true;
+                // 2. 모델의 각진 정점(Vertex)을 둥글게 재계산
+                if (node.geometry) {
+                  node.geometry.computeVertexNormals();
+                }
+              }
+            });
+          }
+        });
+      }
+    });
+  </script>
 </head>
 
 <body>
@@ -56,6 +80,7 @@
     
     <a-assets>
       <a-asset-item id="bean-glb" src="./assets/Models/bmw15th_fire_cake.glb"></a-asset-item>
+      <a-asset-item id="snow1" src="./assets/Models/gold-confetti-paper.glb"></a-asset-item>   
       <a-asset-item id="blades-glb" src="./assets/Models/oscillating_cylinder_motor_for_lego_3d_print.glb"></a-asset-item>
       <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
       <a-asset-item id="blades-glb-1" src="./assets/Models/3d_printable_pneumatic-engined_toy_car.glb"></a-asset-item>
@@ -68,7 +93,7 @@
         playsinline
         webkit-playsinline
         crossorigin="anonymous"
-        src="./assets/Media/bmw_cake.mp4">
+        src="./assets/Media/bmw_sticker_mv.mp4">
       </video>
       <video
         id="wine-label-video1"
@@ -107,7 +132,18 @@
         scale="2 2 2"
         visible="false"
         shadow="receive: false"
+        smooth-model
         animation-mixer>
+        <a-entity
+        id="confetti-model"
+        gltf-model="#snow1"
+        scale="2 2 2"
+        position="0.1 1.6 -1"
+        rotation="90 0 0"
+        smooth-model
+        metal-material="metalness: 1.0; roughness: 0.22; envMapIntensity: 1.8"
+        animation-mixer="loop: repeat; timeScale: 1">
+      </a-entity>
       </a-entity>
     </xrextras-named-image-target>
 
