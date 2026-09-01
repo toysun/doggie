@@ -1,0 +1,18 @@
+{
+  "imagePath": "assets/Media/BMW_notebook_sticker.png",
+  "name": "bmw_target",
+  "type": "PLANAR",
+  "properties": {
+    "top": 0,
+    "left": 0,
+    "width": 2280,
+    "height": 1790,
+    "isRotated": false,
+    "originalWidth": 2280,
+    "originalHeight": 1790
+  },
+  "userMetadataIsJson": true,
+  "loadAutomatically": true,
+  "created": 1646873156802,
+  "updated": 1646873156802
+}
