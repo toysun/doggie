@@ -40,6 +40,26 @@
     };
     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded);
   </script>
+    <!-- 🛠️ 금속 재질 흑색 왜곡 방지 커스텀 컴포넌트 등록 -->
+  <script>
+    AFRAME.registerComponent('fix-metal-material', {
+      init() {
+        this.el.addEventListener('model-loaded', () => {
+          const mesh = this.el.getObject3D('mesh');
+          if (!mesh) return;
+
+          mesh.traverse((node) => {
+            if (node.isMesh && node.material) {
+              // 환경 반사맵이 없는 환경에서 금속(metalness 1.0)이 검게 반사되는 현상 보정
+              node.material.metalness = 0.1;  // 금속성 비중 보정
+              node.material.roughness = 0.35; // 거칠기 값 보정
+              node.material.needsUpdate = true;
+            }
+          });
+        });
+      }
+    });
+  </script>
    <script>
     // 🌟 각진 로우폴리 모델을 둥글고 부드럽게 렌더링해주는 마법의 컴포넌트
     AFRAME.registerComponent('smooth-model', {
@@ -133,6 +153,7 @@
         visible="false"
         shadow="receive: false"
         smooth-model
+        fix-metal-material
         animation-mixer>
         <a-entity
         id="confetti-model"
@@ -141,6 +162,7 @@
         position="0 0 0"
         rotation="0 0 0"
         smooth-model
+        fix-metal-material
         metal-material="metalness: 1.0; roughness: 0.22; envMapIntensity: 1.8"
         animation-mixer="loop: repeat; timeScale: 1">
       </a-entity>
