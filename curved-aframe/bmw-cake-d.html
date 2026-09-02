@@ -41,49 +41,40 @@
     window.XR8 ? onxrloaded() : window.addEventListener('xrloaded', onxrloaded);
   </script>
     <!-- 🛠️ 금속 재질 흑색 왜곡 방지 커스텀 컴포넌트 등록 -->
-  <script>
-    AFRAME.registerComponent('fix-metal-material', {
-      init() {
-        this.el.addEventListener('model-loaded', () => {
-          const mesh = this.el.getObject3D('mesh');
-          if (!mesh) return;
+<script>
+  AFRAME.registerComponent('smart-material-fix', {
+    init: function () {
+      this.el.addEventListener('model-loaded', () => {
+        const mesh = this.el.getObject3D('mesh');
+        if (!mesh) return;
 
-          mesh.traverse((node) => {
-            if (node.isMesh && node.material) {
-              // 환경 반사맵이 없는 환경에서 금속(metalness 1.0)이 검게 반사되는 현상 보정
-              node.material.metalness = 0;  // 금속성 비중 보정
-              node.material.roughness = 0.8; // 거칠기 값 보정
-              node.material.needsUpdate = true;
+        mesh.traverse((node) => {
+          if (node.isMesh && node.material) {
+            // 원본 모델의 노말(각진 부분)만 부드럽게 재계산
+            if (node.geometry) {
+              node.geometry.computeVertexNormals();
             }
-          });
-        });
-      }
-    });
-  </script>
-   <script>
-    // 🌟 각진 로우폴리 모델을 둥글고 부드럽게 렌더링해주는 마법의 컴포넌트
-    AFRAME.registerComponent('smooth-model', {
-      init: function () {
-        this.el.addEventListener('model-loaded', () => {
-          const mesh = this.el.getObject3D('mesh');
-          if (mesh) {
-            mesh.traverse((node) => {
-              if (node.isMesh && node.material) {
-                // 1. 각진 쉐이딩 끄고 표면 빛 반사를 부드럽게 조절
-                node.material.flatShading = false;
-                node.material.roughness = 0.7; // 너무 번쩍거리지 않게 매트하게
-                node.material.needsUpdate = true;
-                // 2. 모델의 각진 정점(Vertex)을 둥글게 재계산
-                if (node.geometry) {
-                  node.geometry.computeVertexNormals();
-                }
+
+            // 재질이 배열인 경우와 단일 객체인 경우 모두 처리
+            const materials = Array.isArray(node.material) ? node.material : [node.material];
+            
+            materials.forEach(mat => {
+              mat.flatShading = false;
+              
+              // 금속(metalness가 높은 재질)이 까맣게 나오는 현상만 선택적으로 방지
+              if (mat.metalness > 0.5) {
+                mat.envMapIntensity = 1.0; 
+                mat.roughness = Math.max(mat.roughness, 0.3); // 너무 거울처럼 반사되지 않게 한계치 설정
               }
+              
+              mat.needsUpdate = true;
             });
           }
         });
-      }
-    });
-  </script>
+      });
+    }
+  });
+</script>
 </head>
 
 <body>
@@ -148,7 +139,7 @@
     target: #model-telannas;" 
     xrextras-attach="target: model; offset: 1 10 3;">
 </a-entity>
-    <!--a-light type="ambient" intensity="0.3"></a-light-->
+    <a-light type="ambient" intensity="0.3"></a-light>
     <a-light type="hemisphere" color="#ffffff" groundColor="#aaaaaa" intensity="0.4"></a-light>
     
     <!-- bmw_target -->
@@ -166,17 +157,15 @@
         scale="1 1 1"
         visible="false"
         shadow="receive: false"
-        smooth-model
-        fix-metal-material
+        smart-material-fix
         animation-mixer>
-        <a-entity
+      <a-entity
         id="confetti-model"
         gltf-model="#snow1"
         scale="1 1 1"
         position="0 0 0"
         rotation="0 0 0"
-        smooth-model
-        fix-metal-material
+        smart-material-fix
         metal-material="metalness: 1.0; roughness: 0.22; envMapIntensity: 1.8"
         animation-mixer="loop: repeat; timeScale: 1">
       </a-entity>
