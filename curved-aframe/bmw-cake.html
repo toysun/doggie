@@ -99,7 +99,7 @@
     xrweb="disableWorldTracking: true">
     
     <a-assets>
-      <a-asset-item id="bean-glb" src="./assets/Models/bmw_15_cake_pbr_lowpoly.glb"></a-asset-item>
+      <a-asset-item id="bean-glb" src="./assets/Models/bmw_15_cake_pbr_lp.glb"></a-asset-item>
       <a-asset-item id="snow1" src="./assets/Models/gold-confetti-paper.glb"></a-asset-item>   
       <a-asset-item id="blades-glb" src="./assets/Models/oscillating_cylinder_motor_for_lego_3d_print.glb"></a-asset-item>
       <a-asset-item id="bean-glb-1" src="./assets/Models/3d_printable_air_balloon_engine_for_lego.glb"></a-asset-item>
@@ -134,9 +134,18 @@
       cursor="fuse: false; rayOrigin: mouse;">
     </a-camera>
 
-    <a-light type="directional" intensity="1.5" position="0 1 0"></a-light>
-    <a-light type="ambient" intensity="0.6"></a-light>
+        <a-entity light="
+        type: directional;
+        intensity: 0.6;
+        castShadow: true;
+        shadowMapHeight:2048;
+        shadowMapWidth:2048;
+        shadowCameraTop: 10;
+        target: #model-telannas;" xrextras-attach="target: model; offset: 1 15 3;" shadow>
+    </a-entity>
+    <a-light type="ambient" intensity="0.5"></a-light>
     <a-light type="hemisphere" color="#ffffff" groundColor="#aaaaaa" intensity="0.7"></a-light>
+    
     <!-- bmw_target -->
     <xrextras-named-image-target name="bmw_target">
       <a-entity
