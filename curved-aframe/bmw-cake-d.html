@@ -95,7 +95,7 @@
     landing-page
     xrextras-loading
     xrextras-runtime-error
-    renderer="colorManagement: true; physicallyBasedRendering: true;"
+    renderer="colorManagement: true; physicallyBasedRendering: true; toneMapping: ACESFilmic;"
     xrweb="disableWorldTracking: true">
     
     <a-assets>
@@ -136,7 +136,7 @@
 
 <a-entity light="
     type: directional;
-    intensity: 0.8; 
+    intensity: 0.5; 
     castShadow: true;
     shadowMapHeight: 2048;
     shadowMapWidth: 2048;
@@ -148,8 +148,8 @@
     target: #model-telannas;" 
     xrextras-attach="target: model; offset: 1 10 3;">
 </a-entity>
-    <a-light type="ambient" intensity="0.5"></a-light>
-    <a-light type="hemisphere" color="#ffffff" groundColor="#aaaaaa" intensity="0.7"></a-light>
+    <a-light type="ambient" intensity="0.3"></a-light>
+    <a-light type="hemisphere" color="#ffffff" groundColor="#aaaaaa" intensity="0.4"></a-light>
     
     <!-- bmw_target -->
     <xrextras-named-image-target name="bmw_target">
@@ -246,7 +246,7 @@
       width="1000"
       height="1000"
       material="shader: shadow"
-      shadow>
+      shadow="receive: true">
     </a-plane>
   </a-scene>
 
