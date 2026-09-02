@@ -51,8 +51,8 @@
           mesh.traverse((node) => {
             if (node.isMesh && node.material) {
               // 환경 반사맵이 없는 환경에서 금속(metalness 1.0)이 검게 반사되는 현상 보정
-              node.material.metalness = 0.1;  // 금속성 비중 보정
-              node.material.roughness = 0.35; // 거칠기 값 보정
+              node.material.metalness = 0;  // 금속성 비중 보정
+              node.material.roughness = 0.8; // 거칠기 값 보정
               node.material.needsUpdate = true;
             }
           });
@@ -95,7 +95,7 @@
     landing-page
     xrextras-loading
     xrextras-runtime-error
-    renderer="colorManagement: true; physicallyBasedRendering: true; toneMapping: ACESFilmic;"
+    renderer="colorManagement: true; physicallyBasedRendering: true; toneMapping: ACESFilmic; exposure: 0.7;"
     xrweb="disableWorldTracking: true">
     
     <a-assets>
