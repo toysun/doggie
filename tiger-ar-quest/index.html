@@ -78,6 +78,22 @@
   </div>
 </section>
 
+<!-- ==================== TRANSITION OVERLAY (pose success -> AR ready) ====================
+     Sits above both screen-pose and screen-image. Fades in on top of the frozen pose
+     photo the instant the pose is confirmed (so there's no cut/black-frame while the
+     camera hands off), stays up while the 8th Wall AR scene spins up underneath, then
+     fades out once the AR camera feed is actually live — so the whole pose -> image
+     handoff reads as one continuous screen instead of two separate camera sessions. -->
+<div id="step-transition" aria-hidden="true">
+  <img id="transition-bg" alt="">
+  <div class="transition-scrim"></div>
+  <div class="transition-content">
+    <div class="spinner"></div>
+    <div class="transition-label">2단계 준비 중...</div>
+    <div class="transition-sub">호랑이 이미지 인식으로 이동할게요</div>
+  </div>
+</div>
+
 <!-- ============================== SCREEN 3 : IMAGE RECOGNITION (8th Wall AR) ============================== -->
 <section id="screen-image" class="screen">
   <div id="ar-mount"></div>

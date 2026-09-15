@@ -235,21 +235,34 @@ function handleGestureResult(result, now) {
   }
 }
 
-function onPoseSuccess() {
+async function onPoseSuccess() {
   state.poseDone = true;
   $("#pose-status-label").textContent = "PERFECT!";
 
-  // capture a snapshot of the winning pose
+  // capture a snapshot of the winning pose (labelled, for the result screen)
   state.snapshotPoseUrl = captureVideoSnapshot($("#pose-video"), {
     label: `POSE CHALLENGE  ·  ${POSE_LABEL_KO[state.selectedPose]}  ·  PERFECT`,
   });
+  // and a plain (unlabelled) frozen frame to use as the transition background,
+  // so the hand-off to STEP 2 reads as one continuous screen instead of a cut.
+  const transitionBg = captureVideoSnapshot($("#pose-video"));
 
+  const overlay = $("#step-transition");
+  $("#transition-bg").src = transitionBg;
+  overlay.classList.add("visible");
+
+  // let the fade-in finish while the (still-live) pose video is hidden behind it,
+  // THEN stop the camera and swap screens underneath — invisible to the user.
+  await wait(400);
   stopPoseCamera();
+  showScreen("image");
+  await enterImageScreen(); // mounts the AR scene and resolves once its camera is live (or times out)
 
-  setTimeout(() => {
-    showScreen("image");
-    enterImageScreen();
-  }, 700);
+  overlay.classList.remove("visible");
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 $("#btn-flip-camera").addEventListener("click", async () => {
@@ -338,6 +351,26 @@ async function enterImageScreen() {
   }
 
   startImageTimeout();
+  await waitForArReady(sceneEl);
+}
+
+// Resolves once the AR camera pipeline appears to be actually running, so the
+// transition overlay only fades out once there's a live camera feed underneath
+// it (never a black or half-initialized frame). "xrimagescanning" is 8th
+// Wall's own signal that image-target scanning has started on live frames;
+// since its exact availability can vary by engine build, this is raced
+// against a short bounded timeout so the reveal never hangs indefinitely.
+function waitForArReady(sceneEl, timeoutMs = 2200) {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      resolve();
+    };
+    sceneEl.addEventListener("xrimagescanning", finish, { once: true });
+    setTimeout(finish, timeoutMs);
+  });
 }
 
 function startImageTimeout() {
@@ -539,6 +572,7 @@ function composeFinalResult(success) {
 function resetGameState() {
   stopPoseCamera();
   teardownArScene();
+  $("#step-transition").classList.remove("visible");
   state.holdStartedAt = null;
   state.poseDone = false;
   state.snapshotPoseUrl = null;
