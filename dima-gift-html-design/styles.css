@@ -267,31 +267,41 @@ img {
 }
 
 .zone-card {
+  --stamp-size: 52px;
+  --check-size: 26px;
   position: relative;
   min-width: 0;
   padding: 9px 4px 8px;
-  color: #fff;
-  background: rgba(29, 28, 49, 0.95);
-  border: 1px solid color-mix(in srgb, var(--accent) 68%, transparent);
+  color: #241a2c;
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--accent) 8%, #ffffff) 0%,
+      color-mix(in srgb, var(--accent) 18%, #f3effa) 56%,
+      color-mix(in srgb, var(--accent) 28%, #ddd6ed) 100%
+    );
+  border: 1px solid color-mix(in srgb, var(--accent) 58%, #ffffff);
   border-radius: 11px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82), 0 8px 18px rgba(4, 3, 12, 0.2);
   cursor: pointer;
 }
 
 .zone-card::before {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 15%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 65%);
+  background: radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.7), transparent 64%);
   border-radius: inherit;
   content: "";
+  pointer-events: none;
 }
 
 .zone-card img {
   position: relative;
-  width: 49px;
-  height: 49px;
+  width: var(--stamp-size);
+  height: var(--stamp-size);
   margin: 0 auto 3px;
   object-fit: contain;
-  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--accent) 56%, transparent));
+  filter: drop-shadow(0 3px 5px rgba(18, 9, 31, 0.22));
 }
 
 .zone-card strong,
@@ -301,31 +311,36 @@ img {
 }
 
 .zone-card strong {
-  color: color-mix(in srgb, var(--accent) 76%, white);
+  color: color-mix(in srgb, var(--accent) 74%, #17101d);
   font-size: 11px;
   font-weight: 950;
 }
 
 .zone-card span {
   margin-top: 2px;
-  color: var(--muted-2);
+  color: #51485d;
   font-size: 9px;
+  font-weight: 750;
 }
 
 .zone-card.collected::after {
   position: absolute;
-  top: 6px;
-  right: 6px;
+  z-index: 2;
+  top: 5px;
+  right: 5px;
   display: grid;
-  width: 17px;
-  height: 17px;
+  width: var(--check-size);
+  height: var(--check-size);
   place-items: center;
   color: #fff;
   background: var(--accent);
+  border: 2px solid rgba(255, 255, 255, 0.94);
   border-radius: 50%;
+  box-shadow: 0 3px 8px rgba(17, 8, 29, 0.3);
   content: "✓";
-  font-size: 10px;
+  font-size: 15px;
   font-weight: 950;
+  line-height: 1;
 }
 
 .button-stack {
