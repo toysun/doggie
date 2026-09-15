@@ -1,0 +1,10 @@
+{
+  "name": "dima-gift-html-design",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AR 화면을 제외한 DIMA GIFT 스탬프투어 HTML 디자인 프로토타입",
+  "scripts": {
+    "serve": "python3 -m http.server 4173",
+    "test": "node tests/static.mjs"
+  }
+}
