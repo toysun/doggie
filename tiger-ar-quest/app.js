@@ -21,6 +21,41 @@
 const MEDIAPIPE_CDN_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.0.1";
 
 // ---------------------------------------------------------------------------
+// 8th Wall: register the built-in CanvasScreenshot pipeline module
+// ---------------------------------------------------------------------------
+// This MUST happen before XR8.run() (which the A-Frame `xrweb` component
+// triggers automatically once <a-scene xrweb> is mounted), so we register it
+// once here at module load — either immediately if the engine script has
+// already finished loading (window.XR8 exists), or on the 'xrloaded' event
+// it dispatches once it has (the standard 8th Wall boilerplate pattern).
+//
+// Why we need this at all: A-Frame's own built-in `screenshot` component
+// (what the previous version of this file used) calls renderer.render(...)
+// a second time to grab a frame. That re-render does NOT go through 8th
+// Wall's own camera pipeline (the step that blits the live camera feed into
+// the canvas each frame), so the captured image can come out with the AR
+// content but a missing/blank camera background, or fail outright depending
+// on buffer state. XR8.CanvasScreenshot hooks directly into 8th Wall's own
+// render pipeline instead, so it reliably captures exactly what's on screen
+// (camera feed + AR overlay together) as a base64 JPEG string. See
+// https://www.8thwall.com/docs/api/canvasscreenshot/takescreenshot/
+function registerCanvasScreenshotModule() {
+  const addModule = () => {
+    if (window.XR8 && window.XR8.CanvasScreenshot) {
+      XR8.addCameraPipelineModules([XR8.CanvasScreenshot.pipelineModule()]);
+    } else {
+      console.warn("XR8.CanvasScreenshot module not available — AR photo capture will be skipped.");
+    }
+  };
+  if (window.XR8) {
+    addModule();
+  } else {
+    window.addEventListener("xrloaded", addModule);
+  }
+}
+registerCanvasScreenshotModule();
+
+// ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 const MEDIAPIPE_WASM_BASE =
@@ -54,8 +89,10 @@ const state = {
   poseRafId: null,
   holdStartedAt: null,
   poseDone: false,
-  snapshotPoseUrl: null,
-  snapshotImageUrl: null,
+  poseFrameUrl: null,
+  imageFrameUrl: null,
+  resultPhotoBlob: null,
+  currentSceneEl: null,
   xrConfigured: false,
   imageTimeoutHandle: null,
   imageTimerRafId: null,
@@ -239,16 +276,12 @@ async function onPoseSuccess() {
   state.poseDone = true;
   $("#pose-status-label").textContent = "PERFECT!";
 
-  // capture a snapshot of the winning pose (labelled, for the result screen)
-  state.snapshotPoseUrl = captureVideoSnapshot($("#pose-video"), {
-    label: `POSE CHALLENGE  ·  ${POSE_LABEL_KO[state.selectedPose]}  ·  PERFECT`,
-  });
-  // and a plain (unlabelled) frozen frame to use as the transition background,
-  // so the hand-off to STEP 2 reads as one continuous screen instead of a cut.
-  const transitionBg = captureVideoSnapshot($("#pose-video"));
+  // capture the winning pose frame — used later as one half of the single
+  // merged result photo, so keep it plain/unlabelled (no per-shot banner).
+  state.poseFrameUrl = captureVideoSnapshot($("#pose-video"));
 
   const overlay = $("#step-transition");
-  $("#transition-bg").src = transitionBg;
+  $("#transition-bg").src = state.poseFrameUrl;
   overlay.classList.add("visible");
 
   // let the fade-in finish while the (still-live) pose video is hidden behind it,
@@ -278,11 +311,17 @@ $("#btn-flip-camera").addEventListener("click", async () => {
 // STEP 2 — IMAGE RECOGNITION (8th Wall / A-Frame / XRExtras)
 // ---------------------------------------------------------------------------
 function buildArSceneMarkup() {
+  // NOTE: no `screenshot` component and no `preserveDrawingBuffer` here —
+  // neither reliably captures 8th Wall's composited camera+AR frame (see the
+  // big comment above registerCanvasScreenshotModule() for why). The actual
+  // capture happens via XR8.CanvasScreenshot.takeScreenshot() in
+  // captureArSnapshot() below, which is registered as a camera pipeline
+  // module once at module load.
   return `
     <a-scene
       xrextras-loading
       xrextras-runtime-error
-      renderer="colorManagement: true; physicallyBasedRendering: true; preserveDrawingBuffer: true;"
+      renderer="colorManagement: true; physicallyBasedRendering: true;"
       xrweb="disableWorldTracking: true">
 
       <a-camera position="0 1 1" raycaster="objects: .cantap" cursor="fuse: false; rayOrigin: mouse;"></a-camera>
@@ -312,6 +351,7 @@ async function enterImageScreen() {
   mount.innerHTML = buildArSceneMarkup();
   const sceneEl = mount.querySelector("a-scene");
   const targetEl = mount.querySelector("#tiger-target-entity");
+  state.currentSceneEl = sceneEl;
 
   // 8th Wall's engine dispatches the low-level "xrimagefound"/"xrimagelost"
   // events on the <a-scene>, and the xrextras-named-image-target wrapper
@@ -408,35 +448,49 @@ function onImageFound() {
   $("#image-status-label").textContent = "인식 성공!";
   $("#image-banner-text").textContent = "호랑이를 찾았어요!";
 
-  // Give the highlight a beat to render before we snapshot + tear down.
-  setTimeout(() => {
-    const arCanvas = document.querySelector("#ar-mount canvas");
-    if (arCanvas) {
-      state.snapshotImageUrl = composeLabelledSnapshot(arCanvas, "IMAGE CHALLENGE  ·  FOUND!");
-    }
+  // Give the green highlight plane a beat to actually render before we
+  // snapshot, then capture through XR8.CanvasScreenshot BEFORE tearing the
+  // AR scene down (it needs the camera session to still be live).
+  setTimeout(async () => {
+    state.imageFrameUrl = await captureArSnapshot();
     teardownArScene();
     finishGame(true);
-  }, 500);
+  }, 400);
 }
 
-function onImageTimeout() {
-  const arCanvas = document.querySelector("#ar-mount canvas");
-  if (arCanvas) {
-    state.snapshotImageUrl = composeLabelledSnapshot(arCanvas, "IMAGE CHALLENGE  ·  FAILED");
-  }
+async function onImageTimeout() {
+  state.imageFrameUrl = await captureArSnapshot();
   teardownArScene();
   finishGame(false);
 }
 
-$("#btn-give-up").addEventListener("click", () => {
+$("#btn-give-up").addEventListener("click", async () => {
   clearImageTimers();
-  const arCanvas = document.querySelector("#ar-mount canvas");
-  if (arCanvas) {
-    state.snapshotImageUrl = composeLabelledSnapshot(arCanvas, "IMAGE CHALLENGE  ·  FAILED");
-  }
+  state.imageFrameUrl = await captureArSnapshot();
   teardownArScene();
   finishGame(false);
 });
+
+// Captures the live 8th Wall AR view (camera feed + AR overlay, composited)
+// via the built-in XR8.CanvasScreenshot pipeline module registered in
+// registerCanvasScreenshotModule() above. This replaced an earlier attempt
+// that used A-Frame's own `screenshot` component: that component calls
+// renderer.render(...) a second time, which does NOT go through 8th Wall's
+// own per-frame camera blit, so it could come back with a missing camera
+// background (or a blank image) instead of the actual AR photo.
+// Must be called BEFORE teardownArScene()/XR8.stop() — the pipeline module
+// needs the live camera session to still be running to grab a frame.
+async function captureArSnapshot() {
+  try {
+    if (!window.XR8 || !XR8.CanvasScreenshot) return null;
+    const base64Jpeg = await XR8.CanvasScreenshot.takeScreenshot();
+    if (!base64Jpeg) return null;
+    return "data:image/jpeg;base64," + base64Jpeg;
+  } catch (err) {
+    console.warn("Could not capture AR snapshot", err);
+    return null;
+  }
+}
 
 function teardownArScene() {
   clearImageTimers();
@@ -445,13 +499,14 @@ function teardownArScene() {
   } catch (err) {
     console.warn("XR8.stop() failed", err);
   }
+  state.currentSceneEl = null;
   $("#ar-mount").innerHTML = "";
 }
 
 // ---------------------------------------------------------------------------
 // RESULT SCREEN
 // ---------------------------------------------------------------------------
-function finishGame(success) {
+async function finishGame(success) {
   showScreen("result");
 
   const icon = $("#result-icon");
@@ -465,19 +520,29 @@ function finishGame(success) {
     ? "포즈 인증과 이미지 인식을 모두 완료했어요."
     : "호랑이 이미지를 다시 인식시켜 도전해보세요.";
 
-  const poseImg = $("#snapshot-pose");
-  const imageImg = $("#snapshot-image");
-  poseImg.src = state.snapshotPoseUrl || "";
-  poseImg.style.visibility = state.snapshotPoseUrl ? "visible" : "hidden";
-  imageImg.src = state.snapshotImageUrl || "";
-  imageImg.style.visibility = state.snapshotImageUrl ? "visible" : "hidden";
-
+  const photoImg = $("#result-photo");
   const downloadBtn = $("#btn-download");
-  if (state.snapshotPoseUrl || state.snapshotImageUrl) {
+
+  if (!state.poseFrameUrl && !state.imageFrameUrl) {
+    photoImg.style.visibility = "hidden";
+    downloadBtn.style.display = "none";
+    return;
+  }
+
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = "사진 준비 중...";
+
+  const blob = await composeResultPhoto(success);
+  state.resultPhotoBlob = blob;
+
+  if (blob) {
+    photoImg.src = URL.createObjectURL(blob);
+    photoImg.style.visibility = "visible";
     downloadBtn.style.display = "inline-flex";
-    downloadBtn.removeAttribute("href"); // cleared until composeFinalResult finishes drawing
-    composeFinalResult(success);
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = "사진 저장하기";
   } else {
+    photoImg.style.visibility = "hidden";
     downloadBtn.style.display = "none";
   }
 }
@@ -487,53 +552,63 @@ $("#btn-retry").addEventListener("click", () => {
   showScreen("intro");
 });
 
+$("#btn-download").addEventListener("click", async () => {
+  const blob = state.resultPhotoBlob;
+  if (!blob) return;
+  const fileName = "tiger-quest-result.png";
+
+  // Prefer the Web Share API on mobile: <a download> with a data/blob URL is
+  // unreliable on iOS Safari (it tends to just open the image instead of
+  // saving it), while navigator.share's file support reliably offers
+  // "Save Image" through the native share sheet.
+  const file = new File([blob], fileName, { type: "image/png" });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: "타이거 포즈 인증 퀘스트" });
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") return; // user cancelled the share sheet
+      console.warn("navigator.share failed, falling back to download link", err);
+    }
+  }
+
+  // Fallback for desktop browsers: a temporary, click-triggered <a download>
+  // (same pattern A-Frame's own screenshot component uses internally).
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+});
+
 // ---------------------------------------------------------------------------
 // Snapshot helpers
 // ---------------------------------------------------------------------------
-function captureVideoSnapshot(videoEl, { label } = {}) {
+function captureVideoSnapshot(videoEl) {
   const canvas = document.createElement("canvas");
   canvas.width = videoEl.videoWidth || 720;
   canvas.height = videoEl.videoHeight || 960;
   const ctx = canvas.getContext("2d");
   ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-  if (label) drawLabelBanner(ctx, canvas.width, canvas.height, label);
   return canvas.toDataURL("image/png");
 }
 
-function composeLabelledSnapshot(sourceCanvas, label) {
-  const canvas = document.createElement("canvas");
-  canvas.width = sourceCanvas.width;
-  canvas.height = sourceCanvas.height;
-  const ctx = canvas.getContext("2d");
-  try {
-    ctx.drawImage(sourceCanvas, 0, 0);
-  } catch (err) {
-    console.warn("Could not read AR canvas pixels", err);
-  }
-  drawLabelBanner(ctx, canvas.width, canvas.height, label);
-  return canvas.toDataURL("image/png");
-}
-
-function drawLabelBanner(ctx, width, height, text) {
-  const bannerHeight = Math.max(36, height * 0.08);
-  ctx.fillStyle = "rgba(15,14,20,0.72)";
-  ctx.fillRect(0, height - bannerHeight, width, bannerHeight);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = `700 ${Math.round(bannerHeight * 0.38)}px sans-serif`;
-  ctx.textAlign = "center";
-  ctx.textBaseline = "middle";
-  ctx.fillText(text, width / 2, height - bannerHeight / 2);
-}
-
-function composeFinalResult(success) {
+// Draws the pose frame and the AR frame edge-to-edge (no gap) into a single
+// canvas so the result reads as one photo, with one shared caption strip
+// underneath — not two separate cropped tiles with a border between them.
+function composeResultPhoto(success) {
   const canvas = $("#compose-canvas");
   const panelW = 540;
   const panelH = 720;
+  const captionH = 70;
   canvas.width = panelW * 2;
-  canvas.height = panelH + 90;
+  canvas.height = panelH + captionH;
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = "#16151c";
+  ctx.fillStyle = "#100f16";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const drawPanel = (src, x) =>
@@ -541,28 +616,37 @@ function composeFinalResult(success) {
       if (!src) return resolve();
       const img = new Image();
       img.onload = () => {
-        ctx.drawImage(img, x, 0, panelW, panelH);
+        // cover-fit into the panel so both frames fill it edge-to-edge
+        // with no letterboxing, matching a real seamless photo strip.
+        const scale = Math.max(panelW / img.width, panelH / img.height);
+        const drawW = img.width * scale;
+        const drawH = img.height * scale;
+        ctx.drawImage(img, x + (panelW - drawW) / 2, (panelH - drawH) / 2, drawW, drawH);
         resolve();
       };
       img.onerror = resolve;
       img.src = src;
     });
 
-  // Fire-and-forget: build synchronously enough for typical small PNGs.
-  // (Images are same-origin data URLs so onload fires essentially immediately.)
-  Promise.all([
-    drawPanel(state.snapshotPoseUrl, 0),
-    drawPanel(state.snapshotImageUrl, panelW),
+  return Promise.all([
+    drawPanel(state.poseFrameUrl, 0),
+    drawPanel(state.imageFrameUrl, panelW),
   ]).then(() => {
+    // thin seam so the join between the two frames still reads intentionally
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    ctx.fillRect(panelW - 1, 0, 2, panelH);
+
     ctx.fillStyle = success ? "#22c55e" : "#ef4444";
-    ctx.font = "700 42px sans-serif";
+    ctx.font = "700 34px sans-serif";
     ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillText(
-      success ? "TIGER QUEST - SUCCESS" : "TIGER QUEST - FAILED",
+      success ? "TIGER QUEST · SUCCESS" : "TIGER QUEST · FAILED",
       canvas.width / 2,
-      panelH + 55
+      panelH + captionH / 2
     );
-    $("#btn-download").href = canvas.toDataURL("image/png");
+
+    return new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
   });
 }
 
@@ -575,8 +659,9 @@ function resetGameState() {
   $("#step-transition").classList.remove("visible");
   state.holdStartedAt = null;
   state.poseDone = false;
-  state.snapshotPoseUrl = null;
-  state.snapshotImageUrl = null;
+  state.poseFrameUrl = null;
+  state.imageFrameUrl = null;
+  state.resultPhotoBlob = null;
   state.imageFound = false;
   setRingProgress(0);
 }

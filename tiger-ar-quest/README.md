@@ -37,6 +37,45 @@ Web AR 이미지 인식 게임입니다.
 느낌으로 넘어갑니다. (넥슨 원본 영상에서도 두 단계 사이에 "LOADING" 화면이 있었던 것과
 같은 방식입니다.)
 
+### 결과 화면 — 사진 1장으로 합치기 + 보기/저장 버그 수정
+
+기존에는 STEP 1(포즈)과 STEP 2(이미지 인식) 사진을 각각 별도의 `<img>` 두 개로
+나란히 보여드려서 사이에 여백/테두리가 보였습니다. 지금은 두 프레임을
+`compose-canvas`에 **가장자리 간격 없이(cover-fit으로 각 545×720 패널을 꽉 채워)**
+한 장으로 합성한 뒤, 구분선 역할만 하는 얇은 2px 세로선 하나만 남기고 하단에
+공통 캡션(성공/실패 문구) 한 줄을 넣어서, 화면에는 `<img id="result-photo">`
+**한 개**만 렌더링합니다. → 요청하신 "사이 간격 없이 하나의 사진처럼"이 이렇게
+반영되었습니다.
+
+"사진보기가 안 됨" 문제는 STEP 2(8th Wall AR 화면) 캡처 쪽 원인을 두 단계에
+걸쳐 찾았습니다.
+
+1차 시도로는 `<a-scene renderer="preserveDrawingBuffer: true">`가 원인이라
+보고(A-Frame 소스상 renderer 시스템이 지원하지 않는 속성이라 조용히 무시됨)
+A-Frame 기본 제공 `screenshot` 컴포넌트로 바꿨는데도 문제가 재현됐습니다. 더
+찾아보니 진짜 원인은 따로 있었습니다: A-Frame의 `screenshot` 컴포넌트는
+캡처 시점에 `renderer.render(scene, camera)`를 **한 번 더** 호출해서 픽셀을
+읽어오는데, 이 재렌더링은 8th Wall이 매 프레임 카메라 영상을 캔버스에 합성해
+넣는 자체 렌더 파이프라인을 거치지 않습니다. 그래서 캡처된 이미지에 카메라
+배경(호랑이가 비친 실제 화면)이 빠지거나 빈 이미지로 나올 수 있었습니다.
+
+→ 8th Wall이 정확히 이 문제를 위해 공식 제공하는
+[`XR8.CanvasScreenshot`](https://www.8thwall.com/docs/api/canvasscreenshot/takescreenshot/)
+API로 교체했습니다. `app.js` 최상단에서 `XR8.addCameraPipelineModules([
+XR8.CanvasScreenshot.pipelineModule() ])`로 파이프라인 모듈을 한 번 등록해두면,
+`XR8.CanvasScreenshot.takeScreenshot()`이 8th Wall 자체 렌더 파이프라인을 거쳐
+"카메라 영상 + AR 콘텐츠"가 합성된 실제 화면 그대로를 base64 JPEG로 반환합니다.
+`preserveDrawingBuffer`나 A-Frame의 `screenshot` 컴포넌트 둘 다 더 이상 쓰지
+않습니다.
+
+"다운로드가 안 됨" 문제는 iOS Safari에서 `<a download>`가 data/blob URL을
+안정적으로 "저장"하지 않고 그냥 이미지를 열어버리는(새 탭/미리보기로 표시) 잘
+알려진 제약 때문일 가능성이 높습니다. → "사진 저장하기" 버튼을 누르면 먼저
+**Web Share API**(`navigator.share({ files: [...] })`)로 기기 공유 시트를 띄워서
+"이미지 저장"을 하도록 시도하고(iOS에서 가장 안정적으로 동작), 이게 지원되지
+않는 환경(주로 데스크톱 브라우저)에서는 기존 방식인 `<a download>` blob 클릭으로
+자동 대체(fallback)됩니다.
+
 ## 2. 파일 구성
 
 ```
@@ -126,6 +165,28 @@ MediaPipe GestureRecognizer는 아래 8종 제스처를 기본 인식합니다. 
    타임아웃을 걸어뒀기 때문에 화면이 멈추진 않습니다. 다만 실기기에서 카메라 전환이
    2.2초보다 오래 걸리면 AR 화면이 완전히 뜨기 전에 오버레이가 먼저 사라져 잠깐
    로딩 중인 화면이 보일 수 있으니, 필요하면 `timeoutMs` 값을 늘려주세요.
+5. **STEP 2 사진 저장(Web Share API)** — "사진 저장하기" 버튼은 `navigator.share`
+   지원 여부를 실행 시점에 확인해서 자동으로 분기하도록 만들었지만, 실제
+   아이폰/안드로이드 기종·브라우저별 공유 시트 동작은 실기기에서 최종 확인해
+   주세요. 데스크톱 Chrome처럼 `navigator.canShare`가 파일 공유를 지원하지 않는
+   환경에서는 자동으로 기존 `<a download>` 방식으로 저장됩니다(이 환경에서
+   `canShare` 분기 자체는 확인했습니다).
+6. **`XR8.CanvasScreenshot` 모듈 사용 가능 여부** — 이 API는 8th Wall Web
+   엔진의 표준 공개 기능이라 별도 유료 애드온 없이 대부분의 `xr.js` 빌드에
+   포함되어 있어야 하지만, 사용 중이신 `8frame-1.5.0` / `xr.js` 번들에 실제로
+   포함돼 있는지는 카메라·8th Wall 라이선스가 필요해서 이 환경에서는 최종
+   확인이 불가능했습니다. `app.js`의 `registerCanvasScreenshotModule()`은
+   `window.XR8.CanvasScreenshot`이 없으면 콘솔에 경고만 남기고 조용히
+   건너뛰도록(캡처만 실패, 나머지 게임 진행에는 영향 없음) 만들어뒀으니, 혹시
+   실기기에서 STEP 2 사진이 여전히 안 나온다면 브라우저 콘솔에서
+   "XR8.CanvasScreenshot module not available" 경고가 뜨는지부터 확인해주세요.
+   뜬다면 사용 중이신 엔진 번들에 해당 모듈이 빠져있다는 뜻이라, 8th Wall
+   콘솔/지원팀에 `xr.js` 빌드에 `CanvasScreenshot`이 포함돼 있는지 문의가
+   필요합니다.
 
 이 외 UI(인트로, 포즈 화면, 결과 화면)는 실제 브라우저(Chromium, 카메라는 가상 장치로
-대체)로 직접 렌더링해서 레이아웃 깨짐/겹침 등은 확인 및 수정 완료했습니다.
+대체)로 직접 렌더링해서 레이아웃 깨짐/겹침 등은 확인 및 수정 완료했습니다. 이번
+수정분(사진 1장 합성, 결과 화면 표시, 다운로드 버튼 분기)도 같은 방식으로
+구조/레이아웃 확인을 마쳤습니다. 다만 `XR8.CanvasScreenshot` 자체의 실제 캡처
+동작(카메라 영상이 실제로 잘 찍히는지)은 8th Wall 라이선스가 있는 실기기에서만
+최종 확인 가능합니다.
