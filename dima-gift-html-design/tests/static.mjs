@@ -76,5 +76,10 @@ assert(css.includes("100dvh"), "동적 viewport 단위 누락");
 assert(css.includes("safe-area-inset-top") && css.includes("safe-area-inset-bottom"), "모바일 안전영역 CSS 누락");
 assert(css.includes("@media (max-width: 359px)"), "소형 모바일 대응 누락");
 assert(css.includes("prefers-reduced-motion"), "동작 줄이기 접근성 누락");
+assert(js.includes('header.addEventListener("click"'), "헤더 닫기·뒤로가기 이벤트 위임 누락");
+assert(js.includes('if (action === "home") navigate("start", true)'), "헤더 닫기 동작 누락");
+assert(js.includes('if (action === "back") navigate(BACK[state.screen] || "start", true)'), "헤더 뒤로가기 동작 누락");
+assert(css.includes("--stamp-size: 52px") && css.includes("--check-size: 26px"), "스탬프 대비 1/2 체크 배지 크기 누락");
+assert(css.includes("color-mix(in srgb, var(--accent) 8%, #ffffff)"), "메인 스탬프 카드의 밝은 배경색 누락");
 
 process.stdout.write(`PASS: ${renderers.length} HTML 디자인 화면, 4개 Zone, 기기 API 제외\n`);

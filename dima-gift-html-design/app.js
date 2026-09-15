@@ -631,6 +631,15 @@
     if (action === "survey") navigate("survey1");
   });
 
+  header.addEventListener("click", (event) => {
+    const control = event.target.closest("[data-action]");
+    if (!control) return;
+    const action = control.dataset.action;
+    if (action === "help") showHelp();
+    if (action === "home") navigate("start", true);
+    if (action === "back") navigate(BACK[state.screen] || "start", true);
+  });
+
   app.addEventListener("change", (event) => {
     const target = event.target;
     if (target.matches('input[name="answer"]')) {
